@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "fabric-roles",
+  "version": "${version}",
+  "name": "Fabric Roles",
+  "description": "Role management & permissions for Fabric servers",
+  "authors": ["gegy1000"],
+  "license": "CC0-1.0",
+  "environment": "*",
+  "entrypoints": {
+    "main": ["net.gegy1000.roles.RolesInitializer"]
+  },
+  "mixins": ["roles.mixins.json"],
+  "depends": {
+    "fabricloader": ">=0.7.4",
+    "fabric": "*",
+    "minecraft": "1.15.x"
+  }
+}
