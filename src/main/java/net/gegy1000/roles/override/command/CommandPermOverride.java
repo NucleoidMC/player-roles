@@ -2,7 +2,7 @@ package net.gegy1000.roles.override.command;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.Dynamic;
 import net.gegy1000.roles.api.HasRoles;
 import net.gegy1000.roles.override.RoleOverride;
 import net.minecraft.server.MinecraftServer;
@@ -32,7 +32,7 @@ public final class CommandPermOverride implements RoleOverride {
     public static <T> CommandPermOverride parse(Dynamic<T> root) {
         ImmutableList.Builder<Command> commands = ImmutableList.builder();
 
-        Map<Dynamic<T>, Dynamic<T>> map = root.getMapValues().orElse(ImmutableMap.of());
+        Map<Dynamic<T>, Dynamic<T>> map = root.getMapValues().result().orElse(ImmutableMap.of());
         for (Map.Entry<Dynamic<T>, Dynamic<T>> entry : map.entrySet()) {
             String[] patternStrings = entry.getKey().asString("").split(" ");
             String ruleName = entry.getValue().asString("pass");

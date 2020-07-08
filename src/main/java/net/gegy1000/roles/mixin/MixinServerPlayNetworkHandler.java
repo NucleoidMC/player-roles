@@ -19,7 +19,7 @@ public class MixinServerPlayNetworkHandler {
     public ServerPlayerEntity player;
 
     @ModifyVariable(
-            method = "onChatMessage",
+            method = "onGameMessage",
             ordinal = 0,
             at = @At(value = "STORE", ordinal = 0)
     )

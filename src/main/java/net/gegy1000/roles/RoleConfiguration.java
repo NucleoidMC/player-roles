@@ -4,8 +4,8 @@ import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.JsonOps;
+import com.mojang.serialization.Dynamic;
+import com.mojang.serialization.JsonOps;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -64,7 +64,7 @@ public final class RoleConfiguration {
         ImmutableMap.Builder<String, Role> roles = ImmutableMap.builder();
         Role everyone = Role.empty(Role.EVERYONE);
 
-        Map<Dynamic<T>, Dynamic<T>> map = root.getMapValues().orElse(ImmutableMap.of());
+        Map<Dynamic<T>, Dynamic<T>> map = root.getMapValues().result().orElse(ImmutableMap.of());
         for (Map.Entry<Dynamic<T>, Dynamic<T>> entry : map.entrySet()) {
             String name = entry.getKey().asString("everyone").toLowerCase(Locale.ROOT);
             Dynamic<T> roleRoot = entry.getValue();

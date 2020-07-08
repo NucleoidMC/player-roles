@@ -1,7 +1,7 @@
 package net.gegy1000.roles;
 
 import com.google.common.collect.ImmutableMap;
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.Dynamic;
 import net.gegy1000.roles.api.HasRoles;
 import net.gegy1000.roles.override.RoleOverride;
 import net.gegy1000.roles.override.RoleOverrideType;
@@ -32,11 +32,11 @@ public final class Role implements Comparable<Role> {
 
         role.level = root.get("level").asInt(0);
 
-        Map<Dynamic<T>, Dynamic<T>> overrides = root.get("overrides").orElseEmptyMap().getMapValues()
+        Map<Dynamic<T>, Dynamic<T>> overrides = root.get("overrides").orElseEmptyMap().getMapValues().result()
                 .orElse(ImmutableMap.of());
 
         for (Map.Entry<Dynamic<T>, Dynamic<T>> entry : overrides.entrySet()) {
-            Optional<String> key = entry.getKey().asString();
+            Optional<String> key = entry.getKey().asString().result();
             Optional<RoleOverrideType<?>> overrideTypeOpt = key.map(RoleOverrideType::byKey);
             if (overrideTypeOpt.isPresent()) {
                 RoleOverrideType<?> overrideType = overrideTypeOpt.get();

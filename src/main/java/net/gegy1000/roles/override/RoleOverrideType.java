@@ -1,7 +1,7 @@
 package net.gegy1000.roles.override;
 
 import com.google.common.base.Preconditions;
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.Dynamic;
 import net.gegy1000.roles.override.command.CommandPermOverride;
 
 import javax.annotation.Nullable;

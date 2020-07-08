@@ -97,7 +97,7 @@ public final class RoleCommand {
         if (player instanceof HasRoles) {
             Collection<Role> roles = ((HasRoles) player).getRoles()
                     .stream().collect(Collectors.toList());
-            Text rolesComponent = Texts.join(roles, role -> new LiteralText(role.getName()).setStyle(new Style().setColor(Formatting.GRAY)));
+            Text rolesComponent = Texts.join(roles, role -> new LiteralText(role.getName()).setStyle(Style.EMPTY.withColor(Formatting.GRAY)));
             source.sendFeedback(new TranslatableText("Found %s roles on player: %s", roles.size(), rolesComponent), false);
         }
 
