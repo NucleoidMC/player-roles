@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "id": "fabric-roles",
+  "id": "player-roles",
   "version": "${version}",
-  "name": "Fabric Roles",
+  "name": "Player Roles",
   "description": "Role management & permissions for Fabric servers via a JSON file",
   "authors": ["gegy1000"],
   "license": "MIT",

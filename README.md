@@ -1,4 +1,4 @@
-# fabric-roles
+# Player Roles for Fabric
 This is a simple implementation allowing for custom permissions to be assigned to players via Discord-like "roles".
 Roles and their permissions are defined within a JSON file, which can be easily modified and reloaded at runtime for rapid iteration.
 
