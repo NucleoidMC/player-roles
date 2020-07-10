@@ -2,8 +2,8 @@ package net.gegy1000.roles;
 
 import com.mojang.brigadier.CommandDispatcher;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.event.server.ServerStartCallback;
-import net.fabricmc.fabric.api.registry.CommandRegistry;
+import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.gegy1000.roles.command.RoleCommand;
 import net.gegy1000.roles.override.command.CommandPermEvaluator;
 import net.gegy1000.roles.override.command.CommandRequirementHooks;
@@ -14,16 +14,18 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public final class RolesInitializer implements ModInitializer {
-    public static final String ID = "fabric-roles";
+    public static final String ID = "player-roles";
     public static final Logger LOGGER = LogManager.getLogger(ID);
 
     @Override
     public void onInitialize() {
         RoleConfiguration.setup();
 
-        CommandRegistry.INSTANCE.register(false, RoleCommand::register);
+        CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
+            RoleCommand.register(dispatcher);
+        });
 
-        ServerStartCallback.EVENT.register(server -> {
+        ServerLifecycleEvents.SERVER_STARTED.register(server -> {
             server.submit(() -> this.hookCommands(server.getCommandManager().getDispatcher()));
         });
     }

@@ -37,9 +37,11 @@ public final class RoleConfiguration {
     }
 
     public static void setup() {
-        Path path = Paths.get("roles.json");
+        Path path = Paths.get("config/roles.json");
         if (!Files.exists(path)) {
-            if (!setupDefaultConfig(path)) return;
+            if (!createDefaultConfig(path)) {
+                return;
+            }
         }
 
         try (BufferedReader reader = Files.newBufferedReader(path)) {
@@ -50,10 +52,22 @@ public final class RoleConfiguration {
         }
     }
 
-    private static boolean setupDefaultConfig(Path path) {
-        try (InputStream input = RolesInitializer.class.getResourceAsStream("/data/fabric-roles/default_roles.json")) {
-            Files.copy(input, path);
-            return true;
+    private static boolean createDefaultConfig(Path path) {
+        try {
+            if (!Files.exists(path.getParent())) {
+                Files.createDirectories(path.getParent());
+            }
+
+            Path legacyPath = Paths.get("roles.json");
+            if (Files.exists(legacyPath)) {
+                Files.move(legacyPath, path);
+                return true;
+            }
+
+            try (InputStream input = RolesInitializer.class.getResourceAsStream("/data/player-roles/default_roles.json")) {
+                Files.copy(input, path);
+                return true;
+            }
         } catch (IOException e) {
             RolesInitializer.LOGGER.warn("Failed to load default roles.json configuration", e);
             return false;

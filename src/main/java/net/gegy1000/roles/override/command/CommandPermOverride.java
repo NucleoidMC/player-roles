@@ -24,8 +24,11 @@ public final class CommandPermOverride implements RoleOverride {
     public PermissionResult test(MatchableCommand command) {
         for (Command permission : this.commands) {
             PermissionResult result = permission.test(command);
-            if (result.isDefinitive()) return result;
+            if (result.isDefinitive()) {
+                return result;
+            }
         }
+
         return PermissionResult.PASS;
     }
 

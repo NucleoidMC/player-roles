@@ -3,10 +3,13 @@ package net.gegy1000.roles.override.command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.tree.CommandNode;
 import net.gegy1000.roles.RolesInitializer;
+import net.minecraft.util.Pair;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.function.Predicate;
 
 // TODO: This can probably be optimized to only hook the required commands and cleverly handle when commands are
@@ -32,28 +35,58 @@ public final class CommandRequirementHooks<S> {
     }
 
     @SuppressWarnings("unchecked")
-    public void hookAll(CommandNode<S> node) {
-        this.hookRecursive(new CommandNode[] { node });
+    public void hookAll(CommandNode<S> root) {
+        List<Pair<CommandNode<S>, Predicate<S>>> queue = new ArrayList<>();
+        this.collectRecursive(new CommandNode[] { root }, queue);
+
+        for (Pair<CommandNode<S>, Predicate<S>> pair : queue) {
+            CommandNode<S> node = pair.getLeft();
+            Predicate<S> requirement = pair.getRight();
+            this.setRequirement(node, requirement);
+        }
     }
 
-    private void hookRecursive(CommandNode<S>[] nodes) {
+    private void collectRecursive(CommandNode<S>[] nodes, List<Pair<CommandNode<S>, Predicate<S>>> queue) {
         CommandNode<S> tail = nodes[nodes.length - 1];
-        this.hookCommand(nodes);
+        this.collectCommand(nodes, queue);
 
         for (CommandNode<S> child : tail.getChildren()) {
             CommandNode<S>[] childNodes = Arrays.copyOf(nodes, nodes.length + 1);
             childNodes[childNodes.length - 1] = child;
-            this.hookRecursive(childNodes);
+            this.collectRecursive(childNodes, queue);
         }
     }
 
-    private void hookCommand(CommandNode<S>[] nodes) {
+    private void collectCommand(CommandNode<S>[] nodes, List<Pair<CommandNode<S>, Predicate<S>>> queue) {
         CommandNode<S> tail = nodes[nodes.length - 1];
+        Predicate<S> requirement = this.effectiveRequirement(nodes);
+
+        queue.add(new Pair<>(tail, this.override.apply(nodes, requirement)));
+    }
+
+    @SuppressWarnings("unchecked")
+    private Predicate<S> effectiveRequirement(CommandNode<S>[] nodes) {
+        Predicate<S>[] requirementTree = new Predicate[nodes.length];
+        for (int i = 0; i < nodes.length; i++) {
+            CommandNode<S> node = nodes[i];
+            requirementTree[i] = node.getRequirement();
+        }
+
+        return value -> {
+            for (Predicate<S> requirement : requirementTree) {
+                if (!requirement.test(value)) {
+                    return false;
+                }
+            }
+            return true;
+        };
+    }
+
+    private void setRequirement(CommandNode<S> node, Predicate<S> requirement) {
         try {
-            Predicate<S> requirement = tail.getRequirement();
-            this.requirementField.set(tail, this.override.apply(nodes, requirement));
+            this.requirementField.set(node, requirement);
         } catch (IllegalAccessException e) {
-            RolesInitializer.LOGGER.error("Failed to hook command node {}", tail, e);
+            RolesInitializer.LOGGER.error("Failed to hook command node {}", node, e);
         }
     }
 

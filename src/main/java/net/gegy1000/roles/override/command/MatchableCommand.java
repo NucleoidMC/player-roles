@@ -26,6 +26,7 @@ public final class MatchableCommand {
                 return false;
             }
         }
+
         return true;
     }
 
