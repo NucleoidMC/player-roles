@@ -2,7 +2,7 @@
 This is a simple implementation allowing for custom permissions to be assigned to players via Discord-like "roles".
 Roles and their permissions are defined within a JSON file, which can be easily modified and reloaded at runtime for rapid iteration.
 
-The roles.json file is located in the root server directory. An example configuration may look like:
+The roles.json file is located in the config directory (`<root>/config/roles.json`). An example configuration may look like:
 ```json
 {
   "admin": {
