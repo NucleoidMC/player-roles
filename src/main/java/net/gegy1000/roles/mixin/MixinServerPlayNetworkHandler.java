@@ -28,7 +28,7 @@ public class MixinServerPlayNetworkHandler {
             RoleCollection roles = ((HasRoles) this.player).getRoles();
             ChatStyleOverride chatStyle = roles.getHighest(RoleOverrideType.CHAT_STYLE);
             if (chatStyle != null) {
-                return chatStyle.make(this.player.getDisplayName(), packet.getChatMessage());
+                return chatStyle.make(this.player.getDisplayName().getString(), packet.getChatMessage());
             }
         }
         return message;

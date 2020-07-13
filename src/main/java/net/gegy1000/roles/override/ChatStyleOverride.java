@@ -1,7 +1,7 @@
 package net.gegy1000.roles.override;
 
+import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
 
 public final class ChatStyleOverride implements RoleOverride {
     private final String format;
@@ -10,7 +10,7 @@ public final class ChatStyleOverride implements RoleOverride {
         this.format = format;
     }
 
-    public Text make(Text name, String message) {
-        return new TranslatableText(this.format, name, message);
+    public Text make(String name, String message) {
+        return new LiteralText(String.format(this.format, name, message));
     }
 }
