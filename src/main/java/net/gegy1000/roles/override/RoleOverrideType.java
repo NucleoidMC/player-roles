@@ -17,9 +17,14 @@ public final class RoleOverrideType<T extends RoleOverride> {
             .parse(CommandPermOverride::parse)
             .register();
 
-    public static final RoleOverrideType<ChatStyleOverride> CHAT_STYLE = RoleOverrideType.<ChatStyleOverride>builder()
-            .key("chat_style")
-            .parse(element -> new ChatStyleOverride(element.asString("")))
+    public static final RoleOverrideType<ChatFormatOverride> CHAT_STYLE = RoleOverrideType.<ChatFormatOverride>builder()
+            .key("chat_format")
+            .parse(element -> new ChatFormatOverride(element.asString("")))
+            .register();
+
+    public static final RoleOverrideType<NameStyleOverride> NAME_FORMAT = RoleOverrideType.<NameStyleOverride>builder()
+            .key("name_style")
+            .parse(NameStyleOverride::parse)
             .register();
 
     private final String key;

@@ -2,7 +2,7 @@ package net.gegy1000.roles.mixin;
 
 import net.gegy1000.roles.RoleCollection;
 import net.gegy1000.roles.api.HasRoles;
-import net.gegy1000.roles.override.ChatStyleOverride;
+import net.gegy1000.roles.override.ChatFormatOverride;
 import net.gegy1000.roles.override.RoleOverrideType;
 import net.minecraft.network.packet.c2s.play.ChatMessageC2SPacket;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 @Mixin(ServerPlayNetworkHandler.class)
-public class MixinServerPlayNetworkHandler {
+public class ServerPlayNetworkHandlerMixin {
     @Shadow
     public ServerPlayerEntity player;
 
@@ -26,9 +26,9 @@ public class MixinServerPlayNetworkHandler {
     private Text formatChat(Text message, ChatMessageC2SPacket packet) {
         if (this.player instanceof HasRoles) {
             RoleCollection roles = ((HasRoles) this.player).getRoles();
-            ChatStyleOverride chatStyle = roles.getHighest(RoleOverrideType.CHAT_STYLE);
+            ChatFormatOverride chatStyle = roles.getHighest(RoleOverrideType.CHAT_STYLE);
             if (chatStyle != null) {
-                return chatStyle.make(this.player.getDisplayName().getString(), packet.getChatMessage());
+                return chatStyle.make(this.player.getDisplayName(), packet.getChatMessage());
             }
         }
         return message;

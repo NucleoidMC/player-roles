@@ -12,7 +12,7 @@ import net.gegy1000.roles.RoleCollection;
 import net.gegy1000.roles.RoleConfiguration;
 import net.gegy1000.roles.api.HasRoles;
 import net.gegy1000.roles.override.command.CommandPermEvaluator;
-import net.minecraft.command.arguments.EntityArgumentType;
+import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.CommandSource;
@@ -43,37 +43,39 @@ public final class RoleCommand {
             new LiteralText("You do not have sufficient power to manage this role")
     );
 
+    // @formatter:off
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         dispatcher.register(literal("role")
                 .requires(s -> s.hasPermissionLevel(4))
                 .then(literal("assign")
-                        .then(argument("targets", EntityArgumentType.players())
-                                .then(argument("role", StringArgumentType.word()).suggests(roleSuggestions())
-                                        .executes(ctx -> {
-                                            ServerCommandSource source = ctx.getSource();
-                                            Collection<ServerPlayerEntity> targets = EntityArgumentType.getPlayers(ctx, "targets");
-                                            String roleName = StringArgumentType.getString(ctx, "role");
-                                            return updateRoles(source, targets, roleName, RoleCollection::add, "'%s' assigned to %s players");
-                                        }))))
+                    .then(argument("targets", EntityArgumentType.players())
+                    .then(argument("role", StringArgumentType.word()).suggests(roleSuggestions())
+                    .executes(ctx -> {
+                        ServerCommandSource source = ctx.getSource();
+                        Collection<ServerPlayerEntity> targets = EntityArgumentType.getPlayers(ctx, "targets");
+                        String roleName = StringArgumentType.getString(ctx, "role");
+                        return updateRoles(source, targets, roleName, RoleCollection::add, "'%s' assigned to %s players");
+                }))))
                 .then(literal("remove")
-                        .then(argument("targets", EntityArgumentType.players())
-                                .then(argument("role", StringArgumentType.word()).suggests(roleSuggestions())
-                                        .executes(ctx -> {
-                                            ServerCommandSource source = ctx.getSource();
-                                            Collection<ServerPlayerEntity> targets = EntityArgumentType.getPlayers(ctx, "targets");
-                                            String roleName = StringArgumentType.getString(ctx, "role");
-                                            return updateRoles(source, targets, roleName, RoleCollection::remove, "'%s' removed from %s players");
-                                        }))))
+                    .then(argument("targets", EntityArgumentType.players())
+                    .then(argument("role", StringArgumentType.word()).suggests(roleSuggestions())
+                    .executes(ctx -> {
+                        ServerCommandSource source = ctx.getSource();
+                        Collection<ServerPlayerEntity> targets = EntityArgumentType.getPlayers(ctx, "targets");
+                        String roleName = StringArgumentType.getString(ctx, "role");
+                        return updateRoles(source, targets, roleName, RoleCollection::remove, "'%s' removed from %s players");
+                    }))))
                 .then(literal("list")
-                        .then(argument("target", EntityArgumentType.player()).executes(ctx -> {
-                            ServerCommandSource source = ctx.getSource();
-                            ServerPlayerEntity target = EntityArgumentType.getPlayer(ctx, "target");
-                            return listRoles(source, target);
-                        }))
+                    .then(argument("target", EntityArgumentType.player()).executes(ctx -> {
+                        ServerCommandSource source = ctx.getSource();
+                        ServerPlayerEntity target = EntityArgumentType.getPlayer(ctx, "target");
+                        return listRoles(source, target);
+                    }))
                 )
                 .then(literal("reload").executes(ctx -> reloadRoles(ctx.getSource())))
         );
     }
+    // @formatter:on
 
     private static int updateRoles(ServerCommandSource source, Collection<ServerPlayerEntity> players, String roleName, BiPredicate<RoleCollection, Role> apply, String success) throws CommandSyntaxException {
         Role role = getRole(roleName);
