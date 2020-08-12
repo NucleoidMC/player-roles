@@ -8,7 +8,8 @@ The roles.json file is located in the config directory (`<root>/config/roles.jso
   "admin": {
     "level": 100,
     "overrides": {
-      "chat_style": "<§6%s§r*> %s",
+      "name_style": ["red", "bold"],
+      "chat_format": "<%s*> %s",
       "commands": {
         ".*": "allow"
       }
@@ -40,7 +41,7 @@ The other roles that are specified function as overrides on top of the `everyone
 
 #### Overrides
 Within each role declaration, we list a set of overrides. Overrides are the generic system that this mod uses to change game behavior based on roles.
-Currently, the only override types supported are `commands` and `chat_style`.
+Currently, the supported override types are `commands`, `name_style` and `chat_format`.
 
 It is important to consider how overrides are applied when multiple roles target the same things. Conflicts like this are resolved by always choosing the role with the highest level.
 So, in the case of the example: although `everyone` declares every command except `help` to be disallowed, because `admin` and `spectator` have higher levels, they will override this behaviour.
@@ -60,14 +61,26 @@ For example:
 }
 ```
 
-##### chat style
-The `chat_style` override is used to change how player messages appear in the chat.
+##### chat format
+The `chat_format` override is used to change how player messages appear in the chat.
 It is declared simply as a string formatter pattern. Every instance of `%s` is replaced by a formatter argument.
 The first `%s` is replaced by the player name, and the second is replaced by the message.
 
 For example:
 ```json
-"chat_style": "<%s> %s"
+"chat_format": "%s says: %s"
+```
+...which would format as `Gegy says: hi!`
+
+It is worth nothing that color codes can be used here, but they *will not apply to the player name*.
+To apply color to a player name, you should use the `name_style` override.
+
+##### name style
+The `name_style` override modifies the name color for players with that role. This has lower priority than scoreboard team colors.
+
+Name style is declared like:
+```json
+"name_style": ["red", "bold", "underline"]
 ```
 
 #### Applying roles in-game

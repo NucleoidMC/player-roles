@@ -48,9 +48,11 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity implements Ha
     public Text getDisplayName() {
         Text displayName = super.getDisplayName();
 
-        NameStyleOverride nameFormat = this.roles.getHighest(RoleOverrideType.NAME_FORMAT);
-        if (nameFormat != null) {
-            displayName = nameFormat.apply(displayName.shallowCopy());
+        if (this.getScoreboardTeam() == null) {
+            NameStyleOverride nameFormat = this.roles.getHighest(RoleOverrideType.NAME_FORMAT);
+            if (nameFormat != null) {
+                displayName = nameFormat.apply(displayName.shallowCopy());
+            }
         }
 
         return displayName;
