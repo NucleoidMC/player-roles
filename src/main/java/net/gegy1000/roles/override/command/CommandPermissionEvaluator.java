@@ -7,7 +7,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.command.ServerCommandSource;
 
-public class CommandPermEvaluator {
+public final class CommandPermissionEvaluator {
     public static PermissionResult canUseCommand(ServerCommandSource source, MatchableCommand command) {
         if (doesBypassPermissions(source)) return PermissionResult.PASS;
 

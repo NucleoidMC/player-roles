@@ -5,7 +5,7 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.gegy1000.roles.command.RoleCommand;
-import net.gegy1000.roles.override.command.CommandPermEvaluator;
+import net.gegy1000.roles.override.command.CommandPermissionEvaluator;
 import net.gegy1000.roles.override.command.CommandRequirementHooks;
 import net.gegy1000.roles.override.command.CommandTestContext;
 import net.gegy1000.roles.override.command.MatchableCommand;
@@ -18,6 +18,8 @@ public final class RolesInitializer implements ModInitializer {
     public static final String ID = "player-roles";
     public static final Logger LOGGER = LogManager.getLogger(ID);
 
+    private static boolean registered;
+
     @Override
     public void onInitialize() {
         RoleConfiguration.setup();
@@ -26,8 +28,17 @@ public final class RolesInitializer implements ModInitializer {
             RoleCommand.register(dispatcher);
         });
 
-        ServerLifecycleEvents.SERVER_STARTED.register(server -> {
-            server.submit(() -> this.hookCommands(server.getCommandManager().getDispatcher()));
+        // cursed solution to make sure we run our handler after everything else
+        // worldedit registers commands in the server started listener, so we need to override that
+        ServerLifecycleEvents.SERVER_STARTING.register(s -> {
+            if (registered) {
+                return;
+            }
+            registered = true;
+
+            ServerLifecycleEvents.SERVER_STARTED.register(server -> {
+                this.hookCommands(server.getCommandManager().getDispatcher());
+            });
         });
     }
 
@@ -37,7 +48,7 @@ public final class RolesInitializer implements ModInitializer {
                 MatchableCommand command = MatchableCommand.compile(nodes);
 
                 return source -> {
-                    PermissionResult result = CommandPermEvaluator.canUseCommand(source, command);
+                    PermissionResult result = CommandPermissionEvaluator.canUseCommand(source, command);
                     if (result == PermissionResult.ALLOW) return true;
                     if (result == PermissionResult.DENY) return false;
                     if (result == PermissionResult.HIDDEN) return !CommandTestContext.isSuggesting();

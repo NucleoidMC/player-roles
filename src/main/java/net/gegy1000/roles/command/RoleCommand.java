@@ -11,7 +11,7 @@ import net.gegy1000.roles.Role;
 import net.gegy1000.roles.RoleCollection;
 import net.gegy1000.roles.RoleConfiguration;
 import net.gegy1000.roles.api.HasRoles;
-import net.gegy1000.roles.override.command.CommandPermEvaluator;
+import net.gegy1000.roles.override.command.CommandPermissionEvaluator;
 import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.MinecraftServer;
@@ -127,7 +127,7 @@ public final class RoleCommand {
     }
 
     private static void assertHasPower(ServerCommandSource source, Role role) throws CommandSyntaxException {
-        if (CommandPermEvaluator.doesBypassPermissions(source)) return;
+        if (CommandPermissionEvaluator.doesBypassPermissions(source)) return;
 
         int highestPower = getHighestPowerLevel(source);
         if (highestPower <= role.getLevel()) {
@@ -155,7 +155,7 @@ public final class RoleCommand {
 
     private static int getHighestPowerLevel(ServerCommandSource source) {
         Entity entity = source.getEntity();
-        if (entity == null || CommandPermEvaluator.doesBypassPermissions(source)) return Integer.MAX_VALUE;
+        if (entity == null || CommandPermissionEvaluator.doesBypassPermissions(source)) return Integer.MAX_VALUE;
 
         if (entity instanceof HasRoles) {
             RoleCollection roles = ((HasRoles) entity).getRoles();
