@@ -12,12 +12,20 @@ import java.util.Map;
 
 @Mixin(CommandDispatcher.class)
 public class CommandDispatcherMixin<S> {
-    @Inject(method = "getSmartUsage(Lcom/mojang/brigadier/tree/CommandNode;Ljava/lang/Object;)Ljava/util/Map;", at = @At("HEAD"))
+    @Inject(
+            method = "getSmartUsage(Lcom/mojang/brigadier/tree/CommandNode;Ljava/lang/Object;)Ljava/util/Map;",
+            remap = false,
+            at = @At("HEAD")
+    )
     private void beforeGetSmartUsage(CommandNode<S> node, S source, CallbackInfoReturnable<Map<CommandNode<S>, String>> cir) {
         CommandTestContext.startSuggesting();
     }
 
-    @Inject(method = "getSmartUsage(Lcom/mojang/brigadier/tree/CommandNode;Ljava/lang/Object;)Ljava/util/Map;", at = @At("RETURN"))
+    @Inject(
+            method = "getSmartUsage(Lcom/mojang/brigadier/tree/CommandNode;Ljava/lang/Object;)Ljava/util/Map;",
+            remap = false,
+            at = @At("RETURN")
+    )
     private void afterGetSmartUsage(CommandNode<S> node, S source, CallbackInfoReturnable<Map<CommandNode<S>, String>> cir) {
         CommandTestContext.stopSuggesting();
     }
