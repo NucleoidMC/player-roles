@@ -7,6 +7,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.gegy1000.roles.command.RoleCommand;
 import net.gegy1000.roles.override.command.CommandPermEvaluator;
 import net.gegy1000.roles.override.command.CommandRequirementHooks;
+import net.gegy1000.roles.override.command.CommandTestContext;
 import net.gegy1000.roles.override.command.MatchableCommand;
 import net.gegy1000.roles.override.command.PermissionResult;
 import net.minecraft.server.command.ServerCommandSource;
@@ -39,6 +40,7 @@ public final class RolesInitializer implements ModInitializer {
                     PermissionResult result = CommandPermEvaluator.canUseCommand(source, command);
                     if (result == PermissionResult.ALLOW) return true;
                     if (result == PermissionResult.DENY) return false;
+                    if (result == PermissionResult.HIDDEN) return !CommandTestContext.isSuggesting();
 
                     return existing.test(source);
                 };
