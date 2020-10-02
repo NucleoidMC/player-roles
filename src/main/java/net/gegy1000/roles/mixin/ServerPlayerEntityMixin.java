@@ -1,6 +1,7 @@
 package net.gegy1000.roles.mixin;
 
 import com.mojang.authlib.GameProfile;
+import net.fabricmc.fabric.api.util.NbtType;
 import net.gegy1000.roles.RoleCollection;
 import net.gegy1000.roles.api.HasRoles;
 import net.gegy1000.roles.override.NameStyleOverride;
@@ -36,7 +37,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity implements Ha
 
     @Inject(method = "readCustomDataFromTag", at = @At("RETURN"))
     private void readCustomDataFromTag(CompoundTag tag, CallbackInfo ci) {
-        this.roles.deserialize(tag.getList("roles", 8));
+        this.roles.deserialize(tag.getList("roles", NbtType.STRING));
     }
 
     @Inject(method = "copyFrom", at = @At("RETURN"))

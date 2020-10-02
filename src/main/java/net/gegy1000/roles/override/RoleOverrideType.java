@@ -27,6 +27,11 @@ public final class RoleOverrideType<T extends RoleOverride> {
             .parse(NameStyleOverride::parse)
             .register();
 
+    public static final RoleOverrideType<CommandFeedbackOverride> COMMAND_FEEDBACK = RoleOverrideType.<CommandFeedbackOverride>builder()
+            .key("command_feedback")
+            .parse(element -> new CommandFeedbackOverride(element.asBoolean(false)))
+            .register();
+
     private final String key;
     private final Function<Dynamic<?>, T> parse;
 

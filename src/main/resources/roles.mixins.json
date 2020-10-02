@@ -4,6 +4,7 @@
   "package": "net.gegy1000.roles.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
+    "ServerCommandSourceMixin",
     "ServerPlayerEntityMixin",
     "ServerPlayNetworkHandlerMixin"
   ],
