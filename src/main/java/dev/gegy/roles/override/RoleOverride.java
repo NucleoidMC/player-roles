@@ -1,6 +1,6 @@
-package net.gegy1000.roles.override;
+package dev.gegy.roles.override;
 
-import net.gegy1000.roles.api.HasRoles;
+import dev.gegy.roles.api.HasRoles;
 
 public interface RoleOverride {
     default void notifyChange(HasRoles entity) {

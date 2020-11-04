@@ -1,4 +1,4 @@
-package net.gegy1000.roles;
+package dev.gegy.roles;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonElement;

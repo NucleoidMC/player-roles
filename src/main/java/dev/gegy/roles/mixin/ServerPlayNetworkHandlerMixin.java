@@ -1,10 +1,10 @@
-package net.gegy1000.roles.mixin;
+package dev.gegy.roles.mixin;
 
-import net.gegy1000.roles.RoleCollection;
-import net.gegy1000.roles.api.HasRoles;
-import net.gegy1000.roles.override.ChatFormatOverride;
-import net.gegy1000.roles.override.MuteOverride;
-import net.gegy1000.roles.override.RoleOverrideType;
+import dev.gegy.roles.RoleCollection;
+import dev.gegy.roles.api.HasRoles;
+import dev.gegy.roles.override.ChatFormatOverride;
+import dev.gegy.roles.override.MuteOverride;
+import dev.gegy.roles.override.RoleOverrideType;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;

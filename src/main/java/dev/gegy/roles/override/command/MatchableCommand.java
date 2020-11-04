@@ -1,4 +1,4 @@
-package net.gegy1000.roles.override.command;
+package dev.gegy.roles.override.command;
 
 import com.mojang.brigadier.tree.CommandNode;
 

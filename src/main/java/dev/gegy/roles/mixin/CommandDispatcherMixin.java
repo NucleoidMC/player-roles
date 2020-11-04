@@ -1,8 +1,8 @@
-package net.gegy1000.roles.mixin;
+package dev.gegy.roles.mixin;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.tree.CommandNode;
-import net.gegy1000.roles.override.command.CommandTestContext;
+import dev.gegy.roles.override.command.CommandTestContext;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;

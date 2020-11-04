@@ -1,4 +1,4 @@
-package net.gegy1000.roles.command;
+package dev.gegy.roles.command;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
@@ -7,11 +7,11 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
-import net.gegy1000.roles.Role;
-import net.gegy1000.roles.RoleCollection;
-import net.gegy1000.roles.RoleConfiguration;
-import net.gegy1000.roles.api.HasRoles;
-import net.gegy1000.roles.override.command.CommandPermissionEvaluator;
+import dev.gegy.roles.Role;
+import dev.gegy.roles.RoleCollection;
+import dev.gegy.roles.RoleConfiguration;
+import dev.gegy.roles.api.HasRoles;
+import dev.gegy.roles.override.command.CommandPermissionEvaluator;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.entity.Entity;

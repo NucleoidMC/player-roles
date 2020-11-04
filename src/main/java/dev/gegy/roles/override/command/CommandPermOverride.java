@@ -1,10 +1,10 @@
-package net.gegy1000.roles.override.command;
+package dev.gegy.roles.override.command;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.serialization.Dynamic;
-import net.gegy1000.roles.api.HasRoles;
-import net.gegy1000.roles.override.RoleOverride;
+import dev.gegy.roles.api.HasRoles;
+import dev.gegy.roles.override.RoleOverride;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 

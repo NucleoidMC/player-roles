@@ -1,4 +1,4 @@
-package net.gegy1000.roles.override;
+package dev.gegy.roles.override;
 
 public final class MuteOverride implements RoleOverride {
     private final boolean muted;

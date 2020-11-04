@@ -1,10 +1,10 @@
-package net.gegy1000.roles;
+package dev.gegy.roles;
 
 import com.google.common.collect.ImmutableMap;
 import com.mojang.serialization.Dynamic;
-import net.gegy1000.roles.api.HasRoles;
-import net.gegy1000.roles.override.RoleOverride;
-import net.gegy1000.roles.override.RoleOverrideType;
+import dev.gegy.roles.api.HasRoles;
+import dev.gegy.roles.override.RoleOverride;
+import dev.gegy.roles.override.RoleOverrideType;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;

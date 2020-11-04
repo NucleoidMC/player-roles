@@ -1,10 +1,10 @@
-package net.gegy1000.roles.mixin;
+package dev.gegy.roles.mixin;
 
 import com.mojang.authlib.GameProfile;
-import net.gegy1000.roles.RoleCollection;
-import net.gegy1000.roles.api.HasRoles;
-import net.gegy1000.roles.override.CommandFeedbackOverride;
-import net.gegy1000.roles.override.RoleOverrideType;
+import dev.gegy.roles.RoleCollection;
+import dev.gegy.roles.api.HasRoles;
+import dev.gegy.roles.override.CommandFeedbackOverride;
+import dev.gegy.roles.override.RoleOverrideType;
 import net.minecraft.server.PlayerManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;

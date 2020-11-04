@@ -1,8 +1,8 @@
-package net.gegy1000.roles.override.command;
+package dev.gegy.roles.override.command;
 
-import net.gegy1000.roles.RoleCollection;
-import net.gegy1000.roles.api.HasRoles;
-import net.gegy1000.roles.override.RoleOverrideType;
+import dev.gegy.roles.RoleCollection;
+import dev.gegy.roles.api.HasRoles;
+import dev.gegy.roles.override.RoleOverrideType;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.command.ServerCommandSource;

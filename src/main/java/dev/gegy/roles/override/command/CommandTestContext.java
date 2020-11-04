@@ -1,4 +1,4 @@
-package net.gegy1000.roles.override.command;
+package dev.gegy.roles.override.command;
 
 public final class CommandTestContext {
     private static final ThreadLocal<Boolean> SUGGESTING = new ThreadLocal<>();

@@ -1,8 +1,8 @@
-package net.gegy1000.roles.override;
+package dev.gegy.roles.override;
 
 import com.google.common.base.Preconditions;
 import com.mojang.serialization.Dynamic;
-import net.gegy1000.roles.override.command.CommandPermOverride;
+import dev.gegy.roles.override.command.CommandPermOverride;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;

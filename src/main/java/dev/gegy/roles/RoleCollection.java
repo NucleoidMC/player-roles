@@ -1,9 +1,9 @@
-package net.gegy1000.roles;
+package dev.gegy.roles;
 
-import net.gegy1000.roles.api.HasRoles;
-import net.gegy1000.roles.override.RoleOverride;
-import net.gegy1000.roles.override.RoleOverrideType;
-import net.gegy1000.roles.override.command.PermissionResult;
+import dev.gegy.roles.api.HasRoles;
+import dev.gegy.roles.override.RoleOverride;
+import dev.gegy.roles.override.RoleOverrideType;
+import dev.gegy.roles.override.command.PermissionResult;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 

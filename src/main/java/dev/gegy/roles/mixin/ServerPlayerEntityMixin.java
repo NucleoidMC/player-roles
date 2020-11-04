@@ -1,11 +1,11 @@
-package net.gegy1000.roles.mixin;
+package dev.gegy.roles.mixin;
 
 import com.mojang.authlib.GameProfile;
+import dev.gegy.roles.RoleCollection;
+import dev.gegy.roles.api.HasRoles;
 import net.fabricmc.fabric.api.util.NbtType;
-import net.gegy1000.roles.RoleCollection;
-import net.gegy1000.roles.api.HasRoles;
-import net.gegy1000.roles.override.NameStyleOverride;
-import net.gegy1000.roles.override.RoleOverrideType;
+import dev.gegy.roles.override.NameStyleOverride;
+import dev.gegy.roles.override.RoleOverrideType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.network.ServerPlayerEntity;

@@ -1,8 +1,8 @@
-package net.gegy1000.roles.override.command;
+package dev.gegy.roles.override.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.tree.CommandNode;
-import net.gegy1000.roles.RolesInitializer;
+import dev.gegy.roles.RolesInitializer;
 import net.minecraft.util.Pair;
 
 import java.lang.reflect.Field;

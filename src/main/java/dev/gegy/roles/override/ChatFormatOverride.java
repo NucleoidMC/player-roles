@@ -1,4 +1,4 @@
-package net.gegy1000.roles.override;
+package dev.gegy.roles.override;
 
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;

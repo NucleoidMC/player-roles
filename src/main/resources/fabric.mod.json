@@ -4,11 +4,11 @@
   "version": "${version}",
   "name": "Player Roles",
   "description": "Role management & permissions for Fabric servers via a JSON file",
-  "authors": ["gegy1000"],
+  "authors": ["Gegy"],
   "license": "MIT",
   "environment": "*",
   "entrypoints": {
-    "main": ["net.gegy1000.roles.RolesInitializer"]
+    "main": ["dev.gegy.roles.RolesInitializer"]
   },
   "mixins": ["roles.mixins.json"],
   "depends": {

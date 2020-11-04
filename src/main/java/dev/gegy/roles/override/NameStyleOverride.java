@@ -1,4 +1,4 @@
-package net.gegy1000.roles.override;
+package dev.gegy.roles.override;
 
 import com.mojang.serialization.Dynamic;
 import net.minecraft.text.MutableText;

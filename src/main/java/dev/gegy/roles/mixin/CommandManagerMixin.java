@@ -1,6 +1,6 @@
-package net.gegy1000.roles.mixin;
+package dev.gegy.roles.mixin;
 
-import net.gegy1000.roles.override.command.CommandTestContext;
+import dev.gegy.roles.override.command.CommandTestContext;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.spongepowered.asm.mixin.Mixin;

@@ -1,15 +1,15 @@
-package net.gegy1000.roles;
+package dev.gegy.roles;
 
 import com.mojang.brigadier.CommandDispatcher;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.gegy1000.roles.command.RoleCommand;
-import net.gegy1000.roles.override.command.CommandPermissionEvaluator;
-import net.gegy1000.roles.override.command.CommandRequirementHooks;
-import net.gegy1000.roles.override.command.CommandTestContext;
-import net.gegy1000.roles.override.command.MatchableCommand;
-import net.gegy1000.roles.override.command.PermissionResult;
+import dev.gegy.roles.command.RoleCommand;
+import dev.gegy.roles.override.command.CommandPermissionEvaluator;
+import dev.gegy.roles.override.command.CommandRequirementHooks;
+import dev.gegy.roles.override.command.CommandTestContext;
+import dev.gegy.roles.override.command.MatchableCommand;
+import dev.gegy.roles.override.command.PermissionResult;
 import net.minecraft.server.command.ServerCommandSource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
