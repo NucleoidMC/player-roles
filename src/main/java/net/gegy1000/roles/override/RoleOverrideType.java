@@ -32,6 +32,11 @@ public final class RoleOverrideType<T extends RoleOverride> {
             .parse(element -> new CommandFeedbackOverride(element.asBoolean(false)))
             .register();
 
+    public static final RoleOverrideType<MuteOverride> MUTE = RoleOverrideType.<MuteOverride>builder()
+            .key("mute")
+            .parse(element -> new MuteOverride(element.asBoolean(false)))
+            .register();
+
     private final String key;
     private final Function<Dynamic<?>, T> parse;
 

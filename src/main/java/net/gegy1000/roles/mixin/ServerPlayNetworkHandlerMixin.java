@@ -3,15 +3,17 @@ package net.gegy1000.roles.mixin;
 import net.gegy1000.roles.RoleCollection;
 import net.gegy1000.roles.api.HasRoles;
 import net.gegy1000.roles.override.ChatFormatOverride;
+import net.gegy1000.roles.override.MuteOverride;
 import net.gegy1000.roles.override.RoleOverrideType;
-import net.minecraft.network.packet.c2s.play.ChatMessageC2SPacket;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ServerPlayNetworkHandler.class)
 public class ServerPlayNetworkHandlerMixin {
@@ -19,18 +21,37 @@ public class ServerPlayNetworkHandlerMixin {
     public ServerPlayerEntity player;
 
     @ModifyVariable(
-            method = "onGameMessage",
+            method = "method_31286",
             ordinal = 0,
             at = @At(value = "STORE", ordinal = 0)
     )
-    private Text formatChat(Text message, ChatMessageC2SPacket packet) {
+    private Text formatChat(Text text, String message) {
         if (this.player instanceof HasRoles) {
             RoleCollection roles = ((HasRoles) this.player).getRoles();
             ChatFormatOverride chatStyle = roles.getHighest(RoleOverrideType.CHAT_STYLE);
             if (chatStyle != null) {
-                return chatStyle.make(this.player.getDisplayName(), packet.getChatMessage());
+                return chatStyle.make(this.player.getDisplayName(), message);
             }
         }
-        return message;
+        return text;
+    }
+
+    @Inject(
+            method = "method_31286",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/server/PlayerManager;broadcastChatMessage(Lnet/minecraft/text/Text;Lnet/minecraft/network/MessageType;Ljava/util/UUID;)V",
+                    shift = At.Shift.BEFORE
+            ),
+            cancellable = true
+    )
+    private void broadcastMessage(String message, CallbackInfo ci) {
+        if (this.player instanceof HasRoles) {
+            RoleCollection roles = ((HasRoles) this.player).getRoles();
+            MuteOverride mute = roles.getHighest(RoleOverrideType.MUTE);
+            if (mute != null && mute.isMuted()) {
+                ci.cancel();
+            }
+        }
     }
 }
