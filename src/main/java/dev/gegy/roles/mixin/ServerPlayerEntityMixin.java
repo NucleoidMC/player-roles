@@ -8,8 +8,10 @@ import dev.gegy.roles.override.NameStyleOverride;
 import dev.gegy.roles.override.RoleOverrideType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.scoreboard.AbstractTeam;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
@@ -49,7 +51,8 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity implements Ha
     public Text getDisplayName() {
         Text displayName = super.getDisplayName();
 
-        if (this.getScoreboardTeam() == null) {
+        AbstractTeam team = this.getScoreboardTeam();
+        if (team == null || team.getColor() == Formatting.RESET) {
             NameStyleOverride nameFormat = this.roles.getHighest(RoleOverrideType.NAME_FORMAT);
             if (nameFormat != null) {
                 displayName = nameFormat.apply(displayName.shallowCopy());
