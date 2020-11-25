@@ -3,7 +3,7 @@ package dev.gegy.roles.override;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 
-public final class ChatFormatOverride implements RoleOverride {
+public final class ChatFormatOverride {
     private final String format;
 
     public ChatFormatOverride(String format) {

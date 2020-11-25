@@ -3,7 +3,6 @@ package dev.gegy.roles.mixin;
 import dev.gegy.roles.RoleCollection;
 import dev.gegy.roles.api.HasRoles;
 import dev.gegy.roles.override.ChatFormatOverride;
-import dev.gegy.roles.override.MuteOverride;
 import dev.gegy.roles.override.RoleOverrideType;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -48,8 +47,7 @@ public class ServerPlayNetworkHandlerMixin {
     private void broadcastMessage(String message, CallbackInfo ci) {
         if (this.player instanceof HasRoles) {
             RoleCollection roles = ((HasRoles) this.player).getRoles();
-            MuteOverride mute = roles.getHighest(RoleOverrideType.MUTE);
-            if (mute != null && mute.isMuted()) {
+            if (roles.test(RoleOverrideType.MUTE)) {
                 ci.cancel();
             }
         }

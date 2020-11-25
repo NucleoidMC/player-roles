@@ -2,19 +2,19 @@ package dev.gegy.roles.override;
 
 import com.google.common.base.Preconditions;
 import com.mojang.serialization.Dynamic;
-import dev.gegy.roles.override.command.CommandPermOverride;
+import dev.gegy.roles.override.command.CommandPermissionOverride;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-public final class RoleOverrideType<T extends RoleOverride> {
+public final class RoleOverrideType<T> {
     private static final Map<String, RoleOverrideType<?>> REGISTRY = new HashMap<>();
 
-    public static final RoleOverrideType<CommandPermOverride> COMMANDS = RoleOverrideType.<CommandPermOverride>builder()
+    public static final RoleOverrideType<CommandPermissionOverride> COMMANDS = RoleOverrideType.<CommandPermissionOverride>builder()
             .key("commands")
-            .parse(CommandPermOverride::parse)
+            .parse(CommandPermissionOverride::parse)
             .register();
 
     public static final RoleOverrideType<ChatFormatOverride> CHAT_STYLE = RoleOverrideType.<ChatFormatOverride>builder()
@@ -27,14 +27,14 @@ public final class RoleOverrideType<T extends RoleOverride> {
             .parse(NameStyleOverride::parse)
             .register();
 
-    public static final RoleOverrideType<CommandFeedbackOverride> COMMAND_FEEDBACK = RoleOverrideType.<CommandFeedbackOverride>builder()
+    public static final RoleOverrideType<Boolean> COMMAND_FEEDBACK = RoleOverrideType.<Boolean>builder()
             .key("command_feedback")
-            .parse(element -> new CommandFeedbackOverride(element.asBoolean(false)))
+            .parse(element -> element.asBoolean(false))
             .register();
 
-    public static final RoleOverrideType<MuteOverride> MUTE = RoleOverrideType.<MuteOverride>builder()
+    public static final RoleOverrideType<Boolean> MUTE = RoleOverrideType.<Boolean>builder()
             .key("mute")
-            .parse(element -> new MuteOverride(element.asBoolean(false)))
+            .parse(element -> element.asBoolean(false))
             .register();
 
     private final String key;
@@ -45,7 +45,7 @@ public final class RoleOverrideType<T extends RoleOverride> {
         this.parse = parse;
     }
 
-    public static <T extends RoleOverride> Builder<T> builder() {
+    public static <T> Builder<T> builder() {
         return new Builder<>();
     }
 
@@ -62,7 +62,7 @@ public final class RoleOverrideType<T extends RoleOverride> {
         return REGISTRY.get(key);
     }
 
-    public static class Builder<T extends RoleOverride> {
+    public static class Builder<T> {
         private String key;
         private Function<Dynamic<?>, T> parse;
 

@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.serialization.Dynamic;
 import dev.gegy.roles.api.HasRoles;
-import dev.gegy.roles.override.RoleOverride;
+import dev.gegy.roles.override.RoleChangeListener;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 
@@ -14,10 +14,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-public final class CommandPermOverride implements RoleOverride {
+public final class CommandPermissionOverride implements RoleChangeListener {
     private final Collection<Command> commands;
 
-    private CommandPermOverride(List<Command> commands) {
+    private CommandPermissionOverride(List<Command> commands) {
         this.commands = commands;
     }
 
@@ -32,7 +32,7 @@ public final class CommandPermOverride implements RoleOverride {
         return PermissionResult.PASS;
     }
 
-    public static <T> CommandPermOverride parse(Dynamic<T> root) {
+    public static <T> CommandPermissionOverride parse(Dynamic<T> root) {
         ImmutableList.Builder<Command> commands = ImmutableList.builder();
 
         Map<Dynamic<T>, Dynamic<T>> map = root.getMapValues().result().orElse(ImmutableMap.of());
@@ -45,7 +45,7 @@ public final class CommandPermOverride implements RoleOverride {
             commands.add(new Command(patterns, rule));
         }
 
-        return new CommandPermOverride(commands.build());
+        return new CommandPermissionOverride(commands.build());
     }
 
     @Override
@@ -61,7 +61,7 @@ public final class CommandPermOverride implements RoleOverride {
 
     @Override
     public String toString() {
-        return "CommandPermOverride[" + this.commands.toString() + "]";
+        return "CommandPermissionOverride[" + this.commands.toString() + "]";
     }
 
     private static class Command {

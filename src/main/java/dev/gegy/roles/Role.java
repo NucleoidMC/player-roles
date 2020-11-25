@@ -3,7 +3,7 @@ package dev.gegy.roles;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.serialization.Dynamic;
 import dev.gegy.roles.api.HasRoles;
-import dev.gegy.roles.override.RoleOverride;
+import dev.gegy.roles.override.RoleChangeListener;
 import dev.gegy.roles.override.RoleOverrideType;
 
 import javax.annotation.Nullable;
@@ -17,7 +17,7 @@ public final class Role implements Comparable<Role> {
     private final String name;
     private int level;
 
-    private final Map<RoleOverrideType<?>, RoleOverride> overrides = new HashMap<>();
+    private final Map<RoleOverrideType<?>, Object> overrides = new HashMap<>();
 
     Role(String name) {
         this.name = name;
@@ -51,8 +51,10 @@ public final class Role implements Comparable<Role> {
     }
 
     public void notifyChange(HasRoles owner) {
-        for (RoleOverride override : this.overrides.values()) {
-            override.notifyChange(owner);
+        for (Object override : this.overrides.values()) {
+            if (override instanceof RoleChangeListener) {
+                ((RoleChangeListener) override).notifyChange(owner);
+            }
         }
     }
 
@@ -66,7 +68,7 @@ public final class Role implements Comparable<Role> {
 
     @Nullable
     @SuppressWarnings("unchecked")
-    public <T extends RoleOverride> T getOverride(RoleOverrideType<T> type) {
+    public <T> T getOverride(RoleOverrideType<T> type) {
         return (T) this.overrides.get(type);
     }
 

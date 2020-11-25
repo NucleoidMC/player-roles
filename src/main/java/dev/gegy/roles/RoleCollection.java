@@ -1,7 +1,6 @@
 package dev.gegy.roles;
 
 import dev.gegy.roles.api.HasRoles;
-import dev.gegy.roles.override.RoleOverride;
 import dev.gegy.roles.override.RoleOverrideType;
 import dev.gegy.roles.override.command.PermissionResult;
 import net.minecraft.nbt.ListTag;
@@ -16,7 +15,7 @@ import java.util.stream.Stream;
 public final class RoleCollection {
     private final HasRoles owner;
 
-    private TreeSet<String> roleIds = new TreeSet<>((n1, n2) -> {
+    private final TreeSet<String> roleIds = new TreeSet<>((n1, n2) -> {
         RoleConfiguration config = RoleConfiguration.get();
         Role r1 = config.get(n1);
         Role r2 = config.get(n2);
@@ -57,18 +56,22 @@ public final class RoleCollection {
         );
     }
 
-    public <T extends RoleOverride> Stream<T> overrides(RoleOverrideType<T> type) {
+    public <T> Stream<T> overrides(RoleOverrideType<T> type) {
         return this.stream().map(role -> role.getOverride(type)).filter(Objects::nonNull);
     }
 
-    public <T extends RoleOverride> PermissionResult test(RoleOverrideType<T> type, Function<T, PermissionResult> function) {
+    public <T> PermissionResult test(RoleOverrideType<T> type, Function<T, PermissionResult> function) {
         return this.overrides(type).map(function)
                 .filter(PermissionResult::isDefinitive)
                 .findFirst().orElse(PermissionResult.PASS);
     }
 
+    public boolean test(RoleOverrideType<Boolean> type) {
+        return this.overrides(type).findFirst().orElse(false);
+    }
+
     @Nullable
-    public <T extends RoleOverride> T getHighest(RoleOverrideType<T> type) {
+    public <T> T getHighest(RoleOverrideType<T> type) {
         return this.overrides(type).findFirst().orElse(null);
     }
 

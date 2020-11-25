@@ -3,7 +3,6 @@ package dev.gegy.roles.mixin;
 import com.mojang.authlib.GameProfile;
 import dev.gegy.roles.RoleCollection;
 import dev.gegy.roles.api.HasRoles;
-import dev.gegy.roles.override.CommandFeedbackOverride;
 import dev.gegy.roles.override.RoleOverrideType;
 import net.minecraft.server.PlayerManager;
 import net.minecraft.server.command.ServerCommandSource;
@@ -29,10 +28,7 @@ public class ServerCommandSourceMixin {
         ServerPlayerEntity player = playerManager.getPlayer(profile.getId());
         if (player instanceof HasRoles) {
             RoleCollection roles = ((HasRoles) player).getRoles();
-            CommandFeedbackOverride feedbackOverride = roles.getHighest(RoleOverrideType.COMMAND_FEEDBACK);
-            if (feedbackOverride != null) {
-                return feedbackOverride.shouldReceiveFeedback();
-            }
+            return roles.test(RoleOverrideType.COMMAND_FEEDBACK);
         }
 
         return false;
