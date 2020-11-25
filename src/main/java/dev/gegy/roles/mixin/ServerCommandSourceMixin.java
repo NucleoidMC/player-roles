@@ -1,7 +1,7 @@
 package dev.gegy.roles.mixin;
 
 import com.mojang.authlib.GameProfile;
-import dev.gegy.roles.RoleCollection;
+import dev.gegy.roles.api.RoleReader;
 import dev.gegy.roles.api.HasRoles;
 import dev.gegy.roles.override.RoleOverrideType;
 import net.minecraft.server.PlayerManager;
@@ -27,7 +27,7 @@ public class ServerCommandSourceMixin {
 
         ServerPlayerEntity player = playerManager.getPlayer(profile.getId());
         if (player instanceof HasRoles) {
-            RoleCollection roles = ((HasRoles) player).getRoles();
+            RoleReader roles = ((HasRoles) player).getRoles();
             return roles.test(RoleOverrideType.COMMAND_FEEDBACK);
         }
 

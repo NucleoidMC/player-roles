@@ -1,7 +1,7 @@
 package dev.gegy.roles.api;
 
-import dev.gegy.roles.RoleCollection;
+import dev.gegy.roles.RoleStorage;
 
 public interface HasRoles {
-    RoleCollection getRoles();
+    RoleStorage getRoles();
 }

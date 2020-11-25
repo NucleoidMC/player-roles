@@ -1,6 +1,6 @@
 package dev.gegy.roles.override.command;
 
-import dev.gegy.roles.RoleCollection;
+import dev.gegy.roles.api.RoleReader;
 import dev.gegy.roles.api.HasRoles;
 import dev.gegy.roles.override.RoleOverrideType;
 import net.minecraft.entity.Entity;
@@ -13,7 +13,7 @@ public final class CommandPermissionEvaluator {
 
         Entity entity = source.getEntity();
         if (entity instanceof HasRoles) {
-            RoleCollection roles = ((HasRoles) entity).getRoles();
+            RoleReader roles = ((HasRoles) entity).getRoles();
             if (roles != null) {
                 return roles.test(RoleOverrideType.COMMANDS, m -> m.test(command));
             }

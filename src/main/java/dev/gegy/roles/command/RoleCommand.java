@@ -8,7 +8,8 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import dev.gegy.roles.Role;
-import dev.gegy.roles.RoleCollection;
+import dev.gegy.roles.RoleStorage;
+import dev.gegy.roles.api.RoleReader;
 import dev.gegy.roles.RoleConfiguration;
 import dev.gegy.roles.api.HasRoles;
 import dev.gegy.roles.override.command.CommandPermissionEvaluator;
@@ -54,7 +55,7 @@ public final class RoleCommand {
                         ServerCommandSource source = ctx.getSource();
                         Collection<ServerPlayerEntity> targets = EntityArgumentType.getPlayers(ctx, "targets");
                         String roleName = StringArgumentType.getString(ctx, "role");
-                        return updateRoles(source, targets, roleName, RoleCollection::add, "'%s' assigned to %s players");
+                        return updateRoles(source, targets, roleName, RoleStorage::add, "'%s' assigned to %s players");
                 }))))
                 .then(literal("remove")
                     .then(argument("targets", EntityArgumentType.players())
@@ -63,7 +64,7 @@ public final class RoleCommand {
                         ServerCommandSource source = ctx.getSource();
                         Collection<ServerPlayerEntity> targets = EntityArgumentType.getPlayers(ctx, "targets");
                         String roleName = StringArgumentType.getString(ctx, "role");
-                        return updateRoles(source, targets, roleName, RoleCollection::remove, "'%s' removed from %s players");
+                        return updateRoles(source, targets, roleName, RoleStorage::remove, "'%s' removed from %s players");
                     }))))
                 .then(literal("list")
                     .then(argument("target", EntityArgumentType.player()).executes(ctx -> {
@@ -77,14 +78,14 @@ public final class RoleCommand {
     }
     // @formatter:on
 
-    private static int updateRoles(ServerCommandSource source, Collection<ServerPlayerEntity> players, String roleName, BiPredicate<RoleCollection, Role> apply, String success) throws CommandSyntaxException {
+    private static int updateRoles(ServerCommandSource source, Collection<ServerPlayerEntity> players, String roleName, BiPredicate<RoleStorage, Role> apply, String success) throws CommandSyntaxException {
         Role role = getRole(roleName);
         assertHasPower(source, role);
 
         int count = 0;
         for (ServerPlayerEntity player : players) {
             if (player instanceof HasRoles) {
-                RoleCollection roles = ((HasRoles) player).getRoles();
+                RoleStorage roles = ((HasRoles) player).getRoles();
                 if (apply.test(roles, role)) {
                     count++;
                 }
@@ -115,7 +116,7 @@ public final class RoleCommand {
             List<ServerPlayerEntity> players = server.getPlayerManager().getPlayerList();
             for (ServerPlayerEntity entity : players) {
                 if (entity instanceof HasRoles) {
-                    RoleCollection roles = ((HasRoles) entity).getRoles();
+                    RoleStorage roles = ((HasRoles) entity).getRoles();
                     roles.notifyReload();
                 }
             }
@@ -158,10 +159,11 @@ public final class RoleCommand {
         if (entity == null || CommandPermissionEvaluator.doesBypassPermissions(source)) return Integer.MAX_VALUE;
 
         if (entity instanceof HasRoles) {
-            RoleCollection roles = ((HasRoles) entity).getRoles();
+            RoleReader roles = ((HasRoles) entity).getRoles();
             IntStream levels = roles.stream().mapToInt(Role::getLevel);
             return levels.max().orElse(0);
         }
+
         return 0;
     }
 }

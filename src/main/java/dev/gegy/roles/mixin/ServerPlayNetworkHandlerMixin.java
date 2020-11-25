@@ -1,6 +1,6 @@
 package dev.gegy.roles.mixin;
 
-import dev.gegy.roles.RoleCollection;
+import dev.gegy.roles.api.RoleReader;
 import dev.gegy.roles.api.HasRoles;
 import dev.gegy.roles.override.ChatFormatOverride;
 import dev.gegy.roles.override.RoleOverrideType;
@@ -26,7 +26,7 @@ public class ServerPlayNetworkHandlerMixin {
     )
     private Text formatChat(Text text, String message) {
         if (this.player instanceof HasRoles) {
-            RoleCollection roles = ((HasRoles) this.player).getRoles();
+            RoleReader roles = ((HasRoles) this.player).getRoles();
             ChatFormatOverride chatStyle = roles.select(RoleOverrideType.CHAT_STYLE);
             if (chatStyle != null) {
                 return chatStyle.make(this.player.getDisplayName(), message);
@@ -46,7 +46,7 @@ public class ServerPlayNetworkHandlerMixin {
     )
     private void broadcastMessage(String message, CallbackInfo ci) {
         if (this.player instanceof HasRoles) {
-            RoleCollection roles = ((HasRoles) this.player).getRoles();
+            RoleReader roles = ((HasRoles) this.player).getRoles();
             if (roles.test(RoleOverrideType.MUTE)) {
                 ci.cancel();
             }

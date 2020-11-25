@@ -1,7 +1,7 @@
 package dev.gegy.roles.mixin;
 
 import com.mojang.authlib.GameProfile;
-import dev.gegy.roles.RoleCollection;
+import dev.gegy.roles.RoleStorage;
 import dev.gegy.roles.api.HasRoles;
 import dev.gegy.roles.override.NameStyleOverride;
 import dev.gegy.roles.override.RoleOverrideType;
@@ -21,14 +21,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ServerPlayerEntity.class)
 public abstract class ServerPlayerEntityMixin extends PlayerEntity implements HasRoles {
-    private final RoleCollection roles = new RoleCollection(this);
+    private final RoleStorage roles = new RoleStorage(this);
 
     private ServerPlayerEntityMixin(World world, BlockPos pos, float yaw, GameProfile profile) {
         super(world, pos, yaw, profile);
     }
 
     @Override
-    public RoleCollection getRoles() {
+    public RoleStorage getRoles() {
         return this.roles;
     }
 

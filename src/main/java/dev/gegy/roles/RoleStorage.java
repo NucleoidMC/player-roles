@@ -1,6 +1,7 @@
 package dev.gegy.roles;
 
 import dev.gegy.roles.api.HasRoles;
+import dev.gegy.roles.api.RoleWriter;
 import dev.gegy.roles.override.RoleOverrideType;
 import dev.gegy.roles.override.command.PermissionResult;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
@@ -16,7 +17,7 @@ import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-public final class RoleCollection {
+public final class RoleStorage implements RoleWriter {
     private final HasRoles owner;
 
     private final TreeSet<String> roleIds = new TreeSet<>((n1, n2) -> {
@@ -29,7 +30,7 @@ public final class RoleCollection {
 
     private final Map<RoleOverrideType<?>, Collection<Object>> overrideCache = new Reference2ObjectOpenHashMap<>();
 
-    public RoleCollection(HasRoles owner) {
+    public RoleStorage(HasRoles owner) {
         this.owner = owner;
     }
 
@@ -50,6 +51,7 @@ public final class RoleCollection {
         });
     }
 
+    @Override
     public boolean add(Role role) {
         if (this.roleIds.add(role.getName())) {
             this.rebuildOverrideCache();
@@ -59,6 +61,7 @@ public final class RoleCollection {
         return false;
     }
 
+    @Override
     public boolean remove(Role role) {
         if (this.roleIds.remove(role.getName())) {
             this.rebuildOverrideCache();
@@ -68,6 +71,7 @@ public final class RoleCollection {
         return false;
     }
 
+    @Override
     public Stream<Role> stream() {
         RoleConfiguration roleConfig = RoleConfiguration.get();
         return Stream.concat(
@@ -76,6 +80,12 @@ public final class RoleCollection {
         );
     }
 
+    @Override
+    public boolean hasRole(String name) {
+        return name.equals(Role.EVERYONE) || this.roleIds.contains(name);
+    }
+
+    @Override
     public <T> Stream<T> overrides(RoleOverrideType<T> type) {
         Collection<T> overrides = this.getOverridesOrNull(type);
         return overrides != null ? overrides.stream() : Stream.empty();
@@ -87,6 +97,7 @@ public final class RoleCollection {
         return (Collection<T>) this.overrideCache.get(type);
     }
 
+    @Override
     public <T> PermissionResult test(RoleOverrideType<T> type, Function<T, PermissionResult> function) {
         Collection<T> overrides = this.getOverridesOrNull(type);
         if (overrides == null) {
@@ -103,6 +114,7 @@ public final class RoleCollection {
         return PermissionResult.PASS;
     }
 
+    @Override
     public boolean test(RoleOverrideType<Boolean> type) {
         Collection<Boolean> overrides = this.getOverridesOrNull(type);
         if (overrides != null) {
@@ -113,6 +125,7 @@ public final class RoleCollection {
         return false;
     }
 
+    @Override
     @Nullable
     public <T> T select(RoleOverrideType<T> type) {
         Collection<T> overrides = this.getOverridesOrNull(type);
@@ -151,7 +164,7 @@ public final class RoleCollection {
         });
     }
 
-    public void copyFrom(RoleCollection old) {
+    public void copyFrom(RoleStorage old) {
         this.deserialize(old.serialize());
     }
 }
