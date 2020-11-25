@@ -10,6 +10,7 @@ import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 public final class Role implements Comparable<Role> {
     public static final String EVERYONE = "everyone";
@@ -70,6 +71,10 @@ public final class Role implements Comparable<Role> {
     @SuppressWarnings("unchecked")
     public <T> T getOverride(RoleOverrideType<T> type) {
         return (T) this.overrides.get(type);
+    }
+
+    public Set<RoleOverrideType<?>> getOverrides() {
+        return this.overrides.keySet();
     }
 
     @Override

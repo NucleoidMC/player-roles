@@ -3,10 +3,14 @@ package dev.gegy.roles;
 import dev.gegy.roles.api.HasRoles;
 import dev.gegy.roles.override.RoleOverrideType;
 import dev.gegy.roles.override.command.PermissionResult;
+import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
 import java.util.Objects;
 import java.util.TreeSet;
 import java.util.function.Function;
@@ -23,6 +27,8 @@ public final class RoleCollection {
         return r1.compareTo(r2);
     });
 
+    private final Map<RoleOverrideType<?>, Collection<Object>> overrideCache = new Reference2ObjectOpenHashMap<>();
+
     public RoleCollection(HasRoles owner) {
         this.owner = owner;
     }
@@ -30,10 +36,23 @@ public final class RoleCollection {
     public void notifyReload() {
         this.removeInvalidRoles();
         this.stream().forEach(role -> role.notifyChange(this.owner));
+
+        this.rebuildOverrideCache();
+    }
+
+    private void rebuildOverrideCache() {
+        this.overrideCache.clear();
+        this.stream().forEach(role -> {
+            for (RoleOverrideType<?> type : role.getOverrides()) {
+                Collection<Object> overrides = this.overrideCache.computeIfAbsent(type, t -> new ArrayList<>());
+                overrides.add(role.getOverride(type));
+            }
+        });
     }
 
     public boolean add(Role role) {
         if (this.roleIds.add(role.getName())) {
+            this.rebuildOverrideCache();
             role.notifyChange(this.owner);
             return true;
         }
@@ -42,6 +61,7 @@ public final class RoleCollection {
 
     public boolean remove(Role role) {
         if (this.roleIds.remove(role.getName())) {
+            this.rebuildOverrideCache();
             role.notifyChange(this.owner);
             return true;
         }
@@ -57,22 +77,51 @@ public final class RoleCollection {
     }
 
     public <T> Stream<T> overrides(RoleOverrideType<T> type) {
-        return this.stream().map(role -> role.getOverride(type)).filter(Objects::nonNull);
-    }
-
-    public <T> PermissionResult test(RoleOverrideType<T> type, Function<T, PermissionResult> function) {
-        return this.overrides(type).map(function)
-                .filter(PermissionResult::isDefinitive)
-                .findFirst().orElse(PermissionResult.PASS);
-    }
-
-    public boolean test(RoleOverrideType<Boolean> type) {
-        return this.overrides(type).findFirst().orElse(false);
+        Collection<T> overrides = this.getOverridesOrNull(type);
+        return overrides != null ? overrides.stream() : Stream.empty();
     }
 
     @Nullable
-    public <T> T getHighest(RoleOverrideType<T> type) {
-        return this.overrides(type).findFirst().orElse(null);
+    @SuppressWarnings("unchecked")
+    private <T> Collection<T> getOverridesOrNull(RoleOverrideType<T> type) {
+        return (Collection<T>) this.overrideCache.get(type);
+    }
+
+    public <T> PermissionResult test(RoleOverrideType<T> type, Function<T, PermissionResult> function) {
+        Collection<T> overrides = this.getOverridesOrNull(type);
+        if (overrides == null) {
+            return PermissionResult.PASS;
+        }
+
+        for (T override : overrides) {
+            PermissionResult result = function.apply(override);
+            if (result.isDefinitive()) {
+                return result;
+            }
+        }
+
+        return PermissionResult.PASS;
+    }
+
+    public boolean test(RoleOverrideType<Boolean> type) {
+        Collection<Boolean> overrides = this.getOverridesOrNull(type);
+        if (overrides != null) {
+            for (Boolean override : overrides) {
+                return override;
+            }
+        }
+        return false;
+    }
+
+    @Nullable
+    public <T> T select(RoleOverrideType<T> type) {
+        Collection<T> overrides = this.getOverridesOrNull(type);
+        if (overrides != null) {
+            for (T override : overrides) {
+                return override;
+            }
+        }
+        return null;
     }
 
     public ListTag serialize() {

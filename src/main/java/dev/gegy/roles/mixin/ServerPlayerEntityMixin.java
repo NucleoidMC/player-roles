@@ -53,7 +53,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity implements Ha
 
         AbstractTeam team = this.getScoreboardTeam();
         if (team == null || team.getColor() == Formatting.RESET) {
-            NameStyleOverride nameFormat = this.roles.getHighest(RoleOverrideType.NAME_FORMAT);
+            NameStyleOverride nameFormat = this.roles.select(RoleOverrideType.NAME_FORMAT);
             if (nameFormat != null) {
                 displayName = nameFormat.apply(displayName.shallowCopy());
             }

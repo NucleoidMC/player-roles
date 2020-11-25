@@ -27,7 +27,7 @@ public class ServerPlayNetworkHandlerMixin {
     private Text formatChat(Text text, String message) {
         if (this.player instanceof HasRoles) {
             RoleCollection roles = ((HasRoles) this.player).getRoles();
-            ChatFormatOverride chatStyle = roles.getHighest(RoleOverrideType.CHAT_STYLE);
+            ChatFormatOverride chatStyle = roles.select(RoleOverrideType.CHAT_STYLE);
             if (chatStyle != null) {
                 return chatStyle.make(this.player.getDisplayName(), message);
             }

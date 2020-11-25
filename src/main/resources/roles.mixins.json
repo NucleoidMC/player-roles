@@ -6,6 +6,7 @@
   "mixins": [
     "CommandDispatcherMixin",
     "CommandManagerMixin",
+    "MinecraftServerMixin",
     "ServerCommandSourceMixin",
     "ServerPlayerEntityMixin",
     "ServerPlayNetworkHandlerMixin"

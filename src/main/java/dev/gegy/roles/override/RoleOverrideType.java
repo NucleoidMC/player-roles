@@ -3,6 +3,7 @@ package dev.gegy.roles.override;
 import com.google.common.base.Preconditions;
 import com.mojang.serialization.Dynamic;
 import dev.gegy.roles.override.command.CommandPermissionOverride;
+import net.minecraft.util.math.MathHelper;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
@@ -35,6 +36,11 @@ public final class RoleOverrideType<T> {
     public static final RoleOverrideType<Boolean> MUTE = RoleOverrideType.<Boolean>builder()
             .key("mute")
             .parse(element -> element.asBoolean(false))
+            .register();
+
+    public static final RoleOverrideType<Integer> PERMISSION_LEVEL = RoleOverrideType.<Integer>builder()
+            .key("permission_level")
+            .parse(element -> MathHelper.clamp(element.asInt(0), 0, 4))
             .register();
 
     private final String key;
