@@ -4,7 +4,7 @@ import dev.gegy.roles.Role;
 import dev.gegy.roles.override.RoleOverrideType;
 import dev.gegy.roles.override.command.PermissionResult;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import java.util.function.Function;
 import java.util.stream.Stream;
 

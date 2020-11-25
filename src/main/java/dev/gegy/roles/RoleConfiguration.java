@@ -7,8 +7,8 @@ import com.google.gson.JsonSyntaxException;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.JsonOps;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -101,7 +101,7 @@ public final class RoleConfiguration {
         return this.roles.get(name);
     }
 
-    @Nonnull
+    @NotNull
     public Role everyone() {
         return this.everyone;
     }

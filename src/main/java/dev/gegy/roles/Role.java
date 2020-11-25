@@ -6,7 +6,7 @@ import dev.gegy.roles.api.HasRoles;
 import dev.gegy.roles.override.RoleChangeListener;
 import dev.gegy.roles.override.RoleOverrideType;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;

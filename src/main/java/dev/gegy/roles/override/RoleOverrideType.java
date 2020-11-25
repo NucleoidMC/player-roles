@@ -5,7 +5,7 @@ import com.mojang.serialization.Dynamic;
 import dev.gegy.roles.override.command.CommandPermissionOverride;
 import net.minecraft.util.math.MathHelper;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
