@@ -43,3 +43,30 @@ task sourcesJar(type: Jar, dependsOn: classes) {
 jar {
 	from "LICENSE"
 }
+
+publishing {
+	publications {
+		mavenJava(MavenPublication) {
+			artifact(remapJar) {
+				builtBy remapJar
+			}
+			artifact(sourcesJar) {
+				builtBy remapSourcesJar
+			}
+		}
+	}
+
+	repositories {
+		if (project.hasProperty("mavenUrl")) {
+			maven {
+				credentials {
+					username project.mavenUsername ?: ""
+					password project.mavenPassword ?: ""
+				}
+				url project.mavenUrl ?: ""
+			}
+		} else {
+			mavenLocal()
+		}
+	}
+}

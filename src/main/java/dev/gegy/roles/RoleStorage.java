@@ -151,6 +151,7 @@ public final class RoleStorage implements RoleWriter {
             this.roleIds.add(list.getString(i));
         }
         this.removeInvalidRoles();
+        this.rebuildOverrideCache();
     }
 
     private void removeInvalidRoles() {
