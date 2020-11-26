@@ -9,7 +9,7 @@
     "MinecraftServerMixin",
     "ServerCommandSourceMixin",
     "ServerPlayerEntityMixin",
-    "ServerPlayNetworkHandlerMixin"
+    "ServerPlayNetworkHandlerMixin", "TeamAccessor"
   ],
   "injectors": {
     "defaultRequire": 1
