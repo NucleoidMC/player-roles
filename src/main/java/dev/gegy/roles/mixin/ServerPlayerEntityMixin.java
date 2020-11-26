@@ -8,7 +8,7 @@ import dev.gegy.roles.override.RoleOverrideType;
 import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.scoreboard.AbstractTeam;
+import net.minecraft.scoreboard.Team;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -51,7 +51,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity implements Ha
     public Text getDisplayName() {
         Text displayName = super.getDisplayName();
 
-        AbstractTeam team = this.getScoreboardTeam();
+        Team team = (Team) this.getScoreboardTeam();
         if (team == null || team.getColor() == Formatting.RESET) {
             NameStyleOverride nameFormat = this.roles.select(RoleOverrideType.NAME_FORMAT);
             if (nameFormat != null) {
