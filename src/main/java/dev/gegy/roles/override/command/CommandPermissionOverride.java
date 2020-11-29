@@ -1,6 +1,5 @@
 package dev.gegy.roles.override.command;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.serialization.Dynamic;
 import dev.gegy.roles.api.HasRoles;
@@ -9,31 +8,22 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
 public final class CommandPermissionOverride implements RoleChangeListener {
-    private final Collection<Command> commands;
+    private final CommandPermissionRules rules;
 
-    private CommandPermissionOverride(List<Command> commands) {
-        this.commands = commands;
+    public CommandPermissionOverride(CommandPermissionRules rules) {
+        this.rules = rules;
     }
 
     public PermissionResult test(MatchableCommand command) {
-        for (Command permission : this.commands) {
-            PermissionResult result = permission.test(command);
-            if (result.isDefinitive()) {
-                return result;
-            }
-        }
-
-        return PermissionResult.PASS;
+        return this.rules.test(command);
     }
 
     public static <T> CommandPermissionOverride parse(Dynamic<T> root) {
-        ImmutableList.Builder<Command> commands = ImmutableList.builder();
+        CommandPermissionRules.Builder rules = CommandPermissionRules.builder();
 
         Map<Dynamic<T>, Dynamic<T>> map = root.getMapValues().result().orElse(ImmutableMap.of());
         for (Map.Entry<Dynamic<T>, Dynamic<T>> entry : map.entrySet()) {
@@ -41,11 +31,12 @@ public final class CommandPermissionOverride implements RoleChangeListener {
             String ruleName = entry.getValue().asString("pass");
 
             Pattern[] patterns = Arrays.stream(patternStrings).map(Pattern::compile).toArray(Pattern[]::new);
-            PermissionResult rule = PermissionResult.byName(ruleName);
-            commands.add(new Command(patterns, rule));
+            PermissionResult result = PermissionResult.byName(ruleName);
+
+            rules.add(patterns, result);
         }
 
-        return new CommandPermissionOverride(commands.build());
+        return new CommandPermissionOverride(rules.build());
     }
 
     @Override
@@ -61,25 +52,6 @@ public final class CommandPermissionOverride implements RoleChangeListener {
 
     @Override
     public String toString() {
-        return "CommandPermissionOverride[" + this.commands.toString() + "]";
-    }
-
-    private static class Command {
-        final Pattern[] patterns;
-        final PermissionResult rule;
-
-        Command(Pattern[] patterns, PermissionResult rule) {
-            this.patterns = patterns;
-            this.rule = rule;
-        }
-
-        PermissionResult test(MatchableCommand command) {
-            return command.matches(this.patterns) ? this.rule : PermissionResult.PASS;
-        }
-
-        @Override
-        public String toString() {
-            return "\"" + Arrays.toString(this.patterns) + "\"=" + this.rule;
-        }
+        return "CommandPermissionOverride[" + this.rules.toString() + "]";
     }
 }
