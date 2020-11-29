@@ -36,9 +36,8 @@ public final class RoleStorage implements RoleWriter {
 
     public void notifyReload() {
         this.removeInvalidRoles();
-        this.stream().forEach(role -> role.notifyChange(this.owner));
-
         this.rebuildOverrideCache();
+        this.stream().forEach(role -> role.notifyChange(this.owner));
     }
 
     private void rebuildOverrideCache() {
