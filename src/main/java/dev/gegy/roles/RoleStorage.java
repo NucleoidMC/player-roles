@@ -4,23 +4,23 @@ import dev.gegy.roles.api.HasRoles;
 import dev.gegy.roles.api.RoleWriter;
 import dev.gegy.roles.override.RoleOverrideType;
 import dev.gegy.roles.override.command.PermissionResult;
+import it.unimi.dsi.fastutil.objects.ObjectRBTreeSet;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
-
 import org.jetbrains.annotations.Nullable;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
-import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
 public final class RoleStorage implements RoleWriter {
     private final HasRoles owner;
 
-    private final TreeSet<String> roleIds = new TreeSet<>((n1, n2) -> {
+    private final ObjectRBTreeSet<String> roleIds = new ObjectRBTreeSet<>((n1, n2) -> {
         RoleConfiguration config = RoleConfiguration.get();
         Role r1 = config.get(n1);
         Role r2 = config.get(n2);
