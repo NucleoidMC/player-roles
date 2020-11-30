@@ -34,6 +34,32 @@ final class CommandRulesTests {
         assertEquals(rules.test(command("execute")), PermissionResult.ALLOW);
     }
 
+    @Test
+    void testOverrideAllowWildcard() {
+        CommandPermissionRules rules = CommandPermissionRules.builder()
+                .add(matcher("gamemode"), PermissionResult.DENY)
+                .add(matcher(".*"), PermissionResult.ALLOW)
+                .build();
+
+        assertEquals(rules.test(command("gamemode")), PermissionResult.DENY);
+        assertEquals(rules.test(command("gamemode creative")), PermissionResult.DENY);
+        assertEquals(rules.test(command("foo")), PermissionResult.ALLOW);
+        assertEquals(rules.test(command("bar")), PermissionResult.ALLOW);
+    }
+
+    @Test
+    void testOverrideDenyWildcard() {
+        CommandPermissionRules rules = CommandPermissionRules.builder()
+                .add(matcher("gamemode"), PermissionResult.ALLOW)
+                .add(matcher(".*"), PermissionResult.DENY)
+                .build();
+
+        assertEquals(rules.test(command("gamemode")), PermissionResult.ALLOW);
+        assertEquals(rules.test(command("gamemode creative")), PermissionResult.ALLOW);
+        assertEquals(rules.test(command("foo")), PermissionResult.DENY);
+        assertEquals(rules.test(command("bar")), PermissionResult.DENY);
+    }
+
     private static Pattern[] matcher(String matcher) {
         String[] patternStrings = matcher.split(" ");
         Pattern[] patterns = new Pattern[patternStrings.length];
