@@ -49,6 +49,8 @@ public final class RoleConfiguration {
             instance = parse(new Dynamic<>(JsonOps.INSTANCE, root));
         } catch (IOException e) {
             RolesInitializer.LOGGER.warn("Failed to load roles.json configuration", e);
+        } catch (JsonSyntaxException e) {
+            RolesInitializer.LOGGER.warn("Malformed syntax in roles.json configuration", e);
         }
     }
 
