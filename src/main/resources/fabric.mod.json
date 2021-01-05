@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "player-roles",
+  "id": "player_roles",
   "version": "${version}",
   "name": "Player Roles",
   "description": "Role management & permissions for Fabric servers via a JSON file",

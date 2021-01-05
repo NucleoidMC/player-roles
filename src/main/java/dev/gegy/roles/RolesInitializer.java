@@ -1,21 +1,21 @@
 package dev.gegy.roles;
 
 import com.mojang.brigadier.CommandDispatcher;
-import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import dev.gegy.roles.command.RoleCommand;
 import dev.gegy.roles.override.command.CommandPermissionEvaluator;
 import dev.gegy.roles.override.command.CommandRequirementHooks;
 import dev.gegy.roles.override.command.CommandTestContext;
 import dev.gegy.roles.override.command.MatchableCommand;
 import dev.gegy.roles.override.command.PermissionResult;
+import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.server.command.ServerCommandSource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public final class RolesInitializer implements ModInitializer {
-    public static final String ID = "player-roles";
+    public static final String ID = "player_roles";
     public static final Logger LOGGER = LogManager.getLogger(ID);
 
     private static boolean registered;
@@ -39,6 +39,10 @@ public final class RolesInitializer implements ModInitializer {
             ServerLifecycleEvents.SERVER_STARTED.register(server -> {
                 this.hookCommands(server.getCommandManager().getDispatcher());
             });
+        });
+
+        ServerLifecycleEvents.END_DATA_PACK_RELOAD.register((server, resources, success) -> {
+            this.hookCommands(server.getCommandManager().getDispatcher());
         });
     }
 
