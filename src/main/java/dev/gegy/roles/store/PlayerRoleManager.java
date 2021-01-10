@@ -12,6 +12,7 @@ import net.minecraft.util.WorldSavePath;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -20,6 +21,7 @@ import java.nio.ByteBuffer;
 import java.nio.file.Path;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.function.Function;
 
 public final class PlayerRoleManager {
     private static final Logger LOGGER = LogManager.getLogger(PlayerRoleManager.class);
@@ -129,5 +131,44 @@ public final class PlayerRoleManager {
         PlayerRoleSet roles = owner.getRoles();
         roles.deserialize(nbt);
         roles.setDirty(true);
+    }
+
+    public <R> R updateRoles(MinecraftServer server, UUID uuid, Function<PlayerRoleSet, R> update) {
+        RoleOwner roleOwner = getRoleOwner(server, uuid);
+        if (roleOwner != null) {
+            return update.apply(roleOwner.getRoles());
+        } else {
+            PlayerRoleSet roles = new PlayerRoleSet(null);
+            this.loadRolesInto(uuid, roles);
+
+            try {
+                return update.apply(roles);
+            } finally {
+                if (roles.isDirty()) {
+                    try {
+                        this.saveRoles(uuid, roles);
+                    } catch (IOException e) {
+                        LOGGER.error("Failed to save roles for {}", uuid, e);
+                    }
+                }
+            }
+        }
+    }
+
+    public PlayerRoleSet peekRoles(MinecraftServer server, UUID uuid) {
+        RoleOwner roleOwner = getRoleOwner(server, uuid);
+        if (roleOwner != null) {
+            return roleOwner.getRoles();
+        } else {
+            PlayerRoleSet roles = new PlayerRoleSet(null);
+            this.loadRolesInto(uuid, roles);
+            return roles;
+        }
+    }
+
+    @Nullable
+    private static RoleOwner getRoleOwner(MinecraftServer server, UUID uuid) {
+        ServerPlayerEntity player = server.getPlayerManager().getPlayer(uuid);
+        return (RoleOwner) player;
     }
 }

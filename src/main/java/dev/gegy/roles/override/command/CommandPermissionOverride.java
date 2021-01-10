@@ -6,6 +6,7 @@ import dev.gegy.roles.api.RoleOwner;
 import dev.gegy.roles.override.RoleChangeListener;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -40,7 +41,7 @@ public final class CommandPermissionOverride implements RoleChangeListener {
     }
 
     @Override
-    public void notifyChange(RoleOwner owner) {
+    public void notifyChange(@Nullable RoleOwner owner) {
         if (owner instanceof ServerPlayerEntity) {
             ServerPlayerEntity player = (ServerPlayerEntity) owner;
             MinecraftServer server = player.getServer();

@@ -21,6 +21,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 public final class PlayerRoleSet implements RoleWriter {
+    @Nullable
     private final RoleOwner owner;
 
     private final ObjectRBTreeSet<String> roleIds = new ObjectRBTreeSet<>((n1, n2) -> {
@@ -35,7 +36,7 @@ public final class PlayerRoleSet implements RoleWriter {
 
     private boolean dirty;
 
-    public PlayerRoleSet(RoleOwner owner) {
+    public PlayerRoleSet(@Nullable RoleOwner owner) {
         this.owner = owner;
     }
 

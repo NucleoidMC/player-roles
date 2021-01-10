@@ -51,7 +51,7 @@ public final class Role implements Comparable<Role> {
         return role;
     }
 
-    public void notifyChange(RoleOwner owner) {
+    public void notifyChange(@Nullable RoleOwner owner) {
         for (Object override : this.overrides.values()) {
             if (override instanceof RoleChangeListener) {
                 ((RoleChangeListener) override).notifyChange(owner);

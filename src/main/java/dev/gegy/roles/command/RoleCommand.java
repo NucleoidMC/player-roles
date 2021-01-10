@@ -1,5 +1,6 @@
 package dev.gegy.roles.command;
 
+import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -8,13 +9,14 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import dev.gegy.roles.Role;
-import dev.gegy.roles.store.PlayerRoleSet;
-import dev.gegy.roles.api.RoleReader;
 import dev.gegy.roles.RoleConfiguration;
 import dev.gegy.roles.api.RoleOwner;
+import dev.gegy.roles.api.RoleReader;
 import dev.gegy.roles.override.command.CommandPermissionEvaluator;
+import dev.gegy.roles.store.PlayerRoleManager;
+import dev.gegy.roles.store.PlayerRoleSet;
 import net.minecraft.command.CommandSource;
-import net.minecraft.command.argument.EntityArgumentType;
+import net.minecraft.command.argument.GameProfileArgumentType;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
@@ -44,33 +46,40 @@ public final class RoleCommand {
             new LiteralText("You do not have sufficient power to manage this role")
     );
 
+    public static final SimpleCommandExceptionType TOO_MANY_SELECTED = new SimpleCommandExceptionType(
+            new LiteralText("Too many players selected!")
+    );
+
     // @formatter:off
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         dispatcher.register(literal("role")
                 .requires(s -> s.hasPermissionLevel(4))
                 .then(literal("assign")
-                    .then(argument("targets", EntityArgumentType.players())
+                    .then(argument("targets", GameProfileArgumentType.gameProfile())
                     .then(argument("role", StringArgumentType.word()).suggests(roleSuggestions())
                     .executes(ctx -> {
                         ServerCommandSource source = ctx.getSource();
-                        Collection<ServerPlayerEntity> targets = EntityArgumentType.getPlayers(ctx, "targets");
+                        Collection<GameProfile> targets = GameProfileArgumentType.getProfileArgument(ctx, "targets");
                         String roleName = StringArgumentType.getString(ctx, "role");
                         return updateRoles(source, targets, roleName, PlayerRoleSet::add, "'%s' assigned to %s players");
                 }))))
                 .then(literal("remove")
-                    .then(argument("targets", EntityArgumentType.players())
+                    .then(argument("targets", GameProfileArgumentType.gameProfile())
                     .then(argument("role", StringArgumentType.word()).suggests(roleSuggestions())
                     .executes(ctx -> {
                         ServerCommandSource source = ctx.getSource();
-                        Collection<ServerPlayerEntity> targets = EntityArgumentType.getPlayers(ctx, "targets");
+                        Collection<GameProfile> targets = GameProfileArgumentType.getProfileArgument(ctx, "targets");
                         String roleName = StringArgumentType.getString(ctx, "role");
                         return updateRoles(source, targets, roleName, PlayerRoleSet::remove, "'%s' removed from %s players");
                     }))))
                 .then(literal("list")
-                    .then(argument("target", EntityArgumentType.player()).executes(ctx -> {
+                    .then(argument("target", GameProfileArgumentType.gameProfile()).executes(ctx -> {
                         ServerCommandSource source = ctx.getSource();
-                        ServerPlayerEntity target = EntityArgumentType.getPlayer(ctx, "target");
-                        return listRoles(source, target);
+                        Collection<GameProfile> gameProfiles = GameProfileArgumentType.getProfileArgument(ctx, "target");
+                        if (gameProfiles.size() != 1) {
+                            throw TOO_MANY_SELECTED.create();
+                        }
+                        return listRoles(source, gameProfiles.iterator().next());
                     }))
                 )
                 .then(literal("reload").executes(ctx -> reloadRoles(ctx.getSource())))
@@ -78,17 +87,21 @@ public final class RoleCommand {
     }
     // @formatter:on
 
-    private static int updateRoles(ServerCommandSource source, Collection<ServerPlayerEntity> players, String roleName, BiPredicate<PlayerRoleSet, Role> apply, String success) throws CommandSyntaxException {
+    private static int updateRoles(ServerCommandSource source, Collection<GameProfile> players, String roleName, BiPredicate<PlayerRoleSet, Role> apply, String success) throws CommandSyntaxException {
         Role role = getRole(roleName);
         assertHasPower(source, role);
 
+        PlayerRoleManager roleManager = PlayerRoleManager.get();
+        MinecraftServer server = source.getMinecraftServer();
+
         int count = 0;
-        for (ServerPlayerEntity player : players) {
-            if (player instanceof RoleOwner) {
-                PlayerRoleSet roles = ((RoleOwner) player).getRoles();
-                if (apply.test(roles, role)) {
-                    count++;
-                }
+        for (GameProfile player : players) {
+            boolean applied = roleManager.updateRoles(server, player.getId(), roles -> {
+                return apply.test(roles, role);
+            });
+
+            if (applied) {
+                count++;
             }
         }
 
@@ -96,13 +109,14 @@ public final class RoleCommand {
         return Command.SINGLE_SUCCESS;
     }
 
-    private static int listRoles(ServerCommandSource source, ServerPlayerEntity player) {
-        if (player instanceof RoleOwner) {
-            Collection<Role> roles = ((RoleOwner) player).getRoles()
-                    .stream().collect(Collectors.toList());
-            Text rolesComponent = Texts.join(roles, role -> new LiteralText(role.getName()).setStyle(Style.EMPTY.withColor(Formatting.GRAY)));
-            source.sendFeedback(new TranslatableText("Found %s roles on player: %s", roles.size(), rolesComponent), false);
-        }
+    private static int listRoles(ServerCommandSource source, GameProfile player) {
+        PlayerRoleManager roleManager = PlayerRoleManager.get();
+        MinecraftServer server = source.getMinecraftServer();
+
+        Collection<Role> roles = roleManager.peekRoles(server, player.getId())
+                .stream().collect(Collectors.toList());
+        Text rolesComponent = Texts.join(roles, role -> new LiteralText(role.getName()).setStyle(Style.EMPTY.withColor(Formatting.GRAY)));
+        source.sendFeedback(new TranslatableText("Found %s roles on player: %s", roles.size(), rolesComponent), false);
 
         return Command.SINGLE_SUCCESS;
     }
