@@ -1,6 +1,5 @@
 package dev.gegy.roles;
 
-import com.sun.istack.internal.Nullable;
 import dev.gegy.roles.store.PlayerIndexedDatabase;
 import org.junit.jupiter.api.Test;
 
@@ -131,8 +130,7 @@ final class RoleDatabaseTests {
         return ByteBuffer.wrap(text.getBytes(StandardCharsets.UTF_8));
     }
 
-    @Nullable
-    private static String decode(@Nullable ByteBuffer bytes) {
+    private static String decode(ByteBuffer bytes) {
         if (bytes != null) {
             return new String(bytes.array(), StandardCharsets.UTF_8);
         } else {
