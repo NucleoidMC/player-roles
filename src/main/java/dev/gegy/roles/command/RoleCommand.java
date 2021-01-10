@@ -8,10 +8,10 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import dev.gegy.roles.Role;
-import dev.gegy.roles.RoleStorage;
+import dev.gegy.roles.store.PlayerRoleSet;
 import dev.gegy.roles.api.RoleReader;
 import dev.gegy.roles.RoleConfiguration;
-import dev.gegy.roles.api.HasRoles;
+import dev.gegy.roles.api.RoleOwner;
 import dev.gegy.roles.override.command.CommandPermissionEvaluator;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.EntityArgumentType;
@@ -55,7 +55,7 @@ public final class RoleCommand {
                         ServerCommandSource source = ctx.getSource();
                         Collection<ServerPlayerEntity> targets = EntityArgumentType.getPlayers(ctx, "targets");
                         String roleName = StringArgumentType.getString(ctx, "role");
-                        return updateRoles(source, targets, roleName, RoleStorage::add, "'%s' assigned to %s players");
+                        return updateRoles(source, targets, roleName, PlayerRoleSet::add, "'%s' assigned to %s players");
                 }))))
                 .then(literal("remove")
                     .then(argument("targets", EntityArgumentType.players())
@@ -64,7 +64,7 @@ public final class RoleCommand {
                         ServerCommandSource source = ctx.getSource();
                         Collection<ServerPlayerEntity> targets = EntityArgumentType.getPlayers(ctx, "targets");
                         String roleName = StringArgumentType.getString(ctx, "role");
-                        return updateRoles(source, targets, roleName, RoleStorage::remove, "'%s' removed from %s players");
+                        return updateRoles(source, targets, roleName, PlayerRoleSet::remove, "'%s' removed from %s players");
                     }))))
                 .then(literal("list")
                     .then(argument("target", EntityArgumentType.player()).executes(ctx -> {
@@ -78,14 +78,14 @@ public final class RoleCommand {
     }
     // @formatter:on
 
-    private static int updateRoles(ServerCommandSource source, Collection<ServerPlayerEntity> players, String roleName, BiPredicate<RoleStorage, Role> apply, String success) throws CommandSyntaxException {
+    private static int updateRoles(ServerCommandSource source, Collection<ServerPlayerEntity> players, String roleName, BiPredicate<PlayerRoleSet, Role> apply, String success) throws CommandSyntaxException {
         Role role = getRole(roleName);
         assertHasPower(source, role);
 
         int count = 0;
         for (ServerPlayerEntity player : players) {
-            if (player instanceof HasRoles) {
-                RoleStorage roles = ((HasRoles) player).getRoles();
+            if (player instanceof RoleOwner) {
+                PlayerRoleSet roles = ((RoleOwner) player).getRoles();
                 if (apply.test(roles, role)) {
                     count++;
                 }
@@ -97,8 +97,8 @@ public final class RoleCommand {
     }
 
     private static int listRoles(ServerCommandSource source, ServerPlayerEntity player) {
-        if (player instanceof HasRoles) {
-            Collection<Role> roles = ((HasRoles) player).getRoles()
+        if (player instanceof RoleOwner) {
+            Collection<Role> roles = ((RoleOwner) player).getRoles()
                     .stream().collect(Collectors.toList());
             Text rolesComponent = Texts.join(roles, role -> new LiteralText(role.getName()).setStyle(Style.EMPTY.withColor(Formatting.GRAY)));
             source.sendFeedback(new TranslatableText("Found %s roles on player: %s", roles.size(), rolesComponent), false);
@@ -115,8 +115,8 @@ public final class RoleCommand {
 
             List<ServerPlayerEntity> players = server.getPlayerManager().getPlayerList();
             for (ServerPlayerEntity entity : players) {
-                if (entity instanceof HasRoles) {
-                    RoleStorage roles = ((HasRoles) entity).getRoles();
+                if (entity instanceof RoleOwner) {
+                    PlayerRoleSet roles = ((RoleOwner) entity).getRoles();
                     roles.notifyReload();
                 }
             }
@@ -158,8 +158,8 @@ public final class RoleCommand {
         Entity entity = source.getEntity();
         if (entity == null || CommandPermissionEvaluator.doesBypassPermissions(source)) return Integer.MAX_VALUE;
 
-        if (entity instanceof HasRoles) {
-            RoleReader roles = ((HasRoles) entity).getRoles();
+        if (entity instanceof RoleOwner) {
+            RoleReader roles = ((RoleOwner) entity).getRoles();
             IntStream levels = roles.stream().mapToInt(Role::getLevel);
             return levels.max().orElse(0);
         }

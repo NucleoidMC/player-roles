@@ -2,7 +2,7 @@ package dev.gegy.roles.override.command;
 
 import com.google.common.collect.ImmutableMap;
 import com.mojang.serialization.Dynamic;
-import dev.gegy.roles.api.HasRoles;
+import dev.gegy.roles.api.RoleOwner;
 import dev.gegy.roles.override.RoleChangeListener;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -40,9 +40,9 @@ public final class CommandPermissionOverride implements RoleChangeListener {
     }
 
     @Override
-    public void notifyChange(HasRoles entity) {
-        if (entity instanceof ServerPlayerEntity) {
-            ServerPlayerEntity player = (ServerPlayerEntity) entity;
+    public void notifyChange(RoleOwner owner) {
+        if (owner instanceof ServerPlayerEntity) {
+            ServerPlayerEntity player = (ServerPlayerEntity) owner;
             MinecraftServer server = player.getServer();
             if (server != null) {
                 server.getCommandManager().sendCommandTree(player);

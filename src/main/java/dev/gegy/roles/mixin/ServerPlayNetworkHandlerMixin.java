@@ -1,7 +1,7 @@
 package dev.gegy.roles.mixin;
 
 import dev.gegy.roles.api.RoleReader;
-import dev.gegy.roles.api.HasRoles;
+import dev.gegy.roles.api.RoleOwner;
 import dev.gegy.roles.override.ChatFormatOverride;
 import dev.gegy.roles.override.RoleOverrideType;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
@@ -25,8 +25,8 @@ public class ServerPlayNetworkHandlerMixin {
             at = @At(value = "STORE", ordinal = 0)
     )
     private Text formatChat(Text text, String message) {
-        if (this.player instanceof HasRoles) {
-            RoleReader roles = ((HasRoles) this.player).getRoles();
+        if (this.player instanceof RoleOwner) {
+            RoleReader roles = ((RoleOwner) this.player).getRoles();
             ChatFormatOverride chatStyle = roles.select(RoleOverrideType.CHAT_STYLE);
             if (chatStyle != null) {
                 return chatStyle.make(this.player.getDisplayName(), message);
@@ -45,8 +45,8 @@ public class ServerPlayNetworkHandlerMixin {
             cancellable = true
     )
     private void broadcastMessage(String message, CallbackInfo ci) {
-        if (this.player instanceof HasRoles) {
-            RoleReader roles = ((HasRoles) this.player).getRoles();
+        if (this.player instanceof RoleOwner) {
+            RoleReader roles = ((RoleOwner) this.player).getRoles();
             if (roles.test(RoleOverrideType.MUTE)) {
                 ci.cancel();
             }

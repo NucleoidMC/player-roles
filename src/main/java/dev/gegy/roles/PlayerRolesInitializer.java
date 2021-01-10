@@ -7,6 +7,7 @@ import dev.gegy.roles.override.command.CommandRequirementHooks;
 import dev.gegy.roles.override.command.CommandTestContext;
 import dev.gegy.roles.override.command.MatchableCommand;
 import dev.gegy.roles.override.command.PermissionResult;
+import dev.gegy.roles.store.PlayerRoleManager;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -14,7 +15,7 @@ import net.minecraft.server.command.ServerCommandSource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public final class RolesInitializer implements ModInitializer {
+public final class PlayerRolesInitializer implements ModInitializer {
     public static final String ID = "player_roles";
     public static final Logger LOGGER = LogManager.getLogger(ID);
 
@@ -23,6 +24,8 @@ public final class RolesInitializer implements ModInitializer {
     @Override
     public void onInitialize() {
         RoleConfiguration.setup();
+
+        PlayerRoleManager.setup();
 
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
             RoleCommand.register(dispatcher);

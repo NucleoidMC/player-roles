@@ -1,7 +1,7 @@
 package dev.gegy.roles.override;
 
-import dev.gegy.roles.api.HasRoles;
+import dev.gegy.roles.api.RoleOwner;
 
 public interface RoleChangeListener {
-    void notifyChange(HasRoles entity);
+    void notifyChange(RoleOwner entity);
 }

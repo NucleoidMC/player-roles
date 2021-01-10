@@ -5,7 +5,7 @@ import com.google.common.collect.Multimap;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
-import dev.gegy.roles.RolesInitializer;
+import dev.gegy.roles.PlayerRolesInitializer;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
@@ -56,7 +56,7 @@ public final class CommandRequirementHooks<S> {
                 chain.append(node.getName()).append(" ");
             }
 
-            RolesInitializer.LOGGER.warn("Aborting hooking long command chain with {} nodes: {}", MAX_CHAIN_LENGTH, chain.toString());
+            PlayerRolesInitializer.LOGGER.warn("Aborting hooking long command chain with {} nodes: {}", MAX_CHAIN_LENGTH, chain.toString());
 
             return;
         }
@@ -166,7 +166,7 @@ public final class CommandRequirementHooks<S> {
         try {
             this.requirementField.set(node, requirement);
         } catch (IllegalAccessException e) {
-            RolesInitializer.LOGGER.error("Failed to hook command node {}", node, e);
+            PlayerRolesInitializer.LOGGER.error("Failed to hook command node {}", node, e);
         }
     }
 

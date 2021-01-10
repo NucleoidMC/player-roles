@@ -48,9 +48,9 @@ public final class RoleConfiguration {
             JsonElement root = JSON.parse(reader);
             instance = parse(new Dynamic<>(JsonOps.INSTANCE, root));
         } catch (IOException e) {
-            RolesInitializer.LOGGER.warn("Failed to load roles.json configuration", e);
+            PlayerRolesInitializer.LOGGER.warn("Failed to load roles.json configuration", e);
         } catch (JsonSyntaxException e) {
-            RolesInitializer.LOGGER.warn("Malformed syntax in roles.json configuration", e);
+            PlayerRolesInitializer.LOGGER.warn("Malformed syntax in roles.json configuration", e);
         }
     }
 
@@ -66,12 +66,12 @@ public final class RoleConfiguration {
                 return true;
             }
 
-            try (InputStream input = RolesInitializer.class.getResourceAsStream("/data/player-roles/default_roles.json")) {
+            try (InputStream input = PlayerRolesInitializer.class.getResourceAsStream("/data/player-roles/default_roles.json")) {
                 Files.copy(input, path);
                 return true;
             }
         } catch (IOException e) {
-            RolesInitializer.LOGGER.warn("Failed to load default roles.json configuration", e);
+            PlayerRolesInitializer.LOGGER.warn("Failed to load default roles.json configuration", e);
             return false;
         }
     }

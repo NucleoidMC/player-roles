@@ -2,7 +2,7 @@ package dev.gegy.roles;
 
 import com.google.common.collect.ImmutableMap;
 import com.mojang.serialization.Dynamic;
-import dev.gegy.roles.api.HasRoles;
+import dev.gegy.roles.api.RoleOwner;
 import dev.gegy.roles.override.RoleChangeListener;
 import dev.gegy.roles.override.RoleOverrideType;
 
@@ -44,14 +44,14 @@ public final class Role implements Comparable<Role> {
                 Dynamic<T> element = entry.getValue();
                 role.overrides.put(overrideType, overrideType.parse(element));
             } else {
-                RolesInitializer.LOGGER.warn("Encountered invalid override type: '{}'", entry.getKey());
+                PlayerRolesInitializer.LOGGER.warn("Encountered invalid override type: '{}'", entry.getKey());
             }
         }
 
         return role;
     }
 
-    public void notifyChange(HasRoles owner) {
+    public void notifyChange(RoleOwner owner) {
         for (Object override : this.overrides.values()) {
             if (override instanceof RoleChangeListener) {
                 ((RoleChangeListener) override).notifyChange(owner);

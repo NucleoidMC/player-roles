@@ -1,10 +1,11 @@
 package dev.gegy.roles.mixin;
 
 import com.mojang.authlib.GameProfile;
-import dev.gegy.roles.RoleStorage;
-import dev.gegy.roles.api.HasRoles;
+import dev.gegy.roles.api.RoleOwner;
 import dev.gegy.roles.override.NameStyleOverride;
 import dev.gegy.roles.override.RoleOverrideType;
+import dev.gegy.roles.store.PlayerRoleManager;
+import dev.gegy.roles.store.PlayerRoleSet;
 import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundTag;
@@ -15,36 +16,30 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ServerPlayerEntity.class)
-public abstract class ServerPlayerEntityMixin extends PlayerEntity implements HasRoles {
-    private final RoleStorage roles = new RoleStorage(this);
+public abstract class ServerPlayerEntityMixin extends PlayerEntity implements RoleOwner {
+    @Unique
+    private final PlayerRoleSet roles = new PlayerRoleSet(this);
 
     private ServerPlayerEntityMixin(World world, BlockPos pos, float yaw, GameProfile profile) {
         super(world, pos, yaw, profile);
     }
 
     @Override
-    public RoleStorage getRoles() {
+    public PlayerRoleSet getRoles() {
         return this.roles;
-    }
-
-    @Inject(method = "writeCustomDataToTag", at = @At("RETURN"))
-    private void writeCustomDataToTag(CompoundTag tag, CallbackInfo ci) {
-        tag.put("roles", this.roles.serialize());
     }
 
     @Inject(method = "readCustomDataFromTag", at = @At("RETURN"))
     private void readCustomDataFromTag(CompoundTag tag, CallbackInfo ci) {
-        this.roles.deserialize(tag.getList("roles", NbtType.STRING));
-    }
-
-    @Inject(method = "copyFrom", at = @At("RETURN"))
-    private void copyFrom(ServerPlayerEntity old, boolean alive, CallbackInfo ci) {
-        this.roles.copyFrom(((HasRoles) old).getRoles());
+        if (tag.contains("roles", NbtType.LIST)) {
+            PlayerRoleManager.get().addLegacyRoles(this, tag.getList("roles", NbtType.STRING));
+        }
     }
 
     @Override

@@ -1,6 +1,9 @@
-package dev.gegy.roles;
+package dev.gegy.roles.store;
 
-import dev.gegy.roles.api.HasRoles;
+import dev.gegy.roles.Role;
+import dev.gegy.roles.RoleConfiguration;
+import dev.gegy.roles.PlayerRolesInitializer;
+import dev.gegy.roles.api.RoleOwner;
 import dev.gegy.roles.api.RoleWriter;
 import dev.gegy.roles.override.RoleOverrideType;
 import dev.gegy.roles.override.command.PermissionResult;
@@ -17,8 +20,8 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-public final class RoleStorage implements RoleWriter {
-    private final HasRoles owner;
+public final class PlayerRoleSet implements RoleWriter {
+    private final RoleOwner owner;
 
     private final ObjectRBTreeSet<String> roleIds = new ObjectRBTreeSet<>((n1, n2) -> {
         RoleConfiguration config = RoleConfiguration.get();
@@ -30,7 +33,9 @@ public final class RoleStorage implements RoleWriter {
 
     private final Map<RoleOverrideType<?>, Collection<Object>> overrideCache = new Reference2ObjectOpenHashMap<>();
 
-    public RoleStorage(HasRoles owner) {
+    private boolean dirty;
+
+    public PlayerRoleSet(RoleOwner owner) {
         this.owner = owner;
     }
 
@@ -53,6 +58,7 @@ public final class RoleStorage implements RoleWriter {
     @Override
     public boolean add(Role role) {
         if (this.roleIds.add(role.getName())) {
+            this.dirty = true;
             this.rebuildOverrideCache();
             role.notifyChange(this.owner);
             return true;
@@ -63,6 +69,7 @@ public final class RoleStorage implements RoleWriter {
     @Override
     public boolean remove(Role role) {
         if (this.roleIds.remove(role.getName())) {
+            this.dirty = true;
             this.rebuildOverrideCache();
             role.notifyChange(this.owner);
             return true;
@@ -154,17 +161,25 @@ public final class RoleStorage implements RoleWriter {
     }
 
     private void removeInvalidRoles() {
-        this.roleIds.removeIf(name -> {
+        this.dirty |= this.roleIds.removeIf(name -> {
             Role role = RoleConfiguration.get().get(name);
             if (role == null || role.getName().equalsIgnoreCase(Role.EVERYONE)) {
-                RolesInitializer.LOGGER.warn("Encountered invalid role '{}'", name);
+                PlayerRolesInitializer.LOGGER.warn("Encountered invalid role '{}'", name);
                 return true;
             }
             return false;
         });
     }
 
-    public void copyFrom(RoleStorage old) {
-        this.deserialize(old.serialize());
+    public void setDirty(boolean dirty) {
+        this.dirty = dirty;
+    }
+
+    public boolean isDirty() {
+        return this.dirty;
+    }
+
+    public boolean isEmpty() {
+        return this.roleIds.isEmpty();
     }
 }
