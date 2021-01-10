@@ -1,8 +1,8 @@
 package dev.gegy.roles.store;
 
+import dev.gegy.roles.PlayerRolesInitializer;
 import dev.gegy.roles.Role;
 import dev.gegy.roles.RoleConfiguration;
-import dev.gegy.roles.PlayerRolesInitializer;
 import dev.gegy.roles.api.RoleOwner;
 import dev.gegy.roles.api.RoleWriter;
 import dev.gegy.roles.override.RoleOverrideType;
@@ -182,5 +182,13 @@ public final class PlayerRoleSet implements RoleWriter {
 
     public boolean isEmpty() {
         return this.roleIds.isEmpty();
+    }
+
+    public void copyFrom(PlayerRoleSet roles) {
+        this.roleIds.clear();
+        this.roleIds.addAll(roles.roleIds);
+        this.dirty = roles.dirty;
+
+        this.rebuildOverrideCache();
     }
 }

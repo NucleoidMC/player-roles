@@ -42,6 +42,11 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity implements Ro
         }
     }
 
+    @Inject(method = "copyFrom", at = @At("HEAD"))
+    private void copyFrom(ServerPlayerEntity oldPlayer, boolean alive, CallbackInfo ci) {
+        this.roles.copyFrom(((RoleOwner) oldPlayer).getRoles());
+    }
+
     @Override
     public Text getDisplayName() {
         Text displayName = super.getDisplayName();
