@@ -39,7 +39,7 @@ public final class PlayerRoleManager {
             instance = PlayerRoleManager.open(server);
         });
 
-        ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
+        ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
             PlayerRoleManager instance = PlayerRoleManager.instance;
             if (instance != null) {
                 instance.close(server);
