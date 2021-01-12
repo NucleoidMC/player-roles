@@ -1,5 +1,6 @@
 package dev.gegy.roles.override.command;
 
+import dev.gegy.roles.api.PermissionResult;
 import dev.gegy.roles.api.RoleReader;
 import dev.gegy.roles.api.RoleOwner;
 import dev.gegy.roles.override.RoleOverrideType;

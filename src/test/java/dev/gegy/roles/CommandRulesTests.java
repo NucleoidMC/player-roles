@@ -2,7 +2,7 @@ package dev.gegy.roles;
 
 import dev.gegy.roles.override.command.CommandPermissionRules;
 import dev.gegy.roles.override.command.MatchableCommand;
-import dev.gegy.roles.override.command.PermissionResult;
+import dev.gegy.roles.api.PermissionResult;
 import org.junit.jupiter.api.Test;
 
 import java.util.regex.Pattern;

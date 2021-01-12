@@ -2,15 +2,17 @@ package dev.gegy.roles;
 
 import com.mojang.brigadier.CommandDispatcher;
 import dev.gegy.roles.command.RoleCommand;
+import dev.gegy.roles.override.permission.PermissionKeyOverride;
 import dev.gegy.roles.override.command.CommandPermissionEvaluator;
 import dev.gegy.roles.override.command.CommandRequirementHooks;
 import dev.gegy.roles.override.command.CommandTestContext;
 import dev.gegy.roles.override.command.MatchableCommand;
-import dev.gegy.roles.override.command.PermissionResult;
+import dev.gegy.roles.api.PermissionResult;
 import dev.gegy.roles.store.PlayerRoleManager;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.server.command.ServerCommandSource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -26,6 +28,10 @@ public final class PlayerRolesInitializer implements ModInitializer {
         RoleConfiguration.setup();
 
         PlayerRoleManager.setup();
+
+        if (FabricLoader.getInstance().isModLoaded("fabric-permissions-api-v0")) {
+            PermissionKeyOverride.register();
+        }
 
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
             RoleCommand.register(dispatcher);

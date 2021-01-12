@@ -1,4 +1,6 @@
-package dev.gegy.roles.override.command;
+package dev.gegy.roles.api;
+
+import net.fabricmc.fabric.api.util.TriState;
 
 import java.util.Locale;
 
@@ -36,6 +38,19 @@ public enum PermissionResult {
             case "pass":
             default:
                 return PermissionResult.PASS;
+        }
+    }
+
+    public TriState asTriState() {
+        switch (this) {
+            case ALLOW:
+            case HIDDEN:
+                return TriState.TRUE;
+            case DENY:
+                return TriState.FALSE;
+            case PASS:
+            default:
+                return TriState.DEFAULT;
         }
     }
 }

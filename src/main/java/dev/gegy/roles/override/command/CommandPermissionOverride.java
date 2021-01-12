@@ -2,6 +2,7 @@ package dev.gegy.roles.override.command;
 
 import com.google.common.collect.ImmutableMap;
 import com.mojang.serialization.Dynamic;
+import dev.gegy.roles.api.PermissionResult;
 import dev.gegy.roles.api.RoleOwner;
 import dev.gegy.roles.override.RoleChangeListener;
 import net.minecraft.server.MinecraftServer;

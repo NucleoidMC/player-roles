@@ -6,7 +6,7 @@ import dev.gegy.roles.RoleConfiguration;
 import dev.gegy.roles.api.RoleOwner;
 import dev.gegy.roles.api.RoleWriter;
 import dev.gegy.roles.override.RoleOverrideType;
-import dev.gegy.roles.override.command.PermissionResult;
+import dev.gegy.roles.api.PermissionResult;
 import it.unimi.dsi.fastutil.objects.ObjectRBTreeSet;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.minecraft.nbt.ListTag;

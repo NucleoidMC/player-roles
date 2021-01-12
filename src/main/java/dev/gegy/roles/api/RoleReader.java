@@ -2,7 +2,6 @@ package dev.gegy.roles.api;
 
 import dev.gegy.roles.Role;
 import dev.gegy.roles.override.RoleOverrideType;
-import dev.gegy.roles.override.command.PermissionResult;
 
 import org.jetbrains.annotations.Nullable;
 import java.util.function.Function;

@@ -1,5 +1,7 @@
 package dev.gegy.roles.override.command;
 
+import dev.gegy.roles.api.PermissionResult;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
