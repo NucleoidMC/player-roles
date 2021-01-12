@@ -94,7 +94,12 @@ public final class PlayerRoleManager {
         try {
             ByteBuffer bytes = this.database.get(uuid);
             if (bytes != null) {
-                deserializeRoles(roles, bytes);
+                try {
+                    deserializeRoles(roles, bytes);
+                } catch (IOException e) {
+                    LOGGER.error("Failed to deserialize roles for {}", uuid, e);
+                    this.database.remove(uuid);
+                }
             }
         } catch (IOException e) {
             LOGGER.error("Failed to load roles for {}", uuid, e);

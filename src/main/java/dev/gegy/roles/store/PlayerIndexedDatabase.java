@@ -21,6 +21,8 @@ import java.util.UUID;
  * for simplicity.
  */
 public final class PlayerIndexedDatabase implements Closeable {
+    private static final int MAX_VALUE_SIZE = 4 * 1024 * 1024;
+
     private static final int UUID_BYTES = 16;
     private static final int SIZE_BYTES = 4;
     private static final int HEADER_BYTES = UUID_BYTES + SIZE_BYTES;
@@ -71,7 +73,7 @@ public final class PlayerIndexedDatabase implements Closeable {
             channel.read(sizeBytes);
 
             UUID uuid = new UUID(uuidBuffer.get(0), uuidBuffer.get(1));
-            int size = sizeBuffer.get(0);
+            int size = validateSize(sizeBuffer.get(0));
 
             pointers.put(uuid, pointer);
 
@@ -101,6 +103,8 @@ public final class PlayerIndexedDatabase implements Closeable {
     }
 
     public synchronized void put(UUID key, ByteBuffer bytes) throws IOException {
+        validateSize(bytes.capacity());
+
         long pointer = this.pointers.getLong(key);
         if (pointer == NULL_POINTER) {
             this.push(key, bytes);
@@ -120,7 +124,7 @@ public final class PlayerIndexedDatabase implements Closeable {
         this.sizeBytes.position(0);
         this.file.read(this.sizeBytes);
 
-        int size = this.sizeBuffer.get(0);
+        int size = validateSize(this.sizeBuffer.get(0));
 
         long endPointer = pointer + HEADER_BYTES + size;
         this.shiftAfter(endPointer, -(size + HEADER_BYTES));
@@ -156,8 +160,8 @@ public final class PlayerIndexedDatabase implements Closeable {
         this.sizeBytes.position(0);
         this.file.read(this.sizeBytes);
 
-        int lastSize = this.sizeBuffer.get(0);
-        int newSize = bytes.capacity();
+        int lastSize = validateSize(this.sizeBuffer.get(0));
+        int newSize = validateSize(bytes.capacity());
         if (lastSize != newSize) {
             long endPointer = pointer + HEADER_BYTES + lastSize;
             this.shiftAfter(endPointer, newSize - lastSize);
@@ -257,6 +261,13 @@ public final class PlayerIndexedDatabase implements Closeable {
         file.write(buffer);
 
         return read;
+    }
+
+    private static int validateSize(int size) throws IOException {
+        if (size > MAX_VALUE_SIZE) {
+            throw new IOException("size greater than maximum (" + size + ">" + MAX_VALUE_SIZE + ")");
+        }
+        return size;
     }
 
     @Override
