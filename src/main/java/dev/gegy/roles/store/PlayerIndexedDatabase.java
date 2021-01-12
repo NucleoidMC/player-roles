@@ -182,11 +182,8 @@ public final class PlayerIndexedDatabase implements Closeable {
             this.file.write(ByteBuffer.allocate(amount));
         }
 
-        // shift the data along
-        this.file.position(destination);
-        long transferred = this.file.transferTo(source, length, this.file);
-        if (transferred != length) {
-            throw new IOException("unable to transfer all bytes (" + transferred + "<" + length + ")");
+        if (length > 0) {
+            moveBytes(this.file, source, destination, length);
         }
 
         if (amount < 0) {
@@ -200,6 +197,34 @@ public final class PlayerIndexedDatabase implements Closeable {
             if (pointer >= source) {
                 entry.setValue(pointer + amount);
             }
+        }
+    }
+
+    private static void moveBytes(FileChannel file, long source, long destination, long length) throws IOException {
+        int bufferSize = Math.min(1024, (int) length);
+        ByteBuffer buffer = ByteBuffer.allocate(bufferSize);
+
+        // transfer the data block-by-block
+        boolean forward = source < destination;
+
+        long pointer = forward ? source + length - bufferSize : source;
+        long offset = destination - source;
+        long remaining = length;
+
+        while (remaining > 0) {
+            file.position(pointer);
+
+            buffer.position(0);
+            int read = file.read(buffer);
+            buffer.flip();
+
+            file.position(pointer + offset);
+            file.write(buffer);
+
+            remaining -= read;
+
+            if (forward) pointer -= read;
+            else pointer += read;
         }
     }
 
