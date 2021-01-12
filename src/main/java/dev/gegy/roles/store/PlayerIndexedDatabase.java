@@ -8,6 +8,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.Closeable;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
 import java.nio.channels.FileChannel;
@@ -26,11 +27,13 @@ public final class PlayerIndexedDatabase implements Closeable {
 
     private static final long NULL_POINTER = -1;
 
+    private static final ByteOrder BYTE_ORDER = ByteOrder.BIG_ENDIAN;
+
     final FileChannel file;
     final Object2LongMap<UUID> pointers;
 
-    final ByteBuffer uuidBytes = ByteBuffer.allocate(16);
-    final ByteBuffer sizeBytes = ByteBuffer.allocate(4);
+    final ByteBuffer uuidBytes = ByteBuffer.allocate(16).order(BYTE_ORDER);
+    final ByteBuffer sizeBytes = ByteBuffer.allocate(4).order(BYTE_ORDER);
     final LongBuffer uuidBuffer = this.uuidBytes.asLongBuffer();
     final IntBuffer sizeBuffer = this.sizeBytes.asIntBuffer();
 
@@ -51,8 +54,8 @@ public final class PlayerIndexedDatabase implements Closeable {
     private static Object2LongMap<UUID> buildPointerIndex(FileChannel channel) throws IOException {
         Object2LongMap<UUID> pointers = new Object2LongOpenHashMap<>();
 
-        ByteBuffer uuidBytes = ByteBuffer.allocate(16);
-        ByteBuffer sizeBytes = ByteBuffer.allocate(4);
+        ByteBuffer uuidBytes = ByteBuffer.allocate(16).order(BYTE_ORDER);
+        ByteBuffer sizeBytes = ByteBuffer.allocate(4).order(BYTE_ORDER);
         LongBuffer uuidBuffer = uuidBytes.asLongBuffer();
         IntBuffer sizeBuffer = sizeBytes.asIntBuffer();
 
@@ -181,7 +184,10 @@ public final class PlayerIndexedDatabase implements Closeable {
 
         // shift the data along
         this.file.position(destination);
-        this.file.transferTo(source, length, this.file);
+        long transferred = this.file.transferTo(source, length, this.file);
+        if (transferred != length) {
+            throw new IOException("unable to transfer all bytes (" + transferred + "<" + length + ")");
+        }
 
         if (amount < 0) {
             // shrink the file if it got smaller
