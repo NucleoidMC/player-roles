@@ -82,7 +82,7 @@ public final class PlayerIndexedDatabase implements Closeable {
     }
 
     @Nullable
-    public ByteBuffer get(UUID key) throws IOException {
+    public synchronized ByteBuffer get(UUID key) throws IOException {
         long pointer = this.pointers.getLong(key);
         if (pointer == NULL_POINTER) {
             return null;
@@ -100,7 +100,7 @@ public final class PlayerIndexedDatabase implements Closeable {
         return buffer;
     }
 
-    public void put(UUID key, ByteBuffer bytes) throws IOException {
+    public synchronized void put(UUID key, ByteBuffer bytes) throws IOException {
         long pointer = this.pointers.getLong(key);
         if (pointer == NULL_POINTER) {
             this.push(key, bytes);
@@ -109,7 +109,7 @@ public final class PlayerIndexedDatabase implements Closeable {
         }
     }
 
-    public boolean remove(UUID key) throws IOException {
+    public synchronized boolean remove(UUID key) throws IOException {
         long pointer = this.pointers.removeLong(key);
         if (pointer == NULL_POINTER) {
             return false;
@@ -229,7 +229,7 @@ public final class PlayerIndexedDatabase implements Closeable {
     }
 
     @Override
-    public void close() throws IOException {
+    public synchronized void close() throws IOException {
         this.file.close();
     }
 }
