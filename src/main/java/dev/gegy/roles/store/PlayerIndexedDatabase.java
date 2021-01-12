@@ -177,15 +177,13 @@ public final class PlayerIndexedDatabase implements Closeable {
             // make space for the shifted data
             this.file.position(this.file.size());
             this.file.write(ByteBuffer.allocate(amount));
+        }
 
-            // move the data up
-            this.file.position(source);
-            this.file.transferFrom(this.file, destination, length);
-        } else {
-            // move the data down
-            this.file.position(destination);
-            this.file.transferTo(source, length, this.file);
+        // shift the data along
+        this.file.position(destination);
+        this.file.transferTo(source, length, this.file);
 
+        if (amount < 0) {
             // shrink the file if it got smaller
             this.file.truncate(this.file.size() + amount);
         }
