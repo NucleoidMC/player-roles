@@ -201,31 +201,62 @@ public final class PlayerIndexedDatabase implements Closeable {
     }
 
     private static void moveBytes(FileChannel file, long source, long destination, long length) throws IOException {
+        if (source < destination) {
+            moveBytesForwards(file, source, destination, length);
+        } else {
+            moveBytesBackwards(file, source, destination, length);
+        }
+    }
+
+    private static void moveBytesForwards(FileChannel file, long source, long destination, long length) throws IOException {
         int bufferSize = Math.min(1024, (int) length);
         ByteBuffer buffer = ByteBuffer.allocate(bufferSize);
 
-        // transfer the data block-by-block
-        boolean forward = source < destination;
-
-        long pointer = forward ? source + length - bufferSize : source;
+        long backPointer = source + length;
         long offset = destination - source;
         long remaining = length;
 
         while (remaining > 0) {
-            file.position(pointer);
+            int copySize = bufferSize;
+            if (remaining < bufferSize) {
+                copySize = (int) remaining;
+                buffer = ByteBuffer.allocate(copySize);
+            }
 
-            buffer.position(0);
-            int read = file.read(buffer);
-            buffer.flip();
-
-            file.position(pointer + offset);
-            file.write(buffer);
+            long frontPointer = backPointer - copySize;
+            int read = copyBytes(file, buffer, frontPointer, frontPointer + offset);
 
             remaining -= read;
-
-            if (forward) pointer -= read;
-            else pointer += read;
+            backPointer -= read;
         }
+    }
+
+    private static void moveBytesBackwards(FileChannel file, long source, long destination, long length) throws IOException {
+        int bufferSize = Math.min(1024, (int) length);
+        ByteBuffer buffer = ByteBuffer.allocate(bufferSize);
+
+        long frontPointer = source;
+        long offset = destination - source;
+        long remaining = length;
+
+        while (remaining > 0) {
+            int read = copyBytes(file, buffer, frontPointer, frontPointer + offset);
+            remaining -= read;
+            frontPointer += read;
+        }
+    }
+
+    private static int copyBytes(FileChannel file, ByteBuffer buffer, long source, long destination) throws IOException {
+        file.position(source);
+
+        buffer.position(0);
+        int read = file.read(buffer);
+        buffer.flip();
+
+        file.position(destination);
+        file.write(buffer);
+
+        return read;
     }
 
     @Override

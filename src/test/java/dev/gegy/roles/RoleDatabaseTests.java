@@ -1,6 +1,7 @@
 package dev.gegy.roles;
 
 import dev.gegy.roles.store.PlayerIndexedDatabase;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -115,6 +116,86 @@ final class RoleDatabaseTests {
         database = reopenDatabase();
         assertEquals(decode(database.get(FOO)), "foo");
         assertEquals(decode(database.get(BAZ)), "baz");
+    }
+
+    @Test
+    void testBigDatabaseGrow() throws IOException {
+        UUID[] uuids = createUuids(30);
+
+        PlayerIndexedDatabase database = createEmptyDatabase();
+        for (UUID uuid : uuids) {
+            database.put(uuid, encode(uuid.toString()));
+        }
+
+        String padding = StringUtils.repeat('a', 20);
+        for (int i = 0; i < uuids.length; i += 4) {
+            UUID uuid = uuids[i];
+            database.put(uuid, encode(uuid.toString() + padding));
+        }
+    }
+
+    @Test
+    void testBigDatabaseRemove() throws IOException {
+        UUID[] uuids = createUuids(30);
+
+        PlayerIndexedDatabase database = createEmptyDatabase();
+        for (UUID uuid : uuids) {
+            database.put(uuid, encode(uuid.toString()));
+        }
+
+        for (int i = 0; i < uuids.length; i += 4) {
+            UUID uuid = uuids[i];
+            database.remove(uuid);
+        }
+    }
+
+    @Test
+    void testBigDatabaseShrink() throws IOException {
+        UUID[] uuids = createUuids(30);
+
+        PlayerIndexedDatabase database = createEmptyDatabase();
+        for (UUID uuid : uuids) {
+            database.put(uuid, encode(uuid.toString()));
+        }
+
+        for (int i = 0; i < uuids.length; i += 4) {
+            UUID uuid = uuids[i];
+            database.put(uuid, encode("a"));
+        }
+    }
+
+    @Test
+    void testBigDatabaseGrowAndRemoveAndShrink() throws IOException {
+        UUID[] uuids = createUuids(30);
+
+        PlayerIndexedDatabase database = createEmptyDatabase();
+        for (UUID uuid : uuids) {
+            database.put(uuid, encode(uuid.toString()));
+        }
+
+        String padding = StringUtils.repeat('a', 20);
+        for (int i = 0; i < uuids.length; i += 4) {
+            UUID uuid = uuids[i];
+            database.put(uuid, encode(uuid.toString() + padding));
+        }
+
+        for (int i = 1; i < uuids.length; i += 4) {
+            UUID uuid = uuids[i];
+            database.remove(uuid);
+        }
+
+        for (int i = 3; i < uuids.length; i += 4) {
+            UUID uuid = uuids[i];
+            database.put(uuid, encode("a"));
+        }
+    }
+
+    private static UUID[] createUuids(int amount) {
+        UUID[] uuids = new UUID[amount];
+        for (int i = 0; i < uuids.length; i++) {
+            uuids[i] = UUID.nameUUIDFromBytes(("id " + i).getBytes(StandardCharsets.UTF_8));
+        }
+        return uuids;
     }
 
     private static PlayerIndexedDatabase createEmptyDatabase() throws IOException {
