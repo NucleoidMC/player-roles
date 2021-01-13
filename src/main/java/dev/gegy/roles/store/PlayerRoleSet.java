@@ -38,6 +38,7 @@ public final class PlayerRoleSet implements RoleWriter {
 
     public PlayerRoleSet(@Nullable RoleOwner owner) {
         this.owner = owner;
+        this.rebuildOverrideCache();
     }
 
     public void notifyReload() {

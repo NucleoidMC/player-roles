@@ -10,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -167,6 +168,8 @@ final class RoleDatabaseTests {
     @Test
     void testBigDatabaseGrowAndRemoveAndShrink() throws IOException {
         UUID[] uuids = createUuids(30);
+        boolean[] set = new boolean[uuids.length];
+        Arrays.fill(set, true);
 
         PlayerIndexedDatabase database = createEmptyDatabase();
         for (UUID uuid : uuids) {
@@ -177,16 +180,26 @@ final class RoleDatabaseTests {
         for (int i = 0; i < uuids.length; i += 4) {
             UUID uuid = uuids[i];
             database.put(uuid, encode(uuid.toString() + padding));
+            set[i] = false;
         }
 
         for (int i = 1; i < uuids.length; i += 4) {
             UUID uuid = uuids[i];
             database.remove(uuid);
+            set[i] = false;
         }
 
         for (int i = 3; i < uuids.length; i += 4) {
             UUID uuid = uuids[i];
             database.put(uuid, encode("a"));
+            set[i] = false;
+        }
+
+        for (int i = 0; i < uuids.length; i++) {
+            if (set[i]) {
+                UUID uuid = uuids[i];
+                assertEquals(decode(database.get(uuid)), uuid.toString());
+            }
         }
     }
 

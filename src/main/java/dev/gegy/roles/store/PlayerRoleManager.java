@@ -97,7 +97,7 @@ public final class PlayerRoleManager {
                 try {
                     deserializeRoles(roles, bytes);
                 } catch (IOException e) {
-                    LOGGER.error("Failed to deserialize roles for {}", uuid, e);
+                    LOGGER.error("Failed to deserialize roles for {}, dropping", uuid, e);
                     this.database.remove(uuid);
                 }
             }
