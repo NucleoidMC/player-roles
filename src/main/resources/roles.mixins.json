@@ -7,10 +7,11 @@
     "CommandDispatcherMixin",
     "CommandManagerMixin",
     "MinecraftServerMixin",
+    "MuteServerPlayNetworkHandlerMixin",
     "PlayerManagerMixin",
     "ServerCommandSourceMixin",
     "ServerPlayerEntityMixin",
-    "ServerPlayNetworkHandlerMixin",
+    "FormatServerPlayNetworkHandlerMixin",
     "TeamAccessor"
   ],
   "injectors": {
