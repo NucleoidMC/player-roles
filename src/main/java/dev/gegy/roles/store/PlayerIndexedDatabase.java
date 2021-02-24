@@ -96,7 +96,7 @@ public final class PlayerIndexedDatabase implements Closeable {
         this.file.read(this.sizeBytes);
 
         int size = this.sizeBuffer.get(0);
-        ByteBuffer buffer = ByteBuffer.allocate(size);
+        ByteBuffer buffer = ByteBuffer.allocate(size).order(BYTE_ORDER);
         this.file.read(buffer);
 
         return buffer;
@@ -183,7 +183,7 @@ public final class PlayerIndexedDatabase implements Closeable {
         if (amount > 0) {
             // make space for the shifted data
             this.file.position(this.file.size());
-            this.file.write(ByteBuffer.allocate(amount));
+            this.file.write(ByteBuffer.allocate(amount).order(BYTE_ORDER));
         }
 
         if (length > 0) {
@@ -214,7 +214,7 @@ public final class PlayerIndexedDatabase implements Closeable {
 
     private static void moveBytesForwards(FileChannel file, long source, long destination, long length) throws IOException {
         int bufferSize = Math.min(1024, (int) length);
-        ByteBuffer buffer = ByteBuffer.allocate(bufferSize);
+        ByteBuffer buffer = ByteBuffer.allocate(bufferSize).order(BYTE_ORDER);
 
         long backPointer = source + length;
         long offset = destination - source;
@@ -224,7 +224,7 @@ public final class PlayerIndexedDatabase implements Closeable {
             int copySize = bufferSize;
             if (remaining < bufferSize) {
                 copySize = (int) remaining;
-                buffer = ByteBuffer.allocate(copySize);
+                buffer = ByteBuffer.allocate(copySize).order(BYTE_ORDER);
             }
 
             long frontPointer = backPointer - copySize;
@@ -237,7 +237,7 @@ public final class PlayerIndexedDatabase implements Closeable {
 
     private static void moveBytesBackwards(FileChannel file, long source, long destination, long length) throws IOException {
         int bufferSize = Math.min(1024, (int) length);
-        ByteBuffer buffer = ByteBuffer.allocate(bufferSize);
+        ByteBuffer buffer = ByteBuffer.allocate(bufferSize).order(BYTE_ORDER);
 
         long frontPointer = source;
         long offset = destination - source;
@@ -266,6 +266,8 @@ public final class PlayerIndexedDatabase implements Closeable {
     private static int validateSize(int size) throws IOException {
         if (size > MAX_VALUE_SIZE) {
             throw new IOException("size greater than maximum (" + size + ">" + MAX_VALUE_SIZE + ")");
+        } else if (size < 0) {
+            throw new IOException("size is negative (" + size + "<0)");
         }
         return size;
     }
