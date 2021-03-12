@@ -63,6 +63,10 @@ public final class Role implements Comparable<Role> {
         return this.name;
     }
 
+    public void setLevel(int level) {
+        this.level = level;
+    }
+
     public int getLevel() {
         return this.level;
     }
