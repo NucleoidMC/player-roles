@@ -38,7 +38,7 @@ public final class Role implements Comparable<Role> {
 
         DataResult<? extends Map<RoleOverrideType<?>, ?>> result = OVERRIDES_CODEC.parse(root.get("overrides").orElseEmptyMap());
         if (result.error().isPresent()) {
-            PlayerRolesInitializer.LOGGER.warn("Encountered invalid role override definition for '{}': {}", name, result.error().get());
+            PlayerRoles.LOGGER.warn("Encountered invalid role override definition for '{}': {}", name, result.error().get());
             return role;
         }
 

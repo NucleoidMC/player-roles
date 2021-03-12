@@ -8,7 +8,7 @@
   "license": "MIT",
   "environment": "*",
   "entrypoints": {
-    "main": ["dev.gegy.roles.PlayerRolesInitializer"]
+    "main": ["dev.gegy.roles.PlayerRoles"]
   },
   "mixins": ["roles.mixins.json"],
   "depends": {

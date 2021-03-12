@@ -6,13 +6,15 @@
   "mixins": [
     "CommandDispatcherMixin",
     "CommandManagerMixin",
+    "FormatServerPlayNetworkHandlerMixin",
     "MinecraftServerMixin",
-    "MuteServerPlayNetworkHandlerMixin",
     "PlayerManagerMixin",
     "ServerCommandSourceMixin",
     "ServerPlayerEntityMixin",
-    "FormatServerPlayNetworkHandlerMixin",
-    "TeamAccessor"
+    "TeamAccessor",
+    "mute.MessageCommandMixin",
+    "mute.ServerPlayNetworkHandlerMixin",
+    "mute.TeamMsgCommandMixin"
   ],
   "injectors": {
     "defaultRequire": 1

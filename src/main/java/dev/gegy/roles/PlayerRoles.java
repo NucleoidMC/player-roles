@@ -14,10 +14,13 @@ import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.LiteralText;
+import net.minecraft.util.Formatting;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public final class PlayerRolesInitializer implements ModInitializer {
+public final class PlayerRoles implements ModInitializer {
     public static final String ID = "player_roles";
     public static final Logger LOGGER = LogManager.getLogger(ID);
 
@@ -74,5 +77,9 @@ public final class PlayerRolesInitializer implements ModInitializer {
         } catch (ReflectiveOperationException e) {
             LOGGER.error("Failed to hook command requirements", e);
         }
+    }
+
+    public static void sendMuteFeedback(ServerPlayerEntity player) {
+        player.sendMessage(new LiteralText("You are muted!").formatted(Formatting.RED), true);
     }
 }

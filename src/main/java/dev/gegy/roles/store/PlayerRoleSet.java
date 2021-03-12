@@ -1,6 +1,6 @@
 package dev.gegy.roles.store;
 
-import dev.gegy.roles.PlayerRolesInitializer;
+import dev.gegy.roles.PlayerRoles;
 import dev.gegy.roles.Role;
 import dev.gegy.roles.RoleConfiguration;
 import dev.gegy.roles.api.RoleOwner;
@@ -166,7 +166,7 @@ public final class PlayerRoleSet implements RoleWriter {
         this.dirty |= this.roleIds.removeIf(name -> {
             Role role = RoleConfiguration.get().get(name);
             if (role == null || role.getName().equalsIgnoreCase(Role.EVERYONE)) {
-                PlayerRolesInitializer.LOGGER.warn("Encountered invalid role '{}'", name);
+                PlayerRoles.LOGGER.warn("Encountered invalid role '{}'", name);
                 return true;
             }
             return false;

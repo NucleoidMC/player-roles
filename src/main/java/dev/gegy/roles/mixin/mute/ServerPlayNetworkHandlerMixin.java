@@ -1,5 +1,6 @@
-package dev.gegy.roles.mixin;
+package dev.gegy.roles.mixin.mute;
 
+import dev.gegy.roles.PlayerRoles;
 import dev.gegy.roles.api.RoleOwner;
 import dev.gegy.roles.api.RoleReader;
 import dev.gegy.roles.override.RoleOverrideType;
@@ -12,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(value = ServerPlayNetworkHandler.class, priority = 999)
-public class MuteServerPlayNetworkHandlerMixin {
+public class ServerPlayNetworkHandlerMixin {
     @Shadow
     public ServerPlayerEntity player;
 
@@ -29,6 +30,7 @@ public class MuteServerPlayNetworkHandlerMixin {
         if (this.player instanceof RoleOwner) {
             RoleReader roles = ((RoleOwner) this.player).getRoles();
             if (roles.test(RoleOverrideType.MUTE)) {
+                PlayerRoles.sendMuteFeedback(this.player);
                 ci.cancel();
             }
         }
