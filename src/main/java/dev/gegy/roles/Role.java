@@ -1,15 +1,16 @@
 package dev.gegy.roles;
 
 import com.google.common.collect.ImmutableMap;
+import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Dynamic;
 import dev.gegy.roles.api.RoleOwner;
 import dev.gegy.roles.override.RoleChangeListener;
 import dev.gegy.roles.override.RoleOverrideType;
-
 import org.jetbrains.annotations.Nullable;
+
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 public final class Role implements Comparable<Role> {
@@ -37,14 +38,21 @@ public final class Role implements Comparable<Role> {
                 .orElse(ImmutableMap.of());
 
         for (Map.Entry<Dynamic<T>, Dynamic<T>> entry : overrides.entrySet()) {
-            Optional<String> key = entry.getKey().asString().result();
-            Optional<RoleOverrideType<?>> overrideTypeOpt = key.map(RoleOverrideType::byKey);
-            if (overrideTypeOpt.isPresent()) {
-                RoleOverrideType<?> overrideType = overrideTypeOpt.get();
+            String key = entry.getKey().asString("");
+            RoleOverrideType<?> overrideType = RoleOverrideType.byKey(key);
+            if (overrideType != null) {
                 Dynamic<T> element = entry.getValue();
-                role.overrides.put(overrideType, overrideType.parse(element));
+
+                DataResult<?> overrideResult = overrideType.getCodec().decode(element).map(Pair::getFirst);
+                overrideResult.result().ifPresent(override -> {
+                    role.overrides.put(overrideType, override);
+                });
+
+                overrideResult.error().ifPresent(result -> {
+                    PlayerRolesInitializer.LOGGER.warn("Encountered invalid override configuration of '{}': {}", key, result);
+                });
             } else {
-                PlayerRolesInitializer.LOGGER.warn("Encountered invalid override type: '{}'", entry.getKey());
+                PlayerRolesInitializer.LOGGER.warn("Encountered invalid override type: '{}'", key);
             }
         }
 

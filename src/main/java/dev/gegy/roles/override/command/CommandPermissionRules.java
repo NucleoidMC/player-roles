@@ -1,5 +1,6 @@
 package dev.gegy.roles.override.command;
 
+import com.mojang.serialization.Codec;
 import dev.gegy.roles.api.PermissionResult;
 
 import java.util.ArrayList;
@@ -7,8 +8,28 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public final class CommandPermissionRules {
+    private static final Codec<Pattern[]> PATTERN_CODEC = Codec.STRING.xmap(
+            key -> {
+                String[] patternStrings = key.split(" ");
+                return Arrays.stream(patternStrings).map(Pattern::compile).toArray(Pattern[]::new);
+            },
+            patterns -> {
+                return Arrays.stream(patterns).map(Pattern::pattern).collect(Collectors.joining(" "));
+            }
+    );
+
+    public static final Codec<CommandPermissionRules> CODEC = Codec.unboundedMap(PATTERN_CODEC, PermissionResult.CODEC)
+            .xmap(map -> {
+                Builder rules = CommandPermissionRules.builder();
+                map.forEach(rules::add);
+                return rules.build();
+            }, rules -> {
+                return Arrays.stream(rules.rules).collect(Collectors.toMap(rule -> rule.patterns, rule -> rule.result));
+            });
+
     private final Rule[] rules;
 
     CommandPermissionRules(Rule[] commands) {

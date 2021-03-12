@@ -1,100 +1,44 @@
 package dev.gegy.roles.override;
 
-import com.google.common.base.Preconditions;
-import com.mojang.serialization.Dynamic;
+import com.mojang.serialization.Codec;
 import dev.gegy.roles.override.command.CommandPermissionOverride;
-import net.minecraft.util.math.MathHelper;
-
+import dev.gegy.roles.util.TinyRegistry;
 import org.jetbrains.annotations.Nullable;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Function;
 
 public final class RoleOverrideType<T> {
-    private static final Map<String, RoleOverrideType<?>> REGISTRY = new HashMap<>();
+    public static final TinyRegistry<RoleOverrideType<?>> REGISTRY = TinyRegistry.newStable();
 
-    public static final RoleOverrideType<CommandPermissionOverride> COMMANDS = RoleOverrideType.<CommandPermissionOverride>builder()
-            .key("commands")
-            .parse(CommandPermissionOverride::parse)
-            .register();
-
-    public static final RoleOverrideType<ChatFormatOverride> CHAT_STYLE = RoleOverrideType.<ChatFormatOverride>builder()
-            .key("chat_format")
-            .parse(element -> new ChatFormatOverride(element.asString("")))
-            .register();
-
-    public static final RoleOverrideType<NameStyleOverride> NAME_FORMAT = RoleOverrideType.<NameStyleOverride>builder()
-            .key("name_style")
-            .parse(NameStyleOverride::parse)
-            .register();
-
-    public static final RoleOverrideType<Boolean> COMMAND_FEEDBACK = RoleOverrideType.<Boolean>builder()
-            .key("command_feedback")
-            .parse(element -> element.asBoolean(false))
-            .register();
-
-    public static final RoleOverrideType<Boolean> MUTE = RoleOverrideType.<Boolean>builder()
-            .key("mute")
-            .parse(element -> element.asBoolean(false))
-            .register();
-
-    public static final RoleOverrideType<Integer> PERMISSION_LEVEL = RoleOverrideType.<Integer>builder()
-            .key("permission_level")
-            .parse(element -> MathHelper.clamp(element.asInt(0), 0, 4))
-            .register();
+    public static final RoleOverrideType<CommandPermissionOverride> COMMANDS = RoleOverrideType.register("commands", CommandPermissionOverride.CODEC);
+    public static final RoleOverrideType<ChatFormatOverride> CHAT_STYLE = RoleOverrideType.register("chat_format", ChatFormatOverride.CODEC);
+    public static final RoleOverrideType<NameStyleOverride> NAME_FORMAT = RoleOverrideType.register("name_style", NameStyleOverride.CODEC);
+    public static final RoleOverrideType<Boolean> COMMAND_FEEDBACK = RoleOverrideType.register("command_feedback", Codec.BOOL);
+    public static final RoleOverrideType<Boolean> MUTE = RoleOverrideType.register("mute", Codec.BOOL);
+    public static final RoleOverrideType<Integer> PERMISSION_LEVEL = RoleOverrideType.register("permission_level", Codec.intRange(0, 4));
 
     private final String key;
-    private final Function<Dynamic<?>, T> parse;
+    private final Codec<T> codec;
 
-    private RoleOverrideType(String key, Function<Dynamic<?>, T> parse) {
+    private RoleOverrideType(String key, Codec<T> codec) {
         this.key = key;
-        this.parse = parse;
+        this.codec = codec;
     }
 
-    public static <T> Builder<T> builder() {
-        return new Builder<>();
+    public static <T> RoleOverrideType<T> register(String key, Codec<T> codec) {
+        RoleOverrideType<T> type = new RoleOverrideType<>(key, codec);
+        REGISTRY.register(key, type);
+        return type;
     }
 
     public String getKey() {
         return this.key;
     }
 
-    public <U> T parse(Dynamic<U> root) {
-        return this.parse.apply(root);
+    public Codec<T> getCodec() {
+        return this.codec;
     }
 
     @Nullable
     public static RoleOverrideType<?> byKey(String key) {
         return REGISTRY.get(key);
-    }
-
-    public static class Builder<T> {
-        private String key;
-        private Function<Dynamic<?>, T> parse;
-
-        private Builder() {
-        }
-
-        public Builder<T> key(String key) {
-            this.key = key;
-            return this;
-        }
-
-        public Builder<T> parse(Function<Dynamic<?>, T> deserialize) {
-            this.parse = deserialize;
-            return this;
-        }
-
-        public RoleOverrideType<T> register() {
-            Preconditions.checkNotNull(this.key, "key not set");
-            Preconditions.checkNotNull(this.parse, "parser not set");
-
-            Preconditions.checkState(!REGISTRY.containsKey(this.key), "override with key already exists");
-
-            RoleOverrideType<T> overrideType = new RoleOverrideType<>(this.key, this.parse);
-            REGISTRY.put(this.key, overrideType);
-
-            return overrideType;
-        }
     }
 }

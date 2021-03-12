@@ -1,7 +1,6 @@
 package dev.gegy.roles.override.permission;
 
-import com.google.common.collect.ImmutableMap;
-import com.mojang.serialization.Dynamic;
+import com.mojang.serialization.Codec;
 import dev.gegy.roles.api.PermissionResult;
 import dev.gegy.roles.api.RoleOwner;
 import dev.gegy.roles.override.RoleChangeListener;
@@ -14,38 +13,28 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Map;
-
 public final class PermissionKeyOverride implements RoleChangeListener {
+    public static final Codec<PermissionKeyOverride> CODEC = PermissionKeyRules.CODEC.xmap(PermissionKeyOverride::new, override -> override.rules);
+
+    private final PermissionKeyRules rules;
+
+    public PermissionKeyOverride(PermissionKeyRules rules) {
+        this.rules = rules;
+    }
+
     public static void register() {
-        RoleOverrideType<PermissionKeyRules> override = RoleOverrideType.<PermissionKeyRules>builder()
-                .key("permission_keys")
-                .parse(PermissionKeyOverride::parse)
-                .register();
+        RoleOverrideType<PermissionKeyOverride> override = RoleOverrideType.register("permission_keys", PermissionKeyOverride.CODEC);
 
         PermissionCheckEvent.EVENT.register((source, permission) -> {
             if (source instanceof ServerCommandSource) {
                 Entity entity = ((ServerCommandSource) source).getEntity();
                 if (entity instanceof RoleOwner) {
-                    PermissionResult result = ((RoleOwner) entity).test(override, permissions -> permissions.test(permission));
+                    PermissionResult result = ((RoleOwner) entity).test(override, permissions -> permissions.rules.test(permission));
                     return result.asTriState();
                 }
             }
             return TriState.DEFAULT;
         });
-    }
-
-    private static <T> PermissionKeyRules parse(Dynamic<T> root) {
-        PermissionKeyRules.Builder builder = PermissionKeyRules.builder();
-
-        Map<Dynamic<T>, Dynamic<T>> map = root.getMapValues().result().orElse(ImmutableMap.of());
-        for (Map.Entry<Dynamic<T>, Dynamic<T>> entry : map.entrySet()) {
-            String permission = entry.getKey().asString("");
-            String ruleName = entry.getValue().asString("pass");
-            builder.add(permission, PermissionResult.byName(ruleName));
-        }
-
-        return builder.build();
     }
 
     @Override

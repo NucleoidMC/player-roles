@@ -1,7 +1,6 @@
 package dev.gegy.roles.override.command;
 
-import com.google.common.collect.ImmutableMap;
-import com.mojang.serialization.Dynamic;
+import com.mojang.serialization.Codec;
 import dev.gegy.roles.api.PermissionResult;
 import dev.gegy.roles.api.RoleOwner;
 import dev.gegy.roles.override.RoleChangeListener;
@@ -9,11 +8,12 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
-import java.util.Map;
-import java.util.regex.Pattern;
-
 public final class CommandPermissionOverride implements RoleChangeListener {
+    public static final Codec<CommandPermissionOverride> CODEC = CommandPermissionRules.CODEC.xmap(
+            CommandPermissionOverride::new,
+            override -> override.rules
+    );
+
     private final CommandPermissionRules rules;
 
     public CommandPermissionOverride(CommandPermissionRules rules) {
@@ -22,23 +22,6 @@ public final class CommandPermissionOverride implements RoleChangeListener {
 
     public PermissionResult test(MatchableCommand command) {
         return this.rules.test(command);
-    }
-
-    public static <T> CommandPermissionOverride parse(Dynamic<T> root) {
-        CommandPermissionRules.Builder rules = CommandPermissionRules.builder();
-
-        Map<Dynamic<T>, Dynamic<T>> map = root.getMapValues().result().orElse(ImmutableMap.of());
-        for (Map.Entry<Dynamic<T>, Dynamic<T>> entry : map.entrySet()) {
-            String[] patternStrings = entry.getKey().asString("").split(" ");
-            String ruleName = entry.getValue().asString("pass");
-
-            Pattern[] patterns = Arrays.stream(patternStrings).map(Pattern::compile).toArray(Pattern[]::new);
-            PermissionResult result = PermissionResult.byName(ruleName);
-
-            rules.add(patterns, result);
-        }
-
-        return new CommandPermissionOverride(rules.build());
     }
 
     @Override

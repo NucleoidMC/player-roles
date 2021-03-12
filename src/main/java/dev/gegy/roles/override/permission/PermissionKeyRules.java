@@ -1,14 +1,31 @@
 package dev.gegy.roles.override.permission;
 
+import com.mojang.serialization.Codec;
 import dev.gegy.roles.api.PermissionResult;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public final class PermissionKeyRules {
+    public static final Codec<PermissionKeyRules> CODEC = Codec.unboundedMap(Codec.STRING, PermissionResult.CODEC).xmap(
+            map -> {
+                PermissionKeyRules.Builder rules = PermissionKeyRules.builder();
+                map.forEach(rules::add);
+                return rules.build();
+            },
+            override -> {
+                Map<String, PermissionResult> map = new HashMap<>(override.exactPermissions);
+                for (KeyMatcher keyMatcher : override.keyMatchers) {
+                    map.put(keyMatcher.asPattern(), keyMatcher.result);
+                }
+                return map;
+            }
+    );
+
     private final Map<String, PermissionResult> exactPermissions;
     private final KeyMatcher[] keyMatchers;
 
@@ -108,6 +125,10 @@ public final class PermissionKeyRules {
             }
 
             return this.result;
+        }
+
+        String asPattern() {
+            return String.join(".", this.pattern);
         }
     }
 }

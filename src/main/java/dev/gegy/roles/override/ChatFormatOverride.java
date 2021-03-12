@@ -1,5 +1,6 @@
 package dev.gegy.roles.override;
 
+import com.mojang.serialization.Codec;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -10,16 +11,23 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public final class ChatFormatOverride {
+    public static final Codec<ChatFormatOverride> CODEC = Codec.STRING.xmap(
+            ChatFormatOverride::new,
+            override -> override.formatString
+    );
+
     private static final Pattern ARGUMENT_PATTERN = Pattern.compile("%(?:(\\d+)\\$)?([A-Za-z%]|$)");
 
     private static final Object NAME_MARKER = new Object();
     private static final Object CONTENT_MARKER = new Object();
 
     private final Object[] format;
+    private final String formatString;
     private final Builder builder = new Builder();
 
     public ChatFormatOverride(String format) {
         this.format = parseFormat(format);
+        this.formatString = format;
     }
 
     private static Object[] parseFormat(String formatString) {
