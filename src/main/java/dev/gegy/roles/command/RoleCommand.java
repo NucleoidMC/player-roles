@@ -9,7 +9,7 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import dev.gegy.roles.Role;
-import dev.gegy.roles.RoleConfiguration;
+import dev.gegy.roles.PlayerRolesConfig;
 import dev.gegy.roles.api.RoleOwner;
 import dev.gegy.roles.api.RoleReader;
 import dev.gegy.roles.override.command.CommandPermissionEvaluator;
@@ -125,7 +125,7 @@ public final class RoleCommand {
         MinecraftServer server = source.getMinecraftServer();
 
         server.execute(() -> {
-            RoleConfiguration.setup();
+            PlayerRolesConfig.setup();
 
             List<ServerPlayerEntity> players = server.getPlayerManager().getPlayerList();
             for (ServerPlayerEntity entity : players) {
@@ -151,7 +151,7 @@ public final class RoleCommand {
     }
 
     private static Role getRole(String roleName) throws CommandSyntaxException {
-        Role role = RoleConfiguration.get().get(roleName);
+        Role role = PlayerRolesConfig.get().get(roleName);
         if (role == null) throw ROLE_NOT_FOUND.create(roleName);
         return role;
     }
@@ -160,7 +160,7 @@ public final class RoleCommand {
         return (ctx, builder) -> {
             int highestPowerLevel = getHighestPowerLevel(ctx.getSource());
             return CommandSource.suggestMatching(
-                    RoleConfiguration.get().stream()
+                    PlayerRolesConfig.get().stream()
                             .filter(role -> role.getLevel() < highestPowerLevel)
                             .map(Role::getName),
                     builder

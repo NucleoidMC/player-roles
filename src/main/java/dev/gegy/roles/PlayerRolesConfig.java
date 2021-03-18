@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.JsonOps;
 import org.jetbrains.annotations.NotNull;
@@ -24,15 +25,15 @@ import java.util.Locale;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public final class RoleConfiguration {
+public final class PlayerRolesConfig {
     private static final JsonParser JSON = new JsonParser();
 
-    private static RoleConfiguration instance = new RoleConfiguration(Collections.emptyList(), Role.empty(Role.EVERYONE));
+    private static PlayerRolesConfig instance = new PlayerRolesConfig(Collections.emptyList(), Role.empty(Role.EVERYONE));
 
     private final ImmutableMap<String, Role> roles;
     private final Role everyone;
 
-    private RoleConfiguration(List<Role> roles, Role everyone) {
+    private PlayerRolesConfig(List<Role> roles, Role everyone) {
         ImmutableMap.Builder<String, Role> roleMap = ImmutableMap.builder();
         for (Role role : roles) {
             roleMap.put(role.getName(), role);
@@ -42,7 +43,7 @@ public final class RoleConfiguration {
         this.everyone = everyone;
     }
 
-    public static RoleConfiguration get() {
+    public static PlayerRolesConfig get() {
         return instance;
     }
 
@@ -86,7 +87,7 @@ public final class RoleConfiguration {
         }
     }
 
-    private static <T> RoleConfiguration parse(Dynamic<T> root) {
+    private static <T> PlayerRolesConfig parse(Dynamic<T> root) {
         Role everyone = Role.empty(Role.EVERYONE);
 
         List<Pair<Dynamic<T>, Dynamic<T>>> roleEntries = root.asMapOpt().result().orElse(Stream.empty())
@@ -95,12 +96,19 @@ public final class RoleConfiguration {
         List<Role> roles = new ArrayList<>(roleEntries.size());
 
         for (Pair<Dynamic<T>, Dynamic<T>> entry : roleEntries) {
-            String name = entry.getFirst().asString("everyone").toLowerCase(Locale.ROOT);
+            String name = entry.getFirst().asString(Role.EVERYONE).toLowerCase(Locale.ROOT);
             Dynamic<T> roleRoot = entry.getSecond();
 
-            Role role = Role.parse(name, roleRoot);
+            DataResult<RoleConfig> roleConfigResult = RoleConfig.CODEC.parse(roleRoot);
+            if (roleConfigResult.error().isPresent()) {
+                DataResult.PartialResult<RoleConfig> error = roleConfigResult.error().get();
+                throw new JsonSyntaxException("Failed to parse role config for '" + name + "': " + error);
+            }
 
-            if (!name.equalsIgnoreCase(Role.EVERYONE)) {
+            RoleConfig roleConfig = roleConfigResult.result().get();
+            Role role = roleConfig.create(name);
+
+            if (!name.equals(Role.EVERYONE)) {
                 roles.add(role);
             } else {
                 if (everyone.getLevel() != 0) {
@@ -119,7 +127,7 @@ public final class RoleConfiguration {
             role.setLevel(idx + 1);
         }
 
-        return new RoleConfiguration(roles, everyone);
+        return new PlayerRolesConfig(roles, everyone);
     }
 
     @Nullable

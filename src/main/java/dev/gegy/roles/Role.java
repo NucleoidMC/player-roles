@@ -1,58 +1,22 @@
 package dev.gegy.roles;
 
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.DataResult;
-import com.mojang.serialization.Dynamic;
-import dev.gegy.roles.api.RoleOwner;
-import dev.gegy.roles.override.RoleChangeListener;
-import dev.gegy.roles.override.RoleOverrideType;
-import org.jetbrains.annotations.Nullable;
-import xyz.nucleoid.codecs.MoreCodecs;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import dev.gegy.roles.override.RoleOverrideMap;
 
 public final class Role implements Comparable<Role> {
     public static final String EVERYONE = "everyone";
 
     private final String name;
+    private final RoleOverrideMap overrides;
     private int level;
 
-    private static final Codec<? extends Map<RoleOverrideType<?>, ?>> OVERRIDES_CODEC = MoreCodecs.dispatchByMapKey(RoleOverrideType.REGISTRY, RoleOverrideType::getCodec);
-
-    private final Map<RoleOverrideType<?>, Object> overrides = new HashMap<>();
-
-    Role(String name) {
+    Role(String name, RoleOverrideMap overrides, int level) {
         this.name = name;
+        this.overrides = overrides;
+        this.level = level;
     }
 
     public static Role empty(String name) {
-        return new Role(name);
-    }
-
-    public static <T> Role parse(String name, Dynamic<T> root) {
-        Role role = new Role(name);
-
-        role.level = root.get("level").asInt(0);
-
-        DataResult<? extends Map<RoleOverrideType<?>, ?>> result = OVERRIDES_CODEC.parse(root.get("overrides").orElseEmptyMap());
-        if (result.error().isPresent()) {
-            PlayerRoles.LOGGER.warn("Encountered invalid role override definition for '{}': {}", name, result.error().get());
-            return role;
-        }
-
-        result.result().ifPresent(role.overrides::putAll);
-
-        return role;
-    }
-
-    public void notifyChange(@Nullable RoleOwner owner) {
-        for (Object override : this.overrides.values()) {
-            if (override instanceof RoleChangeListener) {
-                ((RoleChangeListener) override).notifyChange(owner);
-            }
-        }
+        return new Role(name, new RoleOverrideMap(), 0);
     }
 
     public String getName() {
@@ -67,14 +31,8 @@ public final class Role implements Comparable<Role> {
         return this.level;
     }
 
-    @Nullable
-    @SuppressWarnings("unchecked")
-    public <T> T getOverride(RoleOverrideType<T> type) {
-        return (T) this.overrides.get(type);
-    }
-
-    public Set<RoleOverrideType<?>> getOverrides() {
-        return this.overrides.keySet();
+    public RoleOverrideMap getOverrides() {
+        return this.overrides;
     }
 
     @Override

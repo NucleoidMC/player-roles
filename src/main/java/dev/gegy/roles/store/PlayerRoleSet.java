@@ -2,9 +2,10 @@ package dev.gegy.roles.store;
 
 import dev.gegy.roles.PlayerRoles;
 import dev.gegy.roles.Role;
-import dev.gegy.roles.RoleConfiguration;
+import dev.gegy.roles.PlayerRolesConfig;
 import dev.gegy.roles.api.RoleOwner;
 import dev.gegy.roles.api.RoleWriter;
+import dev.gegy.roles.override.RoleOverrideMap;
 import dev.gegy.roles.override.RoleOverrideType;
 import dev.gegy.roles.api.PermissionResult;
 import it.unimi.dsi.fastutil.objects.ObjectRBTreeSet;
@@ -25,7 +26,7 @@ public final class PlayerRoleSet implements RoleWriter {
     private final RoleOwner owner;
 
     private final ObjectRBTreeSet<String> roleIds = new ObjectRBTreeSet<>((n1, n2) -> {
-        RoleConfiguration config = RoleConfiguration.get();
+        PlayerRolesConfig config = PlayerRolesConfig.get();
         Role r1 = config.get(n1);
         Role r2 = config.get(n2);
         if (r1 == null || r2 == null) return 0;
@@ -44,15 +45,16 @@ public final class PlayerRoleSet implements RoleWriter {
     public void notifyReload() {
         this.removeInvalidRoles();
         this.rebuildOverrideCache();
-        this.stream().forEach(role -> role.notifyChange(this.owner));
+        this.stream().forEach(role -> role.getOverrides().notifyChange(this.owner));
     }
 
     private void rebuildOverrideCache() {
         this.overrideCache.clear();
         this.stream().forEach(role -> {
-            for (RoleOverrideType<?> type : role.getOverrides()) {
-                Collection<Object> overrides = this.overrideCache.computeIfAbsent(type, t -> new ArrayList<>());
-                overrides.add(role.getOverride(type));
+            RoleOverrideMap overrides = role.getOverrides();
+            for (RoleOverrideType<?> type : overrides.keySet()) {
+                Collection<Object> cachedOverrides = this.overrideCache.computeIfAbsent(type, t -> new ArrayList<>());
+                cachedOverrides.add(overrides.get(type));
             }
         });
     }
@@ -62,7 +64,7 @@ public final class PlayerRoleSet implements RoleWriter {
         if (this.roleIds.add(role.getName())) {
             this.dirty = true;
             this.rebuildOverrideCache();
-            role.notifyChange(this.owner);
+            role.getOverrides().notifyChange(this.owner);
             return true;
         }
         return false;
@@ -73,7 +75,7 @@ public final class PlayerRoleSet implements RoleWriter {
         if (this.roleIds.remove(role.getName())) {
             this.dirty = true;
             this.rebuildOverrideCache();
-            role.notifyChange(this.owner);
+            role.getOverrides().notifyChange(this.owner);
             return true;
         }
         return false;
@@ -81,7 +83,7 @@ public final class PlayerRoleSet implements RoleWriter {
 
     @Override
     public Stream<Role> stream() {
-        RoleConfiguration roleConfig = RoleConfiguration.get();
+        PlayerRolesConfig roleConfig = PlayerRolesConfig.get();
         return Stream.concat(
                 this.roleIds.stream().map(roleConfig::get).filter(Objects::nonNull),
                 Stream.of(roleConfig.everyone())
@@ -164,7 +166,7 @@ public final class PlayerRoleSet implements RoleWriter {
 
     private void removeInvalidRoles() {
         this.dirty |= this.roleIds.removeIf(name -> {
-            Role role = RoleConfiguration.get().get(name);
+            Role role = PlayerRolesConfig.get().get(name);
             if (role == null || role.getName().equalsIgnoreCase(Role.EVERYONE)) {
                 PlayerRoles.LOGGER.warn("Encountered invalid role '{}'", name);
                 return true;

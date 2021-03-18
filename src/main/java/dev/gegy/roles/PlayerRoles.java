@@ -28,7 +28,7 @@ public final class PlayerRoles implements ModInitializer {
 
     @Override
     public void onInitialize() {
-        RoleConfiguration.setup();
+        PlayerRolesConfig.setup();
 
         PlayerRoleManager.setup();
 
