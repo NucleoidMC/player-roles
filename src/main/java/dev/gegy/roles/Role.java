@@ -7,7 +7,7 @@ public final class Role implements Comparable<Role> {
 
     private final String name;
     private final RoleOverrideMap overrides;
-    private int level;
+    private final int level;
 
     Role(String name, RoleOverrideMap overrides, int level) {
         this.name = name;
@@ -21,10 +21,6 @@ public final class Role implements Comparable<Role> {
 
     public String getName() {
         return this.name;
-    }
-
-    public void setLevel(int level) {
-        this.level = level;
     }
 
     public int getLevel() {

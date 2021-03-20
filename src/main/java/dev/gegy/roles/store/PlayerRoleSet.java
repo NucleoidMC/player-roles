@@ -1,22 +1,19 @@
 package dev.gegy.roles.store;
 
 import dev.gegy.roles.PlayerRoles;
-import dev.gegy.roles.Role;
 import dev.gegy.roles.PlayerRolesConfig;
+import dev.gegy.roles.Role;
+import dev.gegy.roles.api.PermissionResult;
 import dev.gegy.roles.api.RoleOwner;
 import dev.gegy.roles.api.RoleWriter;
 import dev.gegy.roles.override.RoleOverrideMap;
 import dev.gegy.roles.override.RoleOverrideType;
-import dev.gegy.roles.api.PermissionResult;
 import it.unimi.dsi.fastutil.objects.ObjectRBTreeSet;
-import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -33,7 +30,7 @@ public final class PlayerRoleSet implements RoleWriter {
         return r1.compareTo(r2);
     });
 
-    private final Map<RoleOverrideType<?>, Collection<Object>> overrideCache = new Reference2ObjectOpenHashMap<>();
+    private final RoleOverrideMap overrideCache = new RoleOverrideMap();
 
     private boolean dirty;
 
@@ -50,13 +47,7 @@ public final class PlayerRoleSet implements RoleWriter {
 
     private void rebuildOverrideCache() {
         this.overrideCache.clear();
-        this.stream().forEach(role -> {
-            RoleOverrideMap overrides = role.getOverrides();
-            for (RoleOverrideType<?> type : overrides.keySet()) {
-                Collection<Object> cachedOverrides = this.overrideCache.computeIfAbsent(type, t -> new ArrayList<>());
-                cachedOverrides.add(overrides.get(type));
-            }
-        });
+        this.stream().forEach(role -> this.overrideCache.addAll(role.getOverrides()));
     }
 
     @Override
@@ -102,9 +93,8 @@ public final class PlayerRoleSet implements RoleWriter {
     }
 
     @Nullable
-    @SuppressWarnings("unchecked")
     private <T> Collection<T> getOverridesOrNull(RoleOverrideType<T> type) {
-        return (Collection<T>) this.overrideCache.get(type);
+        return this.overrideCache.getOrNull(type);
     }
 
     @Override
@@ -122,17 +112,6 @@ public final class PlayerRoleSet implements RoleWriter {
         }
 
         return PermissionResult.PASS;
-    }
-
-    @Override
-    public boolean test(RoleOverrideType<Boolean> type) {
-        Collection<Boolean> overrides = this.getOverridesOrNull(type);
-        if (overrides != null) {
-            for (Boolean override : overrides) {
-                return override;
-            }
-        }
-        return false;
     }
 
     @Override

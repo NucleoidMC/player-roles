@@ -41,4 +41,9 @@ public final class RoleOverrideType<T> {
     public static RoleOverrideType<?> byKey(String key) {
         return REGISTRY.get(key);
     }
+
+    @Override
+    public String toString() {
+        return "RoleOverrideType(" + this.key + ")";
+    }
 }

@@ -20,6 +20,8 @@ import net.minecraft.util.Formatting;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.List;
+
 public final class PlayerRoles implements ModInitializer {
     public static final String ID = "player_roles";
     public static final Logger LOGGER = LogManager.getLogger(ID);
@@ -28,7 +30,13 @@ public final class PlayerRoles implements ModInitializer {
 
     @Override
     public void onInitialize() {
-        PlayerRolesConfig.setup();
+        List<String> errors = PlayerRolesConfig.setup();
+        if (!errors.isEmpty()) {
+            LOGGER.warn("Failed to load player-roles config! ({} errors)", errors.size());
+            for (String error : errors) {
+                LOGGER.warn(" - {}", error);
+            }
+        }
 
         PlayerRoleManager.setup();
 

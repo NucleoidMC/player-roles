@@ -8,8 +8,8 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
-import dev.gegy.roles.Role;
 import dev.gegy.roles.PlayerRolesConfig;
+import dev.gegy.roles.Role;
 import dev.gegy.roles.api.RoleOwner;
 import dev.gegy.roles.api.RoleReader;
 import dev.gegy.roles.override.command.CommandPermissionEvaluator;
@@ -22,6 +22,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.text.Texts;
@@ -62,7 +63,8 @@ public final class RoleCommand {
                         Collection<GameProfile> targets = GameProfileArgumentType.getProfileArgument(ctx, "targets");
                         String roleName = StringArgumentType.getString(ctx, "role");
                         return updateRoles(source, targets, roleName, PlayerRoleSet::add, "'%s' assigned to %s players");
-                }))))
+                    })
+                )))
                 .then(literal("remove")
                     .then(argument("targets", GameProfileArgumentType.gameProfile())
                     .then(argument("role", StringArgumentType.word()).suggests(roleSuggestions())
@@ -71,7 +73,8 @@ public final class RoleCommand {
                         Collection<GameProfile> targets = GameProfileArgumentType.getProfileArgument(ctx, "targets");
                         String roleName = StringArgumentType.getString(ctx, "role");
                         return updateRoles(source, targets, roleName, PlayerRoleSet::remove, "'%s' removed from %s players");
-                    }))))
+                    })
+                )))
                 .then(literal("list")
                     .then(argument("target", GameProfileArgumentType.gameProfile()).executes(ctx -> {
                         ServerCommandSource source = ctx.getSource();
@@ -96,16 +99,14 @@ public final class RoleCommand {
 
         int count = 0;
         for (GameProfile player : players) {
-            boolean applied = roleManager.updateRoles(server, player.getId(), roles -> {
-                return apply.test(roles, role);
-            });
-
+            boolean applied = roleManager.updateRoles(server, player.getId(), roles -> apply.test(roles, role));
             if (applied) {
                 count++;
             }
         }
 
         source.sendFeedback(new TranslatableText(success, roleName, count), true);
+
         return Command.SINGLE_SUCCESS;
     }
 
@@ -125,7 +126,7 @@ public final class RoleCommand {
         MinecraftServer server = source.getMinecraftServer();
 
         server.execute(() -> {
-            PlayerRolesConfig.setup();
+            List<String> errors = PlayerRolesConfig.setup();
 
             List<ServerPlayerEntity> players = server.getPlayerManager().getPlayerList();
             for (ServerPlayerEntity entity : players) {
@@ -135,7 +136,15 @@ public final class RoleCommand {
                 }
             }
 
-            source.sendFeedback(new TranslatableText("Role configuration successfully reloaded"), false);
+            if (errors.isEmpty()) {
+                source.sendFeedback(new TranslatableText("Role configuration successfully reloaded"), false);
+            } else {
+                MutableText errorFeedback = new LiteralText("Failed to reload roles configuration!");
+                for (String error : errors) {
+                    errorFeedback = errorFeedback.append("\n - " + error);
+                }
+                source.sendError(errorFeedback);
+            }
         });
 
         return Command.SINGLE_SUCCESS;
