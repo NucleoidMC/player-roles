@@ -24,7 +24,7 @@ public class FormatServerPlayNetworkHandlerMixin {
     )
     private Text formatChat(Text text, String message) {
         if (this.player instanceof RoleOwner) {
-            RoleReader roles = ((RoleOwner) this.player).getRoles();
+            RoleReader roles = (RoleOwner) this.player;
             ChatFormatOverride chatStyle = roles.select(RoleOverrideType.CHAT_STYLE);
             if (chatStyle != null) {
                 return chatStyle.make(this.player.getDisplayName(), message);

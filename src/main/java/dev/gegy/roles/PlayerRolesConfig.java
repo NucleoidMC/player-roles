@@ -8,6 +8,7 @@ import com.google.gson.JsonSyntaxException;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.JsonOps;
+import dev.gegy.roles.store.PlayerRoleSet;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -20,6 +21,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public final class PlayerRolesConfig {
@@ -30,6 +32,9 @@ public final class PlayerRolesConfig {
     private final ImmutableMap<String, Role> roles;
     private final Role everyone;
 
+    private PlayerRoleSet commandBlockRoles;
+    private PlayerRoleSet functionRoles;
+
     private PlayerRolesConfig(List<Role> roles, Role everyone) {
         ImmutableMap.Builder<String, Role> roleMap = ImmutableMap.builder();
         for (Role role : roles) {
@@ -38,6 +43,16 @@ public final class PlayerRolesConfig {
         this.roles = roleMap.build();
 
         this.everyone = everyone;
+    }
+
+    private PlayerRoleSet buildRoles(Predicate<RoleApplyConfig> apply) {
+        PlayerRoleSet roles = new PlayerRoleSet(null);
+
+        this.roles.values().stream()
+                .filter(role -> apply.test(role.getApply()))
+                .forEach(roles::add);
+
+        return roles;
     }
 
     public static PlayerRolesConfig get() {
@@ -120,6 +135,22 @@ public final class PlayerRolesConfig {
     @NotNull
     public Role everyone() {
         return this.everyone;
+    }
+
+    public PlayerRoleSet getCommandBlockRoles() {
+        PlayerRoleSet commandBlockRoles = this.commandBlockRoles;
+        if (commandBlockRoles == null) {
+            this.commandBlockRoles = commandBlockRoles = this.buildRoles(apply -> apply.commandBlock);
+        }
+        return commandBlockRoles;
+    }
+
+    public PlayerRoleSet getFunctionRoles() {
+        PlayerRoleSet functionRoles = this.functionRoles;
+        if (functionRoles == null) {
+            this.functionRoles = functionRoles = this.buildRoles(apply -> apply.functions);
+        }
+        return functionRoles;
     }
 
     public Stream<Role> stream() {

@@ -9,6 +9,7 @@
     "FormatServerPlayNetworkHandlerMixin",
     "MinecraftServerMixin",
     "PlayerManagerMixin",
+    "ServerCommandSourceAccessor",
     "ServerCommandSourceMixin",
     "ServerPlayerEntityMixin",
     "TeamAccessor",

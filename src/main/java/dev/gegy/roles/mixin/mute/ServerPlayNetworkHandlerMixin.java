@@ -28,7 +28,7 @@ public class ServerPlayNetworkHandlerMixin {
     )
     private void broadcastMessage(String message, CallbackInfo ci) {
         if (this.player instanceof RoleOwner) {
-            RoleReader roles = ((RoleOwner) this.player).getRoles();
+            RoleReader roles = (RoleOwner) this.player;
             if (roles.test(RoleOverrideType.MUTE)) {
                 PlayerRoles.sendMuteFeedback(this.player);
                 ci.cancel();

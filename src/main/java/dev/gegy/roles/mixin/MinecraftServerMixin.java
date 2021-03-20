@@ -22,7 +22,7 @@ public abstract class MinecraftServerMixin {
     public void getPermissionLevel(GameProfile profile, CallbackInfoReturnable<Integer> ci) {
         ServerPlayerEntity player = this.getPlayerManager().getPlayer(profile.getId());
         if (player instanceof RoleOwner) {
-            RoleReader roles = ((RoleOwner) player).getRoles();
+            RoleReader roles = (RoleOwner) player;
             Integer permissionLevel = roles.select(RoleOverrideType.PERMISSION_LEVEL);
             if (permissionLevel != null) {
                 ci.setReturnValue(permissionLevel);

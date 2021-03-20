@@ -108,7 +108,7 @@ public final class RoleConfigMap implements Iterable<Pair<String, RoleConfig>> {
 
                 resolvedOverrides.addAll(role.overrides);
 
-                result.put(name, new RoleConfig(role.level, resolvedOverrides, new String[0]));
+                result.put(name, new RoleConfig(role.level, resolvedOverrides, new String[0], role.apply));
             }
 
             return result;

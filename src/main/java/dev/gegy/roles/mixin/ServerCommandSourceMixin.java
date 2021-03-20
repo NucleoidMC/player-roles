@@ -27,7 +27,7 @@ public class ServerCommandSourceMixin {
 
         ServerPlayerEntity player = playerManager.getPlayer(profile.getId());
         if (player instanceof RoleOwner) {
-            RoleReader roles = ((RoleOwner) player).getRoles();
+            RoleReader roles = (RoleOwner) player;
             return roles.test(RoleOverrideType.COMMAND_FEEDBACK);
         }
 

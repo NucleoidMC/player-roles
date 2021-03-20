@@ -8,15 +8,17 @@ public final class Role implements Comparable<Role> {
     private final String name;
     private final RoleOverrideMap overrides;
     private final int level;
+    private final RoleApplyConfig apply;
 
-    Role(String name, RoleOverrideMap overrides, int level) {
+    Role(String name, RoleOverrideMap overrides, int level, RoleApplyConfig apply) {
         this.name = name;
         this.overrides = overrides;
         this.level = level;
+        this.apply = apply;
     }
 
     public static Role empty(String name) {
-        return new Role(name, new RoleOverrideMap(), 0);
+        return new Role(name, new RoleOverrideMap(), 0, RoleApplyConfig.DEFAULT);
     }
 
     public String getName() {
@@ -29,6 +31,10 @@ public final class Role implements Comparable<Role> {
 
     public RoleOverrideMap getOverrides() {
         return this.overrides;
+    }
+
+    public RoleApplyConfig getApply() {
+        return this.apply;
     }
 
     @Override
