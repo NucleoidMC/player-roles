@@ -120,6 +120,45 @@ Command feedback is declared like:
 "command_feedback": true
 ```
 
+#### Other configuration
+Roles can additionally be applied to command blocks or function executors through the configuration file.
+For example:
+```json
+{
+  "commands": {
+    "apply": {
+      "command_block": true,
+      "function": true
+    },
+    "overrides": {
+    }
+  }
+}
+```
+
+It may also be useful for a role to inherit the overrides from another role.
+This can be done with the `includes` declaration by referencing other roles with a lower level.
+For example:
+```json
+{
+  "foo": {
+    "includes": ["bar"],
+    "overrides": {
+      "commands": {
+        ".*": "allow"
+      }
+    }
+  },
+  "bar": {
+    "overrides": {
+      "name_style": "red"
+    }
+  }
+}
+```
+
+With this configuration, the `foo` role will inherit the red `name_style`.
+
 #### Applying roles in-game
 Once you've made modifications to the `roles.json` file, you can reload it by using the `/role reload`.
 
