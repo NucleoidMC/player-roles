@@ -93,11 +93,11 @@ public final class PlayerIndexedDatabase implements Closeable {
         this.file.position(pointer + UUID_BYTES);
 
         this.sizeBytes.position(0);
-        this.file.read(this.sizeBytes);
+        this.readToEnd(this.sizeBytes);
 
         int size = this.sizeBuffer.get(0);
         ByteBuffer buffer = ByteBuffer.allocate(size).order(BYTE_ORDER);
-        this.file.read(buffer);
+        this.readToEnd(buffer);
 
         return buffer;
     }
@@ -122,7 +122,7 @@ public final class PlayerIndexedDatabase implements Closeable {
         this.file.position(pointer + UUID_BYTES);
 
         this.sizeBytes.position(0);
-        this.file.read(this.sizeBytes);
+        this.readToEnd(this.sizeBytes);
 
         int size = validateSize(this.sizeBuffer.get(0));
 
@@ -136,8 +136,8 @@ public final class PlayerIndexedDatabase implements Closeable {
         long pointer = this.file.size();
         this.file.position(pointer);
 
-        this.file.write(this.writeHeader(key, bytes.capacity()));
-        this.file.write(bytes);
+        this.writeToEnd(this.writeHeader(key, bytes.capacity()));
+        this.writeToEnd(bytes);
 
         this.pointers.put(key, pointer);
     }
@@ -158,7 +158,7 @@ public final class PlayerIndexedDatabase implements Closeable {
         this.file.position(pointer + UUID_BYTES);
 
         this.sizeBytes.position(0);
-        this.file.read(this.sizeBytes);
+        this.readToEnd(this.sizeBytes);
 
         int lastSize = validateSize(this.sizeBuffer.get(0));
         int newSize = validateSize(bytes.capacity());
@@ -172,8 +172,8 @@ public final class PlayerIndexedDatabase implements Closeable {
         this.sizeBuffer.put(newSize);
 
         this.file.position(pointer + UUID_BYTES);
-        this.file.write(this.sizeBytes);
-        this.file.write(bytes);
+        this.writeToEnd(this.sizeBytes);
+        this.writeToEnd(bytes);
     }
 
     private void shiftAfter(long source, int amount) throws IOException {
@@ -183,7 +183,7 @@ public final class PlayerIndexedDatabase implements Closeable {
         if (amount > 0) {
             // make space for the shifted data
             this.file.position(this.file.size());
-            this.file.write(ByteBuffer.allocate(amount).order(BYTE_ORDER));
+            this.writeToEnd(ByteBuffer.allocate(amount).order(BYTE_ORDER));
         }
 
         if (length > 0) {
@@ -201,6 +201,26 @@ public final class PlayerIndexedDatabase implements Closeable {
             if (pointer >= source) {
                 entry.setValue(pointer + amount);
             }
+        }
+    }
+
+    private void writeToEnd(ByteBuffer... buffers) throws IOException {
+        for (ByteBuffer buffer : buffers) {
+            this.writeToEnd(buffer);
+        }
+    }
+
+    private void writeToEnd(ByteBuffer buffer) throws IOException {
+        long remaining = buffer.remaining();
+        while (remaining > 0) {
+            remaining -= this.file.write(buffer);
+        }
+    }
+
+    private void readToEnd(ByteBuffer buffer) throws IOException {
+        long remaining = buffer.remaining();
+        while (remaining > 0) {
+            remaining -= this.file.read(buffer);
         }
     }
 
