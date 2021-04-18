@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
@@ -67,8 +68,8 @@ public final class PlayerIndexedDatabase implements Closeable {
         while (pointer < fileSize) {
             channel.position(pointer);
 
-            uuidBytes.position(0);
-            sizeBytes.position(0);
+            clear(uuidBytes);
+            clear(sizeBytes);
             channel.read(uuidBytes);
             channel.read(sizeBytes);
 
@@ -92,7 +93,7 @@ public final class PlayerIndexedDatabase implements Closeable {
 
         this.file.position(pointer + UUID_BYTES);
 
-        this.sizeBytes.position(0);
+        clear(this.sizeBytes);
         this.readToEnd(this.sizeBytes);
 
         int size = this.sizeBuffer.get(0);
@@ -121,7 +122,7 @@ public final class PlayerIndexedDatabase implements Closeable {
 
         this.file.position(pointer + UUID_BYTES);
 
-        this.sizeBytes.position(0);
+        clear(this.sizeBytes);
         this.readToEnd(this.sizeBytes);
 
         int size = validateSize(this.sizeBuffer.get(0));
@@ -143,12 +144,12 @@ public final class PlayerIndexedDatabase implements Closeable {
     }
 
     private ByteBuffer[] writeHeader(UUID key, int size) {
-        this.uuidBytes.position(0);
-        this.uuidBuffer.position(0);
+        clear(this.uuidBytes);
+        clear(this.uuidBuffer);
         this.uuidBuffer.put(key.getMostSignificantBits()).put(key.getLeastSignificantBits());
 
-        this.sizeBytes.position(0);
-        this.sizeBuffer.position(0);
+        clear(this.sizeBytes);
+        clear(this.sizeBuffer);
         this.sizeBuffer.put(size);
 
         return this.headerBytes;
@@ -157,7 +158,7 @@ public final class PlayerIndexedDatabase implements Closeable {
     private void update(long pointer, ByteBuffer bytes) throws IOException {
         this.file.position(pointer + UUID_BYTES);
 
-        this.sizeBytes.position(0);
+        clear(this.sizeBytes);
         this.readToEnd(this.sizeBytes);
 
         int lastSize = validateSize(this.sizeBuffer.get(0));
@@ -167,8 +168,8 @@ public final class PlayerIndexedDatabase implements Closeable {
             this.shiftAfter(endPointer, newSize - lastSize);
         }
 
-        this.sizeBytes.position(0);
-        this.sizeBuffer.position(0);
+        clear(this.sizeBytes);
+        clear(this.sizeBuffer);
         this.sizeBuffer.put(newSize);
 
         this.file.position(pointer + UUID_BYTES);
@@ -273,7 +274,7 @@ public final class PlayerIndexedDatabase implements Closeable {
     private static int copyBytes(FileChannel file, ByteBuffer buffer, long source, long destination) throws IOException {
         file.position(source);
 
-        buffer.position(0);
+        clear(buffer);
         int read = file.read(buffer);
         buffer.flip();
 
@@ -295,5 +296,11 @@ public final class PlayerIndexedDatabase implements Closeable {
     @Override
     public synchronized void close() throws IOException {
         this.file.close();
+    }
+
+    // in newer Java versions, ByteBuffer overrides the clear method in order to return the right type.
+    // here we upcast to force compatibility when compiling with newer Java versions and running on older.
+    private static void clear(Buffer buffer) {
+        buffer.clear();
     }
 }
