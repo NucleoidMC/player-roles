@@ -19,7 +19,7 @@ public final class RoleOverrideType<T> {
     }
 
     public static <T> RoleOverrideType<T> register(String key, Codec<T> codec) {
-        RoleOverrideType<T> type = new RoleOverrideType<>(key, codec);
+        var type = new RoleOverrideType<>(key, codec);
         REGISTRY.register(key, type);
         return type;
     }

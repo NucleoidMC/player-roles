@@ -10,9 +10,9 @@ import java.util.Iterator;
 
 public final class RoleSet extends AbstractSet<Role> {
     private final ObjectRBTreeSet<String> ids = new ObjectRBTreeSet<>((leftId, rightId) -> {
-        PlayerRolesConfig config = PlayerRolesConfig.get();
-        Role left = config.get(leftId);
-        Role right = config.get(rightId);
+        var config = PlayerRolesConfig.get();
+        var left = config.get(leftId);
+        var right = config.get(rightId);
         if (left == null || right == null) return 0;
         return left.compareTo(right);
     });
@@ -49,15 +49,15 @@ public final class RoleSet extends AbstractSet<Role> {
 
     @Override
     public Iterator<Role> iterator() {
-        PlayerRolesConfig config = PlayerRolesConfig.get();
-        Iterator<String> idIterator = this.ids.iterator();
+        var config = PlayerRolesConfig.get();
+        var idIterator = this.ids.iterator();
 
         return new AbstractIterator<Role>() {
             @Override
             protected Role computeNext() {
                 while (idIterator.hasNext()) {
-                    String id = idIterator.next();
-                    Role role = config.get(id);
+                    var id = idIterator.next();
+                    var role = config.get(id);
                     if (role != null) {
                         return role;
                     }

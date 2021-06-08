@@ -49,18 +49,18 @@ public final class PlayerIndexedDatabase implements Closeable {
     }
 
     public static PlayerIndexedDatabase open(Path path) throws IOException {
-        FileChannel channel = FileChannel.open(path, StandardOpenOption.CREATE, StandardOpenOption.READ, StandardOpenOption.WRITE);
-        Object2LongMap<UUID> pointers = buildPointerIndex(channel);
+        var channel = FileChannel.open(path, StandardOpenOption.CREATE, StandardOpenOption.READ, StandardOpenOption.WRITE);
+        var pointers = buildPointerIndex(channel);
         return new PlayerIndexedDatabase(channel, pointers);
     }
 
     private static Object2LongMap<UUID> buildPointerIndex(FileChannel channel) throws IOException {
         Object2LongMap<UUID> pointers = new Object2LongOpenHashMap<>();
 
-        ByteBuffer uuidBytes = ByteBuffer.allocate(16).order(BYTE_ORDER);
-        ByteBuffer sizeBytes = ByteBuffer.allocate(4).order(BYTE_ORDER);
-        LongBuffer uuidBuffer = uuidBytes.asLongBuffer();
-        IntBuffer sizeBuffer = sizeBytes.asIntBuffer();
+        var uuidBytes = ByteBuffer.allocate(16).order(BYTE_ORDER);
+        var sizeBytes = ByteBuffer.allocate(4).order(BYTE_ORDER);
+        var uuidBuffer = uuidBytes.asLongBuffer();
+        var sizeBuffer = sizeBytes.asIntBuffer();
 
         int pointer = 0;
 
@@ -73,7 +73,7 @@ public final class PlayerIndexedDatabase implements Closeable {
             channel.read(uuidBytes);
             channel.read(sizeBytes);
 
-            UUID uuid = new UUID(uuidBuffer.get(0), uuidBuffer.get(1));
+            var uuid = new UUID(uuidBuffer.get(0), uuidBuffer.get(1));
             int size = validateSize(sizeBuffer.get(0));
 
             pointers.put(uuid, pointer);
@@ -97,7 +97,7 @@ public final class PlayerIndexedDatabase implements Closeable {
         this.readToEnd(this.sizeBytes);
 
         int size = this.sizeBuffer.get(0);
-        ByteBuffer buffer = ByteBuffer.allocate(size).order(BYTE_ORDER);
+        var buffer = ByteBuffer.allocate(size).order(BYTE_ORDER);
         this.readToEnd(buffer);
 
         return buffer;
@@ -197,7 +197,7 @@ public final class PlayerIndexedDatabase implements Closeable {
         }
 
         // shift all pointers
-        for (Object2LongMap.Entry<UUID> entry : Object2LongMaps.fastIterable(this.pointers)) {
+        for (var entry : Object2LongMaps.fastIterable(this.pointers)) {
             long pointer = entry.getLongValue();
             if (pointer >= source) {
                 entry.setValue(pointer + amount);
@@ -206,7 +206,7 @@ public final class PlayerIndexedDatabase implements Closeable {
     }
 
     private void writeToEnd(ByteBuffer... buffers) throws IOException {
-        for (ByteBuffer buffer : buffers) {
+        for (var buffer : buffers) {
             this.writeToEnd(buffer);
         }
     }
@@ -235,7 +235,7 @@ public final class PlayerIndexedDatabase implements Closeable {
 
     private static void moveBytesForwards(FileChannel file, long source, long destination, long length) throws IOException {
         int bufferSize = Math.min(1024, (int) length);
-        ByteBuffer buffer = ByteBuffer.allocate(bufferSize).order(BYTE_ORDER);
+        var buffer = ByteBuffer.allocate(bufferSize).order(BYTE_ORDER);
 
         long backPointer = source + length;
         long offset = destination - source;
@@ -258,7 +258,7 @@ public final class PlayerIndexedDatabase implements Closeable {
 
     private static void moveBytesBackwards(FileChannel file, long source, long destination, long length) throws IOException {
         int bufferSize = Math.min(1024, (int) length);
-        ByteBuffer buffer = ByteBuffer.allocate(bufferSize).order(BYTE_ORDER);
+        var buffer = ByteBuffer.allocate(bufferSize).order(BYTE_ORDER);
 
         long frontPointer = source;
         long offset = destination - source;

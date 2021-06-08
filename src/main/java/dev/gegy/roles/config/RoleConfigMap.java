@@ -2,7 +2,6 @@ package dev.gegy.roles.config;
 
 import com.google.common.collect.Iterators;
 import com.mojang.datafixers.util.Pair;
-import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Dynamic;
 import dev.gegy.roles.Role;
 import dev.gegy.roles.override.RoleOverrideMap;
@@ -30,22 +29,22 @@ public final class RoleConfigMap implements Iterable<Pair<String, RoleConfig>> {
     }
 
     public static <T> RoleConfigMap parse(Dynamic<T> root, ConfigErrorConsumer error) {
-        List<Pair<Dynamic<T>, Dynamic<T>>> roleEntries = root.asMapOpt().result().orElse(Stream.empty())
+        var roleEntries = root.asMapOpt().result().orElse(Stream.empty())
                 .collect(Collectors.toList());
 
-        Builder roleBuilder = new Builder();
+        var roleBuilder = new Builder();
 
-        for (Pair<Dynamic<T>, Dynamic<T>> entry : roleEntries) {
-            String name = entry.getFirst().asString(Role.EVERYONE).toLowerCase(Locale.ROOT);
-            Dynamic<T> roleRoot = entry.getSecond();
+        for (var entry : roleEntries) {
+            var name = entry.getFirst().asString(Role.EVERYONE).toLowerCase(Locale.ROOT);
+            var roleRoot = entry.getSecond();
 
-            DataResult<RoleConfig> roleConfigResult = RoleConfig.CODEC.parse(roleRoot);
+            var roleConfigResult = RoleConfig.CODEC.parse(roleRoot);
             if (roleConfigResult.error().isPresent()) {
                 error.report("Failed to parse role config for '" + name + "'", roleConfigResult.error().get());
                 continue;
             }
 
-            RoleConfig role = roleConfigResult.result().get();
+            var role = roleConfigResult.result().get();
             roleBuilder.add(name, role);
         }
 
@@ -77,8 +76,8 @@ public final class RoleConfigMap implements Iterable<Pair<String, RoleConfig>> {
         }
 
         public RoleConfigMap build(ConfigErrorConsumer error) {
-            Map<String, RoleConfig> roles = this.roles;
-            List<String> order = this.sortRoles();
+            var roles = this.roles;
+            var order = this.sortRoles();
 
             roles = this.resolveIncludes(roles, order, error);
 
@@ -89,14 +88,14 @@ public final class RoleConfigMap implements Iterable<Pair<String, RoleConfig>> {
             Map<String, RoleConfig> result = new Object2ObjectOpenHashMap<>(roles.size());
 
             for (String name : order) {
-                RoleConfig role = roles.get(name);
+                var role = roles.get(name);
 
-                RoleOverrideMap resolvedOverrides = new RoleOverrideMap();
+                var resolvedOverrides = new RoleOverrideMap();
                 resolvedOverrides.addAll(role.overrides);
 
                 // add includes to our resolved overrides with lower priority than our own
-                for (String include : role.includes) {
-                    RoleConfig includeRole = result.get(include);
+                for (var include : role.includes) {
+                    var includeRole = result.get(include);
                     if (includeRole != null) {
                         resolvedOverrides.addAll(includeRole.overrides);
                     } else {
@@ -119,7 +118,7 @@ public final class RoleConfigMap implements Iterable<Pair<String, RoleConfig>> {
 
             Collections.reverse(roleOrder);
             roleOrder.sort(Comparator.comparingInt(name -> {
-                RoleConfig role = this.roles.get(name);
+                var role = this.roles.get(name);
                 return role.level;
             }));
 

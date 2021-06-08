@@ -20,7 +20,7 @@ public final class ServerRoleSet implements RoleWriter {
 
     private void rebuildOverrides() {
         this.overrides.clear();
-        for (Role role : this.roles) {
+        for (var role : this.roles) {
             this.overrides.addAll(role.getOverrides());
         }
     }

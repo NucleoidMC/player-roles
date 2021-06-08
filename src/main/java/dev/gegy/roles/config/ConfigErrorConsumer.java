@@ -10,7 +10,7 @@ public interface ConfigErrorConsumer {
     }
 
     default void report(String message, Throwable throwable) {
-        String throwableMessage = throwable.getMessage();
+        var throwableMessage = throwable.getMessage();
         if (throwableMessage != null) {
             this.report(message + ": " + throwableMessage);
         } else {

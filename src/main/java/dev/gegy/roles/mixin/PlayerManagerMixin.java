@@ -13,13 +13,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class PlayerManagerMixin {
     @Inject(method = "onPlayerConnect", at = @At("HEAD"))
     private void onPlayerConnect(ClientConnection connection, ServerPlayerEntity player, CallbackInfo ci) {
-        PlayerRoleManager roleManager = PlayerRoleManager.get();
+        var roleManager = PlayerRoleManager.get();
         roleManager.onPlayerJoin(player);
     }
 
     @Inject(method = "remove", at = @At("HEAD"))
     private void onPlayerDisconnect(ServerPlayerEntity player, CallbackInfo ci) {
-        PlayerRoleManager roleManager = PlayerRoleManager.get();
+        var roleManager = PlayerRoleManager.get();
         roleManager.onPlayerLeave(player);
     }
 }

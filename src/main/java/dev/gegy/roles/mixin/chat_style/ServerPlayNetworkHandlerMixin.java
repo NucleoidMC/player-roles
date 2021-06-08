@@ -2,8 +2,6 @@ package dev.gegy.roles.mixin.chat_style;
 
 import dev.gegy.roles.PlayerRoles;
 import dev.gegy.roles.api.PlayerRoleSource;
-import dev.gegy.roles.api.RoleReader;
-import dev.gegy.roles.override.ChatFormatOverride;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
@@ -23,9 +21,9 @@ public class ServerPlayNetworkHandlerMixin {
             at = @At(value = "STORE", ordinal = 0)
     )
     private Text formatChat(Text text, String message) {
-        if (this.player instanceof PlayerRoleSource) {
-            RoleReader roles = ((PlayerRoleSource) this.player).getPlayerRoles();
-            ChatFormatOverride chatStyle = roles.select(PlayerRoles.CHAT_STYLE);
+        if (this.player instanceof PlayerRoleSource roleSource) {
+            var roles = roleSource.getPlayerRoles();
+            var chatStyle = roles.select(PlayerRoles.CHAT_STYLE);
             if (chatStyle != null) {
                 return chatStyle.make(this.player.getDisplayName(), message);
             }

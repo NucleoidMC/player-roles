@@ -6,7 +6,7 @@ import dev.gegy.roles.store.PlayerRoleManager;
 import dev.gegy.roles.store.PlayerRoleSet;
 import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -35,8 +35,8 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity implements Pl
         return this.playerRoleSet;
     }
 
-    @Inject(method = "readCustomDataFromTag", at = @At("RETURN"))
-    private void readCustomDataFromTag(CompoundTag tag, CallbackInfo ci) {
+    @Inject(method = "readCustomDataFromNbt", at = @At("RETURN"))
+    private void readCustomDataFromTag(NbtCompound tag, CallbackInfo ci) {
         if (tag.contains("roles", NbtType.LIST)) {
             PlayerRoleManager.get().addLegacyRoles(this, tag.getList("roles", NbtType.STRING));
         }

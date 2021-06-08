@@ -21,7 +21,7 @@ public interface RoleReader {
     @Nullable <T> T select(RoleOverrideType<T> type);
 
     default boolean test(RoleOverrideType<Boolean> type) {
-        Boolean result = this.select(type);
+        var result = this.select(type);
         return result != null ? result : false;
     }
 }

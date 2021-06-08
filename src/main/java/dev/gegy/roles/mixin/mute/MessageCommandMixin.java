@@ -3,8 +3,6 @@ package dev.gegy.roles.mixin.mute;
 import com.mojang.brigadier.Command;
 import dev.gegy.roles.PlayerRoles;
 import dev.gegy.roles.api.PlayerRoleSource;
-import dev.gegy.roles.api.RoleReader;
-import net.minecraft.entity.Entity;
 import net.minecraft.server.command.MessageCommand;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -20,11 +18,11 @@ import java.util.Collection;
 public class MessageCommandMixin {
     @Inject(method = "execute", at = @At("HEAD"), cancellable = true)
     private static void execute(ServerCommandSource source, Collection<ServerPlayerEntity> targets, Text message, CallbackInfoReturnable<Integer> ci) {
-        Entity entity = source.getEntity();
-        if (entity instanceof PlayerRoleSource && entity instanceof ServerPlayerEntity) {
-            RoleReader roles = ((PlayerRoleSource) entity).getPlayerRoles();
+        var entity = source.getEntity();
+        if (entity instanceof PlayerRoleSource roleSource && entity instanceof ServerPlayerEntity player) {
+            var roles = roleSource.getPlayerRoles();
             if (roles.test(PlayerRoles.MUTE)) {
-                PlayerRoles.sendMuteFeedback((ServerPlayerEntity) entity);
+                PlayerRoles.sendMuteFeedback(player);
                 ci.setReturnValue(Command.SINGLE_SUCCESS);
             }
         }

@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 public final class CommandPermissionRules {
     private static final Codec<Pattern[]> PATTERN_CODEC = Codec.STRING.xmap(
             key -> {
-                String[] patternStrings = key.split(" ");
+                var patternStrings = key.split(" ");
                 return Arrays.stream(patternStrings).map(Pattern::compile).toArray(Pattern[]::new);
             },
             patterns -> {
@@ -23,7 +23,7 @@ public final class CommandPermissionRules {
 
     public static final Codec<CommandPermissionRules> CODEC = Codec.unboundedMap(PATTERN_CODEC, PermissionResult.CODEC)
             .xmap(map -> {
-                Builder rules = CommandPermissionRules.builder();
+                var rules = CommandPermissionRules.builder();
                 map.forEach(rules::add);
                 return rules.build();
             }, rules -> {
@@ -41,8 +41,8 @@ public final class CommandPermissionRules {
     }
 
     public PermissionResult test(MatchableCommand command) {
-        for (Rule rule : this.rules) {
-            PermissionResult result = rule.test(command);
+        for (var rule : this.rules) {
+            var result = rule.test(command);
             if (result.isDefinitive()) {
                 return result;
             }
@@ -68,20 +68,12 @@ public final class CommandPermissionRules {
 
         public CommandPermissionRules build() {
             this.rules.sort(Comparator.comparingInt(Rule::size).reversed());
-            Rule[] rules = this.rules.toArray(new Rule[0]);
+            var rules = this.rules.toArray(new Rule[0]);
             return new CommandPermissionRules(rules);
         }
     }
 
-    private static class Rule {
-        final Pattern[] patterns;
-        final PermissionResult result;
-
-        Rule(Pattern[] patterns, PermissionResult result) {
-            this.patterns = patterns;
-            this.result = result;
-        }
-
+    private record Rule(Pattern[] patterns, PermissionResult result) {
         PermissionResult test(MatchableCommand command) {
             if (this.result.isAllowed()) {
                 return command.matchesAllow(this.patterns) ? this.result : PermissionResult.PASS;

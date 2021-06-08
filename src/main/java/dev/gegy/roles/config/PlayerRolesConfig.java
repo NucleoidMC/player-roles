@@ -2,7 +2,6 @@ package dev.gegy.roles.config;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import com.mojang.datafixers.util.Pair;
@@ -14,9 +13,7 @@ import dev.gegy.roles.store.ServerRoleSet;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -48,7 +45,7 @@ public final class PlayerRolesConfig {
     }
 
     private ServerRoleSet buildRoles(Predicate<RoleApplyConfig> apply) {
-        ServerRoleSet roles = new ServerRoleSet();
+        var roles = new ServerRoleSet();
         this.roles.values().stream()
                 .filter(role -> apply.test(role.getApply()))
                 .forEach(roles::add);
@@ -61,7 +58,7 @@ public final class PlayerRolesConfig {
     }
 
     public static List<String> setup() {
-        Path path = Paths.get("config/roles.json");
+        var path = Paths.get("config/roles.json");
         if (!Files.exists(path)) {
             if (!createDefaultConfig(path)) {
                 return ImmutableList.of();
@@ -71,8 +68,8 @@ public final class PlayerRolesConfig {
         List<String> errors = new ArrayList<>();
         ConfigErrorConsumer errorConsumer = errors::add;
 
-        try (BufferedReader reader = Files.newBufferedReader(path)) {
-            JsonElement root = JSON.parse(reader);
+        try (var reader = Files.newBufferedReader(path)) {
+            var root = JSON.parse(reader);
             instance = parse(new Dynamic<>(JsonOps.INSTANCE, root), errorConsumer);
         } catch (IOException e) {
             errorConsumer.report("Failed to read roles.json configuration", e);
@@ -91,13 +88,13 @@ public final class PlayerRolesConfig {
                 Files.createDirectories(path.getParent());
             }
 
-            Path legacyPath = Paths.get("roles.json");
+            var legacyPath = Paths.get("roles.json");
             if (Files.exists(legacyPath)) {
                 Files.move(legacyPath, path);
                 return true;
             }
 
-            try (InputStream input = PlayerRoles.class.getResourceAsStream("/data/player-roles/default_roles.json")) {
+            try (var input = PlayerRoles.class.getResourceAsStream("/data/player-roles/default_roles.json")) {
                 Files.copy(input, path);
                 return true;
             }
@@ -108,9 +105,9 @@ public final class PlayerRolesConfig {
     }
 
     private static <T> PlayerRolesConfig parse(Dynamic<T> root, ConfigErrorConsumer error) {
-        RoleConfigMap roleConfigs = RoleConfigMap.parse(root, error);
+        var roleConfigs = RoleConfigMap.parse(root, error);
 
-        Role everyone = Role.empty(Role.EVERYONE);
+        var everyone = Role.empty(Role.EVERYONE);
         List<Role> roles = new ArrayList<>();
 
         int level = 1;
@@ -139,7 +136,7 @@ public final class PlayerRolesConfig {
     }
 
     public ServerRoleSet getCommandBlockRoles() {
-        ServerRoleSet commandBlockRoles = this.commandBlockRoles;
+        var commandBlockRoles = this.commandBlockRoles;
         if (commandBlockRoles == null) {
             this.commandBlockRoles = commandBlockRoles = this.buildRoles(apply -> apply.commandBlock);
         }
@@ -147,7 +144,7 @@ public final class PlayerRolesConfig {
     }
 
     public ServerRoleSet getFunctionRoles() {
-        ServerRoleSet functionRoles = this.functionRoles;
+        var functionRoles = this.functionRoles;
         if (functionRoles == null) {
             this.functionRoles = functionRoles = this.buildRoles(apply -> apply.functions);
         }

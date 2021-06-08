@@ -27,46 +27,29 @@ public enum PermissionResult implements StringIdentifiable {
     }
 
     public static PermissionResult byName(String name) {
-        switch (name.toLowerCase(Locale.ROOT)) {
-            case "allow":
-            case "yes":
-            case "true":
-                return PermissionResult.ALLOW;
-            case "deny":
-            case "no":
-            case "false":
-                return PermissionResult.DENY;
-            case "hidden":
-            case "hide":
-                return PermissionResult.HIDDEN;
-            case "pass":
-            default:
-                return PermissionResult.PASS;
-        }
+        return switch (name.toLowerCase(Locale.ROOT)) {
+            case "allow", "yes", "true" -> PermissionResult.ALLOW;
+            case "deny", "no", "false" -> PermissionResult.DENY;
+            case "hidden", "hide" -> PermissionResult.HIDDEN;
+            default -> PermissionResult.PASS;
+        };
     }
 
     public TriState asTriState() {
-        switch (this) {
-            case ALLOW:
-            case HIDDEN:
-                return TriState.TRUE;
-            case DENY:
-                return TriState.FALSE;
-            case PASS:
-            default:
-                return TriState.DEFAULT;
-        }
+        return switch (this) {
+            case ALLOW, HIDDEN -> TriState.TRUE;
+            case DENY -> TriState.FALSE;
+            default -> TriState.DEFAULT;
+        };
     }
 
     @Override
     public String asString() {
-        switch (this) {
-            case ALLOW: return "allow";
-            case DENY: return "deny";
-            case HIDDEN: return "hidden";
-            case PASS:
-            default:
-                return "pass";
-        }
+        return switch (this) {
+            case ALLOW -> "allow";
+            case DENY -> "deny";
+            case HIDDEN -> "hidden";
+            default -> "pass";
+        };
     }
 }

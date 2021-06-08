@@ -7,7 +7,6 @@ import net.minecraft.text.Text;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public final class ChatFormatOverride {
@@ -31,12 +30,12 @@ public final class ChatFormatOverride {
     }
 
     private static Object[] parseFormat(String formatString) {
-        Parser parser = new Parser();
+        var parser = new Parser();
 
         int lastIdx = 0;
         int currentArgumentIdx = 0;
 
-        Matcher argumentMatcher = ARGUMENT_PATTERN.matcher(formatString);
+        var argumentMatcher = ARGUMENT_PATTERN.matcher(formatString);
         while (argumentMatcher.find(lastIdx)) {
             int argumentStart = argumentMatcher.start();
             int argumentEnd = argumentMatcher.end();
@@ -45,8 +44,8 @@ public final class ChatFormatOverride {
                 parser.add(formatString.substring(lastIdx, argumentStart));
             }
 
-            String index = argumentMatcher.group(1);
-            String type = argumentMatcher.group(2);
+            var index = argumentMatcher.group(1);
+            var type = argumentMatcher.group(2);
             if (type.equals("s")) {
                 int argumentIdx;
                 if ("1".equals(index)) {
@@ -76,8 +75,8 @@ public final class ChatFormatOverride {
     }
 
     public Text make(Text name, String content) {
-        Builder builder = this.builder;
-        for (Object format : this.format) {
+        var builder = this.builder;
+        for (var format : this.format) {
             if (format == NAME_MARKER) {
                 builder.pushText(name);
             } else if (format == CONTENT_MARKER) {
@@ -103,9 +102,9 @@ public final class ChatFormatOverride {
         }
 
         private void flushStringBuilder() {
-            StringBuilder builder = this.builder;
+            var builder = this.builder;
             if (builder.length() > 0) {
-                MutableText text = new LiteralText(builder.toString());
+                var text = new LiteralText(builder.toString());
                 builder.setLength(0);
                 this.appendText(text);
             }
@@ -122,7 +121,7 @@ public final class ChatFormatOverride {
         MutableText get() {
             this.flushStringBuilder();
 
-            MutableText result = this.result;
+            var result = this.result;
             this.result = null;
             this.builder.setLength(0);
             return result;

@@ -18,11 +18,11 @@ public final class NameStyleOverride {
                 TextColor color = null;
 
                 for (String formatKey : formatKeys) {
-                    Formatting format = Formatting.byName(formatKey);
+                    var format = Formatting.byName(formatKey);
                     if (format != null) {
                         formats.add(format);
                     } else {
-                        TextColor parsedColor = TextColor.parse(formatKey);
+                        var parsedColor = TextColor.parse(formatKey);
                         if (parsedColor != null) {
                             color = parsedColor;
                         }
@@ -37,7 +37,7 @@ public final class NameStyleOverride {
                     formatKeys.add(override.color.getName());
                 }
 
-                for (Formatting format : override.formats) {
+                for (var format : override.formats) {
                     formatKeys.add(format.getName());
                 }
 

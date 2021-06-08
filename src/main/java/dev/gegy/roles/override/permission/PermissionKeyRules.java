@@ -18,8 +18,8 @@ public final class PermissionKeyRules {
                 return rules.build();
             },
             override -> {
-                Map<String, PermissionResult> map = new HashMap<>(override.exactPermissions);
-                for (KeyMatcher keyMatcher : override.keyMatchers) {
+                var map = new HashMap<>(override.exactPermissions);
+                for (var keyMatcher : override.keyMatchers) {
                     map.put(keyMatcher.asPattern(), keyMatcher.result);
                 }
                 return map;
@@ -39,13 +39,13 @@ public final class PermissionKeyRules {
     }
 
     public PermissionResult test(String permission) {
-        PermissionResult result = this.exactPermissions.get(permission);
+        var result = this.exactPermissions.get(permission);
         if (result != null) {
             return result;
         }
 
-        String[] tokens = permission.split("\\.");
-        for (KeyMatcher matcher : this.keyMatchers) {
+        var tokens = permission.split("\\.");
+        for (var matcher : this.keyMatchers) {
             result = matcher.test(tokens);
             if (result != null) {
                 return result;
@@ -87,13 +87,13 @@ public final class PermissionKeyRules {
 
         @Nullable
         PermissionResult test(String[] tokens) {
-            String[] pattern = this.pattern;
+            var pattern = this.pattern;
             int patternIdx = 0;
             String endWildcard = null;
 
-            for (String token : tokens) {
+            for (var token : tokens) {
                 if (endWildcard == null) {
-                    String match = pattern[patternIdx];
+                    var match = pattern[patternIdx];
                     if (match.equals("*")) {
                         if (++patternIdx < pattern.length) {
                             endWildcard = pattern[patternIdx];

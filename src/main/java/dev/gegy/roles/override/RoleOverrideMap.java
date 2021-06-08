@@ -34,7 +34,7 @@ public final class RoleOverrideMap {
     }
 
     public void notifyChange(PlayerRoleSource owner) {
-        for (RoleOverrideType<?> override : this.overrides.keySet()) {
+        for (var override : this.overrides.keySet()) {
             override.notifyChange(owner);
         }
     }
@@ -56,13 +56,13 @@ public final class RoleOverrideMap {
     }
 
     public <T> PermissionResult test(RoleOverrideType<T> type, Function<T, PermissionResult> function) {
-        Collection<T> overrides = this.getOrNull(type);
+        var overrides = this.getOrNull(type);
         if (overrides == null) {
             return PermissionResult.PASS;
         }
 
-        for (T override : overrides) {
-            PermissionResult result = function.apply(override);
+        for (var override : overrides) {
+            var result = function.apply(override);
             if (result.isDefinitive()) {
                 return result;
             }
@@ -73,9 +73,9 @@ public final class RoleOverrideMap {
 
     @Nullable
     public <T> T select(RoleOverrideType<T> type) {
-        Collection<T> overrides = this.getOrNull(type);
+        var overrides = this.getOrNull(type);
         if (overrides != null) {
-            for (T override : overrides) {
+            for (var override : overrides) {
                 return override;
             }
         }
@@ -87,7 +87,7 @@ public final class RoleOverrideMap {
     }
 
     public void addAll(RoleOverrideMap map) {
-        for (RoleOverrideType<?> type : map.keySet()) {
+        for (var type : map.keySet()) {
             this.addAllUnchecked(type, map.get(type));
         }
     }

@@ -2,24 +2,23 @@ package dev.gegy.roles;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.serialization.Codec;
+import dev.gegy.roles.api.PermissionResult;
 import dev.gegy.roles.api.override.RoleOverrideType;
 import dev.gegy.roles.command.RoleCommand;
 import dev.gegy.roles.config.PlayerRolesConfig;
 import dev.gegy.roles.override.ChatFormatOverride;
 import dev.gegy.roles.override.NameStyleOverride;
-import dev.gegy.roles.override.command.CommandPermissionOverride;
-import dev.gegy.roles.override.permission.PermissionKeyOverride;
 import dev.gegy.roles.override.command.CommandPermissionEvaluator;
+import dev.gegy.roles.override.command.CommandPermissionOverride;
 import dev.gegy.roles.override.command.CommandRequirementHooks;
 import dev.gegy.roles.override.command.CommandTestContext;
 import dev.gegy.roles.override.command.MatchableCommand;
-import dev.gegy.roles.api.PermissionResult;
+import dev.gegy.roles.override.permission.PermissionKeyOverride;
 import dev.gegy.roles.store.PlayerRoleManager;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
@@ -27,17 +26,14 @@ import net.minecraft.util.Formatting;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.List;
-
 public final class PlayerRoles implements ModInitializer {
     public static final String ID = "player_roles";
     public static final Logger LOGGER = LogManager.getLogger(ID);
 
     public static final RoleOverrideType<CommandPermissionOverride> COMMANDS = RoleOverrideType.register("commands", CommandPermissionOverride.CODEC)
             .withChangeListener(owner -> {
-                if (owner instanceof ServerPlayerEntity) {
-                    ServerPlayerEntity player = (ServerPlayerEntity) owner;
-                    MinecraftServer server = player.getServer();
+                if (owner instanceof ServerPlayerEntity player) {
+                    var server = player.getServer();
                     if (server != null) {
                         server.getCommandManager().sendCommandTree(player);
                     }
@@ -54,10 +50,10 @@ public final class PlayerRoles implements ModInitializer {
 
     @Override
     public void onInitialize() {
-        List<String> errors = PlayerRolesConfig.setup();
+        var errors = PlayerRolesConfig.setup();
         if (!errors.isEmpty()) {
             LOGGER.warn("Failed to load player-roles config! ({} errors)", errors.size());
-            for (String error : errors) {
+            for (var error : errors) {
                 LOGGER.warn(" - {}", error);
             }
         }
@@ -93,10 +89,10 @@ public final class PlayerRoles implements ModInitializer {
     private void hookCommands(CommandDispatcher<ServerCommandSource> dispatcher) {
         try {
             CommandRequirementHooks<ServerCommandSource> hooks = CommandRequirementHooks.tryCreate((nodes, existing) -> {
-                MatchableCommand command = MatchableCommand.compile(nodes);
+                var command = MatchableCommand.compile(nodes);
 
                 return source -> {
-                    PermissionResult result = CommandPermissionEvaluator.canUseCommand(source, command);
+                    var result = CommandPermissionEvaluator.canUseCommand(source, command);
                     if (result == PermissionResult.ALLOW) return true;
                     if (result == PermissionResult.DENY) return false;
                     if (result == PermissionResult.HIDDEN) return !CommandTestContext.isSuggesting();

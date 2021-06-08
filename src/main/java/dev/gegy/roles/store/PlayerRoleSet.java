@@ -8,8 +8,8 @@ import dev.gegy.roles.api.PlayerRoleSource;
 import dev.gegy.roles.api.RoleWriter;
 import dev.gegy.roles.override.RoleOverrideMap;
 import dev.gegy.roles.api.override.RoleOverrideType;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.NbtList;
+import net.minecraft.nbt.NbtString;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.jetbrains.annotations.Nullable;
 
@@ -66,7 +66,7 @@ public final class PlayerRoleSet implements RoleWriter {
 
     @Override
     public Stream<Role> stream() {
-        PlayerRolesConfig roleConfig = PlayerRolesConfig.get();
+        var roleConfig = PlayerRolesConfig.get();
         return Stream.concat(
                 this.roles.stream(),
                 Stream.of(roleConfig.everyone())
@@ -94,21 +94,21 @@ public final class PlayerRoleSet implements RoleWriter {
         return this.overrides.select(type);
     }
 
-    public ListTag serialize() {
-        ListTag list = new ListTag();
-        for (Role role : this.roles) {
-            list.add(StringTag.of(role.getName()));
+    public NbtList serialize() {
+        var list = new NbtList();
+        for (var role : this.roles) {
+            list.add(NbtString.of(role.getName()));
         }
         return list;
     }
 
-    public void deserialize(ListTag list) {
-        PlayerRolesConfig config = PlayerRolesConfig.get();
+    public void deserialize(NbtList list) {
+        var config = PlayerRolesConfig.get();
 
         this.roles.clear();
         for (int i = 0; i < list.size(); i++) {
-            String name = list.getString(i);
-            Role role = config.get(name);
+            var name = list.getString(i);
+            var role = config.get(name);
             if (role == null || name.equalsIgnoreCase(Role.EVERYONE)) {
                 this.dirty = true;
                 PlayerRoles.LOGGER.warn("Encountered invalid role '{}'", name);

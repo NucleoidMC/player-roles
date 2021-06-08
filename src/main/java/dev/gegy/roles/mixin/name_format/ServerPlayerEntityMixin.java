@@ -4,9 +4,7 @@ import com.mojang.authlib.GameProfile;
 import dev.gegy.roles.PlayerRoles;
 import dev.gegy.roles.api.PlayerRoleSource;
 import dev.gegy.roles.mixin.TeamAccessor;
-import dev.gegy.roles.override.NameStyleOverride;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.scoreboard.AbstractTeam;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -22,11 +20,11 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity implements Pl
 
     @Override
     public Text getDisplayName() {
-        Text displayName = super.getDisplayName();
+        var displayName = super.getDisplayName();
 
-        AbstractTeam team = this.getScoreboardTeam();
+        var team = this.getScoreboardTeam();
         if (team == null || ((TeamAccessor) team).getFormattingColor() == Formatting.RESET) {
-            NameStyleOverride nameFormat = this.getPlayerRoles().select(PlayerRoles.NAME_FORMAT);
+            var nameFormat = this.getPlayerRoles().select(PlayerRoles.NAME_FORMAT);
             if (nameFormat != null) {
                 displayName = nameFormat.apply(displayName.shallowCopy());
             }

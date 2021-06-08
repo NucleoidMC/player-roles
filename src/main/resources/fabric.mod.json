@@ -11,9 +11,11 @@
     "main": ["dev.gegy.roles.PlayerRoles"]
   },
   "mixins": ["roles.mixins.json"],
+  "compatibilityLevel": "JAVA_16",
   "depends": {
-    "fabricloader": ">=0.8.9",
-    "fabric": "*",
-    "minecraft": "1.16.x"
+    "fabricloader": ">=0.11",
+    "fabric": ">=0.34",
+    "minecraft": "1.17.x",
+    "java": ">=16"
   }
 }

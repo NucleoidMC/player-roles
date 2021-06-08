@@ -9,7 +9,6 @@ import dev.gegy.roles.PlayerRoles;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 
@@ -25,34 +24,34 @@ public final class CommandRequirementHooks<S> {
     }
 
     public static <S> CommandRequirementHooks<S> tryCreate(RequirementOverride<S> override) throws ReflectiveOperationException {
-        Field requirementField = CommandNode.class.getDeclaredField("requirement");
+        var requirementField = CommandNode.class.getDeclaredField("requirement");
         requirementField.setAccessible(true);
         return new CommandRequirementHooks<>(override, requirementField);
     }
 
     @SuppressWarnings("unchecked")
     public void hookAll(CommandDispatcher<S> dispatcher) {
-        Collection<CommandNode<S>> nodes = dispatcher.getRoot().getChildren();
+        var nodes = dispatcher.getRoot().getChildren();
 
         Multimap<CommandNode<S>, Predicate<S>> overrides = HashMultimap.create();
         BiConsumer<CommandNode<S>, Predicate<S>> override = overrides::put;
 
-        for (CommandNode<S> node : nodes) {
+        for (var node : nodes) {
             this.collectRecursive(new CommandNode[] { node }, override);
         }
 
-        for (CommandNode<S> node : overrides.keySet()) {
-            Collection<Predicate<S>> requirements = overrides.get(node);
+        for (var node : overrides.keySet()) {
+            var requirements = overrides.get(node);
 
-            Predicate<S> requirement = this.anyRequirement(requirements.toArray(new Predicate[0]));
+            var requirement = this.anyRequirement(requirements.toArray(new Predicate[0]));
             this.setRequirement(node, requirement);
         }
     }
 
     private void collectRecursive(CommandNode<S>[] nodes, BiConsumer<CommandNode<S>, Predicate<S>> override) {
         if (nodes.length >= MAX_CHAIN_LENGTH) {
-            StringBuilder chain = new StringBuilder();
-            for (CommandNode<S> node : nodes) {
+            var chain = new StringBuilder();
+            for (var node : nodes) {
                 chain.append(node.getName()).append(" ");
             }
 
@@ -61,18 +60,18 @@ public final class CommandRequirementHooks<S> {
             return;
         }
 
-        CommandNode<S> tail = nodes[nodes.length - 1];
-        Collection<CommandNode<S>> children = tail.getChildren();
+        var tail = nodes[nodes.length - 1];
+        var children = tail.getChildren();
 
-        Predicate<S> requirement = this.createRequirementFor(nodes);
+        var requirement = this.createRequirementFor(nodes);
         override.accept(tail, requirement);
 
-        CommandNode<S> redirect = tail.getRedirect();
+        var redirect = tail.getRedirect();
         if (redirect != null && children.isEmpty() && this.canRedirectTo(nodes, redirect)) {
-            CommandNode<S>[] redirectNodes = Arrays.copyOf(nodes, nodes.length);
+            var redirectNodes = Arrays.copyOf(nodes, nodes.length);
             redirectNodes[redirectNodes.length - 1] = redirect;
 
-            Predicate<S> redirectRequirement = this.createRequirementFor(redirectNodes);
+            var redirectRequirement = this.createRequirementFor(redirectNodes);
 
             // set our override on the redirect, and set the redirect override on us
             override.accept(tail, redirectRequirement);
@@ -82,12 +81,12 @@ public final class CommandRequirementHooks<S> {
             children = redirect.getChildren();
         }
 
-        for (CommandNode<S> child : children) {
+        for (var child : children) {
             if (this.isChildRecursive(nodes, child)) {
                 continue;
             }
 
-            CommandNode<S>[] childNodes = Arrays.copyOf(nodes, nodes.length + 1);
+            var childNodes = Arrays.copyOf(nodes, nodes.length + 1);
             childNodes[childNodes.length - 1] = child;
             this.collectRecursive(childNodes, override);
         }
@@ -104,7 +103,7 @@ public final class CommandRequirementHooks<S> {
     }
 
     private boolean isChildRecursive(CommandNode<S>[] nodes, CommandNode<S> child) {
-        for (CommandNode<S> node : nodes) {
+        for (var node : nodes) {
             if (node == child) {
                 return true;
             }
@@ -113,15 +112,15 @@ public final class CommandRequirementHooks<S> {
     }
 
     private Predicate<S> createRequirementFor(CommandNode<S>[] nodes) {
-        Predicate<S> chainRequirements = this.requirementForChain(nodes);
+        var chainRequirements = this.requirementForChain(nodes);
         return this.override.apply(nodes, chainRequirements);
     }
 
     @SuppressWarnings("unchecked")
     private Predicate<S> requirementForChain(CommandNode<S>[] nodes) {
-        Predicate<S>[] requirementTree = new Predicate[nodes.length];
+        var requirementTree = new Predicate[nodes.length];
         for (int i = 0; i < nodes.length; i++) {
-            CommandNode<S> node = nodes[i];
+            var node = nodes[i];
             requirementTree[i] = node.getRequirement();
         }
 
@@ -136,7 +135,7 @@ public final class CommandRequirementHooks<S> {
         }
 
         return s -> {
-            for (Predicate<S> requirement : requirements) {
+            for (var requirement : requirements) {
                 if (requirement.test(s)) {
                     return true;
                 }
@@ -153,7 +152,7 @@ public final class CommandRequirementHooks<S> {
         }
 
         return s -> {
-            for (Predicate<S> requirement : requirements) {
+            for (var requirement : requirements) {
                 if (!requirement.test(s)) {
                     return false;
                 }
