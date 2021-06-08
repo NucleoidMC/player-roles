@@ -1,9 +1,8 @@
 package dev.gegy.roles.mixin.mute;
 
 import dev.gegy.roles.PlayerRoles;
-import dev.gegy.roles.api.RoleOwner;
+import dev.gegy.roles.api.PlayerRoleSource;
 import dev.gegy.roles.api.RoleReader;
-import dev.gegy.roles.override.RoleOverrideType;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.spongepowered.asm.mixin.Mixin;
@@ -27,9 +26,9 @@ public class ServerPlayNetworkHandlerMixin {
             cancellable = true
     )
     private void broadcastMessage(String message, CallbackInfo ci) {
-        if (this.player instanceof RoleOwner) {
-            RoleReader roles = (RoleOwner) this.player;
-            if (roles.test(RoleOverrideType.MUTE)) {
+        if (this.player instanceof PlayerRoleSource) {
+            RoleReader roles = ((PlayerRoleSource) this.player).getPlayerRoles();
+            if (roles.test(PlayerRoles.MUTE)) {
                 PlayerRoles.sendMuteFeedback(this.player);
                 ci.cancel();
             }

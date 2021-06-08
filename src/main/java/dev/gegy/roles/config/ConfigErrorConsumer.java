@@ -1,8 +1,8 @@
-package dev.gegy.roles;
+package dev.gegy.roles.config;
 
 import com.mojang.serialization.DataResult;
 
-public interface ErrorConsumer {
+public interface ConfigErrorConsumer {
     void report(String message);
 
     default void report(String message, DataResult.PartialResult<?> error) {

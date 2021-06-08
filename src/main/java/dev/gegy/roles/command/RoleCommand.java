@@ -8,9 +8,9 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
-import dev.gegy.roles.PlayerRolesConfig;
+import dev.gegy.roles.config.PlayerRolesConfig;
 import dev.gegy.roles.Role;
-import dev.gegy.roles.api.RoleOwner;
+import dev.gegy.roles.api.PlayerRoleSource;
 import dev.gegy.roles.api.RoleReader;
 import dev.gegy.roles.override.command.CommandPermissionEvaluator;
 import dev.gegy.roles.store.PlayerRoleManager;
@@ -130,9 +130,8 @@ public final class RoleCommand {
 
             List<ServerPlayerEntity> players = server.getPlayerManager().getPlayerList();
             for (ServerPlayerEntity entity : players) {
-                if (entity instanceof RoleOwner) {
-                    PlayerRoleSet roles = ((RoleOwner) entity).getRoles();
-                    roles.notifyReload();
+                if (entity instanceof PlayerRoleSource) {
+                    ((PlayerRoleSource) entity).notifyPlayerRoleReload();
                 }
             }
 
@@ -181,8 +180,8 @@ public final class RoleCommand {
         Entity entity = source.getEntity();
         if (entity == null || CommandPermissionEvaluator.doesBypassPermissions(source)) return Integer.MAX_VALUE;
 
-        if (entity instanceof RoleOwner) {
-            RoleReader roles = ((RoleOwner) entity).getRoles();
+        if (entity instanceof PlayerRoleSource) {
+            RoleReader roles = ((PlayerRoleSource) entity).getPlayerRoles();
             IntStream levels = roles.stream().mapToInt(Role::getLevel);
             return levels.max().orElse(0);
         }

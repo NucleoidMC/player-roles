@@ -1,8 +1,7 @@
 package dev.gegy.roles.override;
 
-import dev.gegy.roles.api.RoleOwner;
-import org.jetbrains.annotations.Nullable;
+import dev.gegy.roles.api.PlayerRoleSource;
 
 public interface RoleChangeListener {
-    void notifyChange(@Nullable RoleOwner entity);
+    void notifyChange(PlayerRoleSource owner);
 }

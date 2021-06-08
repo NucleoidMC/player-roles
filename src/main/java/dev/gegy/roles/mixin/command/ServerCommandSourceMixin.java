@@ -1,9 +1,9 @@
-package dev.gegy.roles.mixin;
+package dev.gegy.roles.mixin.command;
 
 import com.mojang.authlib.GameProfile;
+import dev.gegy.roles.PlayerRoles;
+import dev.gegy.roles.api.PlayerRoleSource;
 import dev.gegy.roles.api.RoleReader;
-import dev.gegy.roles.api.RoleOwner;
-import dev.gegy.roles.override.RoleOverrideType;
 import net.minecraft.server.PlayerManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -26,9 +26,9 @@ public class ServerCommandSourceMixin {
         }
 
         ServerPlayerEntity player = playerManager.getPlayer(profile.getId());
-        if (player instanceof RoleOwner) {
-            RoleReader roles = (RoleOwner) player;
-            return roles.test(RoleOverrideType.COMMAND_FEEDBACK);
+        if (player instanceof PlayerRoleSource) {
+            RoleReader roles = ((PlayerRoleSource) player).getPlayerRoles();
+            return roles.test(PlayerRoles.COMMAND_FEEDBACK);
         }
 
         return false;

@@ -4,18 +4,19 @@
   "package": "dev.gegy.roles.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "CommandDispatcherMixin",
-    "CommandManagerMixin",
-    "FormatServerPlayNetworkHandlerMixin",
-    "MinecraftServerMixin",
     "PlayerManagerMixin",
     "ServerCommandSourceAccessor",
-    "ServerCommandSourceMixin",
     "ServerPlayerEntityMixin",
     "TeamAccessor",
+    "chat_style.ServerPlayNetworkHandlerMixin",
+    "command.CommandDispatcherMixin",
+    "command.CommandManagerMixin",
+    "command.ServerCommandSourceMixin",
     "mute.MessageCommandMixin",
     "mute.ServerPlayNetworkHandlerMixin",
-    "mute.TeamMsgCommandMixin"
+    "mute.TeamMsgCommandMixin",
+    "name_format.ServerPlayerEntityMixin",
+    "permission_level.MinecraftServerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

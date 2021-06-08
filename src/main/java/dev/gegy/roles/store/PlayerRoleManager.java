@@ -1,6 +1,6 @@
 package dev.gegy.roles.store;
 
-import dev.gegy.roles.api.RoleOwner;
+import dev.gegy.roles.api.PlayerRoleSource;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.nbt.CompoundTag;
@@ -63,13 +63,13 @@ public final class PlayerRoleManager {
     }
 
     public void onPlayerJoin(ServerPlayerEntity player) {
-        RoleOwner roleOwner = (RoleOwner) player;
-        this.loadRolesInto(player.getUuid(), roleOwner.getRoles());
+        PlayerRoleSource roleOwner = (PlayerRoleSource) player;
+        this.loadRolesInto(player.getUuid(), roleOwner.getPlayerRoles());
     }
 
     public void onPlayerLeave(ServerPlayerEntity player) {
-        RoleOwner roleOwner = (RoleOwner) player;
-        PlayerRoleSet roles = roleOwner.getRoles();
+        PlayerRoleSource roleOwner = (PlayerRoleSource) player;
+        PlayerRoleSet roles = roleOwner.getPlayerRoles();
         if (roles.isDirty()) {
             try {
                 this.saveRoles(player.getUuid(), roles);
@@ -132,16 +132,16 @@ public final class PlayerRoleManager {
         }
     }
 
-    public void addLegacyRoles(RoleOwner owner, ListTag nbt) {
-        PlayerRoleSet roles = owner.getRoles();
+    public void addLegacyRoles(PlayerRoleSource owner, ListTag nbt) {
+        PlayerRoleSet roles = owner.getPlayerRoles();
         roles.deserialize(nbt);
         roles.setDirty(true);
     }
 
     public <R> R updateRoles(MinecraftServer server, UUID uuid, Function<PlayerRoleSet, R> update) {
-        RoleOwner roleOwner = getRoleOwner(server, uuid);
+        PlayerRoleSource roleOwner = getRoleOwner(server, uuid);
         if (roleOwner != null) {
-            return update.apply(roleOwner.getRoles());
+            return update.apply(roleOwner.getPlayerRoles());
         } else {
             PlayerRoleSet roles = new PlayerRoleSet(null);
             this.loadRolesInto(uuid, roles);
@@ -161,9 +161,9 @@ public final class PlayerRoleManager {
     }
 
     public PlayerRoleSet peekRoles(MinecraftServer server, UUID uuid) {
-        RoleOwner roleOwner = getRoleOwner(server, uuid);
+        PlayerRoleSource roleOwner = getRoleOwner(server, uuid);
         if (roleOwner != null) {
-            return roleOwner.getRoles();
+            return roleOwner.getPlayerRoles();
         } else {
             PlayerRoleSet roles = new PlayerRoleSet(null);
             this.loadRolesInto(uuid, roles);
@@ -172,8 +172,8 @@ public final class PlayerRoleManager {
     }
 
     @Nullable
-    private static RoleOwner getRoleOwner(MinecraftServer server, UUID uuid) {
+    private static PlayerRoleSource getRoleOwner(MinecraftServer server, UUID uuid) {
         ServerPlayerEntity player = server.getPlayerManager().getPlayer(uuid);
-        return (RoleOwner) player;
+        return (PlayerRoleSource) player;
     }
 }

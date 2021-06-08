@@ -1,4 +1,4 @@
-package dev.gegy.roles.mixin;
+package dev.gegy.roles.mixin.command;
 
 import dev.gegy.roles.override.command.CommandTestContext;
 import net.minecraft.server.command.CommandManager;

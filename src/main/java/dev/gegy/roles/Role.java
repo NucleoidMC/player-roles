@@ -1,5 +1,6 @@
 package dev.gegy.roles;
 
+import dev.gegy.roles.config.RoleApplyConfig;
 import dev.gegy.roles.override.RoleOverrideMap;
 
 public final class Role implements Comparable<Role> {
@@ -10,7 +11,7 @@ public final class Role implements Comparable<Role> {
     private final int level;
     private final RoleApplyConfig apply;
 
-    Role(String name, RoleOverrideMap overrides, int level, RoleApplyConfig apply) {
+    public Role(String name, RoleOverrideMap overrides, int level, RoleApplyConfig apply) {
         this.name = name;
         this.overrides = overrides;
         this.level = level;

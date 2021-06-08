@@ -1,9 +1,10 @@
-package dev.gegy.roles;
+package dev.gegy.roles.config;
 
 import com.google.common.collect.Iterators;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Dynamic;
+import dev.gegy.roles.Role;
 import dev.gegy.roles.override.RoleOverrideMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.jetbrains.annotations.NotNull;
@@ -28,7 +29,7 @@ public final class RoleConfigMap implements Iterable<Pair<String, RoleConfig>> {
         this.roleOrder = roleOrder;
     }
 
-    public static <T> RoleConfigMap parse(Dynamic<T> root, ErrorConsumer error) {
+    public static <T> RoleConfigMap parse(Dynamic<T> root, ConfigErrorConsumer error) {
         List<Pair<Dynamic<T>, Dynamic<T>>> roleEntries = root.asMapOpt().result().orElse(Stream.empty())
                 .collect(Collectors.toList());
 
@@ -75,7 +76,7 @@ public final class RoleConfigMap implements Iterable<Pair<String, RoleConfig>> {
             return this;
         }
 
-        public RoleConfigMap build(ErrorConsumer error) {
+        public RoleConfigMap build(ConfigErrorConsumer error) {
             Map<String, RoleConfig> roles = this.roles;
             List<String> order = this.sortRoles();
 
@@ -84,7 +85,7 @@ public final class RoleConfigMap implements Iterable<Pair<String, RoleConfig>> {
             return new RoleConfigMap(roles, order);
         }
 
-        private Map<String, RoleConfig> resolveIncludes(Map<String, RoleConfig> roles, List<String> order, ErrorConsumer error) {
+        private Map<String, RoleConfig> resolveIncludes(Map<String, RoleConfig> roles, List<String> order, ConfigErrorConsumer error) {
             Map<String, RoleConfig> result = new Object2ObjectOpenHashMap<>(roles.size());
 
             for (String name : order) {

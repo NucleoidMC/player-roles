@@ -1,7 +1,13 @@
 package dev.gegy.roles;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.serialization.Codec;
+import dev.gegy.roles.api.override.RoleOverrideType;
 import dev.gegy.roles.command.RoleCommand;
+import dev.gegy.roles.config.PlayerRolesConfig;
+import dev.gegy.roles.override.ChatFormatOverride;
+import dev.gegy.roles.override.NameStyleOverride;
+import dev.gegy.roles.override.command.CommandPermissionOverride;
 import dev.gegy.roles.override.permission.PermissionKeyOverride;
 import dev.gegy.roles.override.command.CommandPermissionEvaluator;
 import dev.gegy.roles.override.command.CommandRequirementHooks;
@@ -13,6 +19,7 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
@@ -25,6 +32,23 @@ import java.util.List;
 public final class PlayerRoles implements ModInitializer {
     public static final String ID = "player_roles";
     public static final Logger LOGGER = LogManager.getLogger(ID);
+
+    public static final RoleOverrideType<CommandPermissionOverride> COMMANDS = RoleOverrideType.register("commands", CommandPermissionOverride.CODEC)
+            .withChangeListener(owner -> {
+                if (owner instanceof ServerPlayerEntity) {
+                    ServerPlayerEntity player = (ServerPlayerEntity) owner;
+                    MinecraftServer server = player.getServer();
+                    if (server != null) {
+                        server.getCommandManager().sendCommandTree(player);
+                    }
+                }
+            });
+
+    public static final RoleOverrideType<ChatFormatOverride> CHAT_STYLE = RoleOverrideType.register("chat_format", ChatFormatOverride.CODEC);
+    public static final RoleOverrideType<NameStyleOverride> NAME_FORMAT = RoleOverrideType.register("name_style", NameStyleOverride.CODEC);
+    public static final RoleOverrideType<Boolean> COMMAND_FEEDBACK = RoleOverrideType.register("command_feedback", Codec.BOOL);
+    public static final RoleOverrideType<Boolean> MUTE = RoleOverrideType.register("mute", Codec.BOOL);
+    public static final RoleOverrideType<Integer> PERMISSION_LEVEL = RoleOverrideType.register("permission_level", Codec.intRange(0, 4));
 
     private static boolean registered;
 

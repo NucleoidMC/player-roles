@@ -1,4 +1,4 @@
-package dev.gegy.roles;
+package dev.gegy.roles.config;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -8,7 +8,9 @@ import com.google.gson.JsonSyntaxException;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.JsonOps;
-import dev.gegy.roles.store.PlayerRoleSet;
+import dev.gegy.roles.PlayerRoles;
+import dev.gegy.roles.Role;
+import dev.gegy.roles.store.ServerRoleSet;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -32,8 +34,8 @@ public final class PlayerRolesConfig {
     private final ImmutableMap<String, Role> roles;
     private final Role everyone;
 
-    private PlayerRoleSet commandBlockRoles;
-    private PlayerRoleSet functionRoles;
+    private ServerRoleSet commandBlockRoles;
+    private ServerRoleSet functionRoles;
 
     private PlayerRolesConfig(List<Role> roles, Role everyone) {
         ImmutableMap.Builder<String, Role> roleMap = ImmutableMap.builder();
@@ -45,9 +47,8 @@ public final class PlayerRolesConfig {
         this.everyone = everyone;
     }
 
-    private PlayerRoleSet buildRoles(Predicate<RoleApplyConfig> apply) {
-        PlayerRoleSet roles = new PlayerRoleSet(null);
-
+    private ServerRoleSet buildRoles(Predicate<RoleApplyConfig> apply) {
+        ServerRoleSet roles = new ServerRoleSet();
         this.roles.values().stream()
                 .filter(role -> apply.test(role.getApply()))
                 .forEach(roles::add);
@@ -68,7 +69,7 @@ public final class PlayerRolesConfig {
         }
 
         List<String> errors = new ArrayList<>();
-        ErrorConsumer errorConsumer = errors::add;
+        ConfigErrorConsumer errorConsumer = errors::add;
 
         try (BufferedReader reader = Files.newBufferedReader(path)) {
             JsonElement root = JSON.parse(reader);
@@ -106,7 +107,7 @@ public final class PlayerRolesConfig {
         }
     }
 
-    private static <T> PlayerRolesConfig parse(Dynamic<T> root, ErrorConsumer error) {
+    private static <T> PlayerRolesConfig parse(Dynamic<T> root, ConfigErrorConsumer error) {
         RoleConfigMap roleConfigs = RoleConfigMap.parse(root, error);
 
         Role everyone = Role.empty(Role.EVERYONE);
@@ -137,16 +138,16 @@ public final class PlayerRolesConfig {
         return this.everyone;
     }
 
-    public PlayerRoleSet getCommandBlockRoles() {
-        PlayerRoleSet commandBlockRoles = this.commandBlockRoles;
+    public ServerRoleSet getCommandBlockRoles() {
+        ServerRoleSet commandBlockRoles = this.commandBlockRoles;
         if (commandBlockRoles == null) {
             this.commandBlockRoles = commandBlockRoles = this.buildRoles(apply -> apply.commandBlock);
         }
         return commandBlockRoles;
     }
 
-    public PlayerRoleSet getFunctionRoles() {
-        PlayerRoleSet functionRoles = this.functionRoles;
+    public ServerRoleSet getFunctionRoles() {
+        ServerRoleSet functionRoles = this.functionRoles;
         if (functionRoles == null) {
             this.functionRoles = functionRoles = this.buildRoles(apply -> apply.functions);
         }

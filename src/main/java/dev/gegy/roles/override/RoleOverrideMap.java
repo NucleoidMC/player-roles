@@ -2,7 +2,9 @@ package dev.gegy.roles.override;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Codec;
-import dev.gegy.roles.api.RoleOwner;
+import dev.gegy.roles.api.PermissionResult;
+import dev.gegy.roles.api.PlayerRoleSource;
+import dev.gegy.roles.api.override.RoleOverrideType;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -13,6 +15,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 public final class RoleOverrideMap {
     @SuppressWarnings("unchecked")
@@ -29,11 +33,9 @@ public final class RoleOverrideMap {
         this.overrides = new Reference2ObjectOpenHashMap<>(overrides);
     }
 
-    public void notifyChange(@Nullable RoleOwner owner) {
-        for (Object override : this.overrides.values()) {
-            if (override instanceof RoleChangeListener) {
-                ((RoleChangeListener) override).notifyChange(owner);
-            }
+    public void notifyChange(PlayerRoleSource owner) {
+        for (RoleOverrideType<?> override : this.overrides.keySet()) {
+            override.notifyChange(owner);
         }
     }
 
@@ -47,6 +49,37 @@ public final class RoleOverrideMap {
     @SuppressWarnings("unchecked")
     public <T> List<T> getOrNull(RoleOverrideType<T> type) {
         return (List<T>) this.overrides.get(type);
+    }
+
+    public <T> Stream<T> streamOf(RoleOverrideType<T> type) {
+        return this.get(type).stream();
+    }
+
+    public <T> PermissionResult test(RoleOverrideType<T> type, Function<T, PermissionResult> function) {
+        Collection<T> overrides = this.getOrNull(type);
+        if (overrides == null) {
+            return PermissionResult.PASS;
+        }
+
+        for (T override : overrides) {
+            PermissionResult result = function.apply(override);
+            if (result.isDefinitive()) {
+                return result;
+            }
+        }
+
+        return PermissionResult.PASS;
+    }
+
+    @Nullable
+    public <T> T select(RoleOverrideType<T> type) {
+        Collection<T> overrides = this.getOrNull(type);
+        if (overrides != null) {
+            for (T override : overrides) {
+                return override;
+            }
+        }
+        return null;
     }
 
     public void clear() {

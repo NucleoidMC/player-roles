@@ -1,9 +1,9 @@
-package dev.gegy.roles.mixin;
+package dev.gegy.roles.mixin.chat_style;
 
-import dev.gegy.roles.api.RoleOwner;
+import dev.gegy.roles.PlayerRoles;
+import dev.gegy.roles.api.PlayerRoleSource;
 import dev.gegy.roles.api.RoleReader;
 import dev.gegy.roles.override.ChatFormatOverride;
-import dev.gegy.roles.override.RoleOverrideType;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 @Mixin(value = ServerPlayNetworkHandler.class, priority = 2000)
-public class FormatServerPlayNetworkHandlerMixin {
+public class ServerPlayNetworkHandlerMixin {
     @Shadow
     public ServerPlayerEntity player;
 
@@ -23,9 +23,9 @@ public class FormatServerPlayNetworkHandlerMixin {
             at = @At(value = "STORE", ordinal = 0)
     )
     private Text formatChat(Text text, String message) {
-        if (this.player instanceof RoleOwner) {
-            RoleReader roles = (RoleOwner) this.player;
-            ChatFormatOverride chatStyle = roles.select(RoleOverrideType.CHAT_STYLE);
+        if (this.player instanceof PlayerRoleSource) {
+            RoleReader roles = ((PlayerRoleSource) this.player).getPlayerRoles();
+            ChatFormatOverride chatStyle = roles.select(PlayerRoles.CHAT_STYLE);
             if (chatStyle != null) {
                 return chatStyle.make(this.player.getDisplayName(), message);
             }

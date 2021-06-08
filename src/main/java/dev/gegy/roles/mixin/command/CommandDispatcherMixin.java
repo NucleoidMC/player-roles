@@ -1,4 +1,4 @@
-package dev.gegy.roles.mixin;
+package dev.gegy.roles.mixin.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.tree.CommandNode;

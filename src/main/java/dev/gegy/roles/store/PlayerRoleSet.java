@@ -1,74 +1,66 @@
 package dev.gegy.roles.store;
 
 import dev.gegy.roles.PlayerRoles;
-import dev.gegy.roles.PlayerRolesConfig;
+import dev.gegy.roles.config.PlayerRolesConfig;
 import dev.gegy.roles.Role;
 import dev.gegy.roles.api.PermissionResult;
-import dev.gegy.roles.api.RoleOwner;
+import dev.gegy.roles.api.PlayerRoleSource;
 import dev.gegy.roles.api.RoleWriter;
 import dev.gegy.roles.override.RoleOverrideMap;
-import dev.gegy.roles.override.RoleOverrideType;
-import it.unimi.dsi.fastutil.objects.ObjectRBTreeSet;
+import dev.gegy.roles.api.override.RoleOverrideType;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
+import net.minecraft.server.network.ServerPlayerEntity;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
-import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
 public final class PlayerRoleSet implements RoleWriter {
     @Nullable
-    private final RoleOwner owner;
+    private final ServerPlayerEntity player;
 
-    private final ObjectRBTreeSet<String> roleIds = new ObjectRBTreeSet<>((n1, n2) -> {
-        PlayerRolesConfig config = PlayerRolesConfig.get();
-        Role r1 = config.get(n1);
-        Role r2 = config.get(n2);
-        if (r1 == null || r2 == null) return 0;
-        return r1.compareTo(r2);
-    });
-
-    private final RoleOverrideMap overrideCache = new RoleOverrideMap();
+    private final RoleSet roles = new RoleSet();
+    private final RoleOverrideMap overrides = new RoleOverrideMap();
 
     private boolean dirty;
 
-    public PlayerRoleSet(@Nullable RoleOwner owner) {
-        this.owner = owner;
-        this.rebuildOverrideCache();
+    public PlayerRoleSet(@Nullable ServerPlayerEntity player) {
+        this.player = player;
+        this.rebuildOverrides();
     }
 
-    public void notifyReload() {
-        this.removeInvalidRoles();
-        this.rebuildOverrideCache();
-        this.stream().forEach(role -> role.getOverrides().notifyChange(this.owner));
+    public void rebuildOverridesAndNotify() {
+        this.rebuildOverrides();
+        if (this.player != null) {
+            this.overrides.notifyChange((PlayerRoleSource) this.player);
+        }
     }
 
-    private void rebuildOverrideCache() {
-        this.overrideCache.clear();
-        this.stream().forEach(role -> this.overrideCache.addAll(role.getOverrides()));
+    private void rebuildOverrides() {
+        this.overrides.clear();
+        this.stream().forEach(role -> this.overrides.addAll(role.getOverrides()));
     }
 
     @Override
     public boolean add(Role role) {
-        if (this.roleIds.add(role.getName())) {
+        if (this.roles.add(role)) {
             this.dirty = true;
-            this.rebuildOverrideCache();
-            role.getOverrides().notifyChange(this.owner);
+            this.rebuildOverridesAndNotify();
             return true;
         }
+
         return false;
     }
 
     @Override
     public boolean remove(Role role) {
-        if (this.roleIds.remove(role.getName())) {
+        if (this.roles.remove(role)) {
             this.dirty = true;
-            this.rebuildOverrideCache();
-            role.getOverrides().notifyChange(this.owner);
+            this.rebuildOverridesAndNotify();
             return true;
         }
+
         return false;
     }
 
@@ -76,82 +68,57 @@ public final class PlayerRoleSet implements RoleWriter {
     public Stream<Role> stream() {
         PlayerRolesConfig roleConfig = PlayerRolesConfig.get();
         return Stream.concat(
-                this.roleIds.stream().map(roleConfig::get).filter(Objects::nonNull),
+                this.roles.stream(),
                 Stream.of(roleConfig.everyone())
         );
     }
 
     @Override
     public boolean hasRole(String name) {
-        return name.equals(Role.EVERYONE) || this.roleIds.contains(name);
+        return name.equals(Role.EVERYONE) || this.roles.containsId(name);
     }
 
     @Override
     public <T> Stream<T> overrides(RoleOverrideType<T> type) {
-        Collection<T> overrides = this.getOverridesOrNull(type);
-        return overrides != null ? overrides.stream() : Stream.empty();
-    }
-
-    @Nullable
-    private <T> Collection<T> getOverridesOrNull(RoleOverrideType<T> type) {
-        return this.overrideCache.getOrNull(type);
+        return this.overrides.streamOf(type);
     }
 
     @Override
     public <T> PermissionResult test(RoleOverrideType<T> type, Function<T, PermissionResult> function) {
-        Collection<T> overrides = this.getOverridesOrNull(type);
-        if (overrides == null) {
-            return PermissionResult.PASS;
-        }
-
-        for (T override : overrides) {
-            PermissionResult result = function.apply(override);
-            if (result.isDefinitive()) {
-                return result;
-            }
-        }
-
-        return PermissionResult.PASS;
+        return this.overrides.test(type, function);
     }
 
     @Override
     @Nullable
     public <T> T select(RoleOverrideType<T> type) {
-        Collection<T> overrides = this.getOverridesOrNull(type);
-        if (overrides != null) {
-            for (T override : overrides) {
-                return override;
-            }
-        }
-        return null;
+        return this.overrides.select(type);
     }
 
     public ListTag serialize() {
         ListTag list = new ListTag();
-        for (String role : this.roleIds) {
-            list.add(StringTag.of(role));
+        for (Role role : this.roles) {
+            list.add(StringTag.of(role.getName()));
         }
         return list;
     }
 
     public void deserialize(ListTag list) {
-        this.roleIds.clear();
-        for (int i = 0; i < list.size(); i++) {
-            this.roleIds.add(list.getString(i));
-        }
-        this.removeInvalidRoles();
-        this.rebuildOverrideCache();
-    }
+        PlayerRolesConfig config = PlayerRolesConfig.get();
 
-    private void removeInvalidRoles() {
-        this.dirty |= this.roleIds.removeIf(name -> {
-            Role role = PlayerRolesConfig.get().get(name);
-            if (role == null || role.getName().equalsIgnoreCase(Role.EVERYONE)) {
+        this.roles.clear();
+        for (int i = 0; i < list.size(); i++) {
+            String name = list.getString(i);
+            Role role = config.get(name);
+            if (role == null || name.equalsIgnoreCase(Role.EVERYONE)) {
+                this.dirty = true;
                 PlayerRoles.LOGGER.warn("Encountered invalid role '{}'", name);
-                return true;
+                continue;
             }
-            return false;
-        });
+
+            this.roles.add(role);
+        }
+
+        this.rebuildOverrides();
     }
 
     public void setDirty(boolean dirty) {
@@ -163,14 +130,14 @@ public final class PlayerRoleSet implements RoleWriter {
     }
 
     public boolean isEmpty() {
-        return this.roleIds.isEmpty();
+        return this.roles.isEmpty();
     }
 
     public void copyFrom(PlayerRoleSet roles) {
-        this.roleIds.clear();
-        this.roleIds.addAll(roles.roleIds);
+        this.roles.clear();
+        this.roles.addAll(roles.roles);
         this.dirty = roles.dirty;
 
-        this.rebuildOverrideCache();
+        this.rebuildOverrides();
     }
 }

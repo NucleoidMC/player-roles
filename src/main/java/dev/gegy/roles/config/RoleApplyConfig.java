@@ -1,4 +1,4 @@
-package dev.gegy.roles;
+package dev.gegy.roles.config;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;

@@ -1,7 +1,8 @@
-package dev.gegy.roles;
+package dev.gegy.roles.config;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.gegy.roles.Role;
 import dev.gegy.roles.override.RoleOverrideMap;
 import org.jetbrains.annotations.Nullable;
 import xyz.nucleoid.codecs.MoreCodecs;
