@@ -2,6 +2,7 @@ package dev.gegy.roles.mixin.mute;
 
 import dev.gegy.roles.PlayerRoles;
 import dev.gegy.roles.api.PlayerRoleSource;
+import net.minecraft.network.packet.c2s.play.ChatMessageC2SPacket;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.spongepowered.asm.mixin.Mixin;
@@ -16,20 +17,23 @@ public class ServerPlayNetworkHandlerMixin {
     public ServerPlayerEntity player;
 
     @Inject(
-            method = "method_31286",
+            method = "onGameMessage",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/server/PlayerManager;broadcastChatMessage(Lnet/minecraft/text/Text;Lnet/minecraft/network/MessageType;Ljava/util/UUID;)V",
+                    target = "Ljava/lang/String;startsWith(Ljava/lang/String;)Z",
                     shift = At.Shift.BEFORE
             ),
             cancellable = true
     )
-    private void broadcastMessage(String message, CallbackInfo ci) {
+    private void onGameMessage(ChatMessageC2SPacket packet, CallbackInfo ci) {
         if (this.player instanceof PlayerRoleSource roleSource) {
             var roles = roleSource.getPlayerRoles();
             if (roles.test(PlayerRoles.MUTE)) {
-                PlayerRoles.sendMuteFeedback(this.player);
-                ci.cancel();
+                String message = packet.getChatMessage();
+                if (!message.startsWith("/")) {
+                    PlayerRoles.sendMuteFeedback(this.player);
+                    ci.cancel();
+                }
             }
         }
     }

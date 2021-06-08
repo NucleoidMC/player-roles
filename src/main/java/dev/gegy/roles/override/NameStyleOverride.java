@@ -11,7 +11,7 @@ import xyz.nucleoid.codecs.MoreCodecs;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class NameStyleOverride {
+public record NameStyleOverride(Formatting[] formats, @Nullable TextColor color) {
     public static final Codec<NameStyleOverride> CODEC = MoreCodecs.listOrUnit(Codec.STRING).xmap(
             formatKeys -> {
                 List<Formatting> formats = new ArrayList<>();
@@ -44,14 +44,6 @@ public final class NameStyleOverride {
                 return formatKeys;
             }
     );
-
-    private final Formatting[] formats;
-    private final TextColor color;
-
-    public NameStyleOverride(Formatting[] formats, @Nullable TextColor color) {
-        this.formats = formats;
-        this.color = color;
-    }
 
     public MutableText apply(MutableText text) {
         return text.setStyle(this.applyStyle(text.getStyle()));

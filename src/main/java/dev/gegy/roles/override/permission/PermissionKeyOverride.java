@@ -8,14 +8,8 @@ import net.fabricmc.fabric.api.util.TriState;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 
-public final class PermissionKeyOverride {
+public record PermissionKeyOverride(PermissionKeyRules rules) {
     public static final Codec<PermissionKeyOverride> CODEC = PermissionKeyRules.CODEC.xmap(PermissionKeyOverride::new, override -> override.rules);
-
-    private final PermissionKeyRules rules;
-
-    public PermissionKeyOverride(PermissionKeyRules rules) {
-        this.rules = rules;
-    }
 
     public static void register() {
         var override = RoleOverrideType.register("permission_keys", PermissionKeyOverride.CODEC)
