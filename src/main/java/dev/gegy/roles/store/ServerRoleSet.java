@@ -1,13 +1,11 @@
 package dev.gegy.roles.store;
 
 import dev.gegy.roles.Role;
-import dev.gegy.roles.api.PermissionResult;
 import dev.gegy.roles.api.RoleWriter;
+import dev.gegy.roles.api.override.RoleOverrideReader;
 import dev.gegy.roles.override.RoleOverrideMap;
-import dev.gegy.roles.api.override.RoleOverrideType;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.function.Function;
+import java.util.Iterator;
 import java.util.stream.Stream;
 
 public final class ServerRoleSet implements RoleWriter {
@@ -44,28 +42,22 @@ public final class ServerRoleSet implements RoleWriter {
     }
 
     @Override
+    public Iterator<Role> iterator() {
+        return this.roles.iterator();
+    }
+
+    @Override
     public Stream<Role> stream() {
         return this.roles.stream();
     }
 
     @Override
-    public boolean hasRole(String name) {
+    public boolean has(String name) {
         return this.roles.containsId(name);
     }
 
     @Override
-    public <T> Stream<T> overrides(RoleOverrideType<T> type) {
-        return this.overrides.streamOf(type);
-    }
-
-    @Override
-    public <T> PermissionResult test(RoleOverrideType<T> type, Function<T, PermissionResult> function) {
-        return this.overrides.test(type, function);
-    }
-
-    @Override
-    @Nullable
-    public <T> T select(RoleOverrideType<T> type) {
-        return this.overrides.select(type);
+    public RoleOverrideReader overrides() {
+        return this.overrides;
     }
 }

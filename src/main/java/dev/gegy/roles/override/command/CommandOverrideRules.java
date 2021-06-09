@@ -1,7 +1,7 @@
 package dev.gegy.roles.override.command;
 
 import com.mojang.serialization.Codec;
-import dev.gegy.roles.api.PermissionResult;
+import dev.gegy.roles.api.override.OverrideResult;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public final class CommandPermissionRules {
+public final class CommandOverrideRules {
     private static final Codec<Pattern[]> PATTERN_CODEC = Codec.STRING.xmap(
             key -> {
                 var patternStrings = key.split(" ");
@@ -21,9 +21,9 @@ public final class CommandPermissionRules {
             }
     );
 
-    public static final Codec<CommandPermissionRules> CODEC = Codec.unboundedMap(PATTERN_CODEC, PermissionResult.CODEC)
+    public static final Codec<CommandOverrideRules> CODEC = Codec.unboundedMap(PATTERN_CODEC, OverrideResult.CODEC)
             .xmap(map -> {
-                var rules = CommandPermissionRules.builder();
+                var rules = CommandOverrideRules.builder();
                 map.forEach(rules::add);
                 return rules.build();
             }, rules -> {
@@ -32,7 +32,7 @@ public final class CommandPermissionRules {
 
     private final Rule[] rules;
 
-    CommandPermissionRules(Rule[] commands) {
+    CommandOverrideRules(Rule[] commands) {
         this.rules = commands;
     }
 
@@ -40,14 +40,14 @@ public final class CommandPermissionRules {
         return new Builder();
     }
 
-    public PermissionResult test(MatchableCommand command) {
+    public OverrideResult test(MatchableCommand command) {
         for (var rule : this.rules) {
             var result = rule.test(command);
             if (result.isDefinitive()) {
                 return result;
             }
         }
-        return PermissionResult.PASS;
+        return OverrideResult.PASS;
     }
 
     @Override
@@ -61,26 +61,26 @@ public final class CommandPermissionRules {
         Builder() {
         }
 
-        public Builder add(Pattern[] patterns, PermissionResult result) {
+        public Builder add(Pattern[] patterns, OverrideResult result) {
             this.rules.add(new Rule(patterns, result));
             return this;
         }
 
-        public CommandPermissionRules build() {
+        public CommandOverrideRules build() {
             this.rules.sort(Comparator.comparingInt(Rule::size).reversed());
             var rules = this.rules.toArray(new Rule[0]);
-            return new CommandPermissionRules(rules);
+            return new CommandOverrideRules(rules);
         }
     }
 
-    private record Rule(Pattern[] patterns, PermissionResult result) {
-        PermissionResult test(MatchableCommand command) {
+    private record Rule(Pattern[] patterns, OverrideResult result) {
+        OverrideResult test(MatchableCommand command) {
             if (this.result.isAllowed()) {
-                return command.matchesAllow(this.patterns) ? this.result : PermissionResult.PASS;
+                return command.matchesAllow(this.patterns) ? this.result : OverrideResult.PASS;
             } else if (this.result.isDenied()) {
-                return command.matchesDeny(this.patterns) ? this.result : PermissionResult.PASS;
+                return command.matchesDeny(this.patterns) ? this.result : OverrideResult.PASS;
             }
-            return PermissionResult.PASS;
+            return OverrideResult.PASS;
         }
 
         int size() {

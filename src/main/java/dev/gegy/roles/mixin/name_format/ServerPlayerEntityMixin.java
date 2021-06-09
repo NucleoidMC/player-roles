@@ -24,7 +24,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity implements Pl
 
         var team = this.getScoreboardTeam();
         if (team == null || ((TeamAccessor) team).getFormattingColor() == Formatting.RESET) {
-            var nameFormat = this.getPlayerRoles().select(PlayerRoles.NAME_FORMAT);
+            var nameFormat = this.getPlayerRoles().overrides().select(PlayerRoles.NAME_FORMAT);
             if (nameFormat != null) {
                 displayName = nameFormat.apply(displayName.shallowCopy());
             }

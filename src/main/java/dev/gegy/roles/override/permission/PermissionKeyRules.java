@@ -1,7 +1,7 @@
 package dev.gegy.roles.override.permission;
 
 import com.mojang.serialization.Codec;
-import dev.gegy.roles.api.PermissionResult;
+import dev.gegy.roles.api.override.OverrideResult;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.jetbrains.annotations.Nullable;
 
@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 public final class PermissionKeyRules {
-    public static final Codec<PermissionKeyRules> CODEC = Codec.unboundedMap(Codec.STRING, PermissionResult.CODEC).xmap(
+    public static final Codec<PermissionKeyRules> CODEC = Codec.unboundedMap(Codec.STRING, OverrideResult.CODEC).xmap(
             map -> {
                 PermissionKeyRules.Builder rules = PermissionKeyRules.builder();
                 map.forEach(rules::add);
@@ -26,10 +26,10 @@ public final class PermissionKeyRules {
             }
     );
 
-    private final Map<String, PermissionResult> exactPermissions;
+    private final Map<String, OverrideResult> exactPermissions;
     private final KeyMatcher[] keyMatchers;
 
-    private PermissionKeyRules(Map<String, PermissionResult> exactPermissions, KeyMatcher[] keyMatchers) {
+    private PermissionKeyRules(Map<String, OverrideResult> exactPermissions, KeyMatcher[] keyMatchers) {
         this.exactPermissions = exactPermissions;
         this.keyMatchers = keyMatchers;
     }
@@ -38,7 +38,7 @@ public final class PermissionKeyRules {
         return new Builder();
     }
 
-    public PermissionResult test(String permission) {
+    public OverrideResult test(String permission) {
         var result = this.exactPermissions.get(permission);
         if (result != null) {
             return result;
@@ -52,17 +52,17 @@ public final class PermissionKeyRules {
             }
         }
 
-        return PermissionResult.PASS;
+        return OverrideResult.PASS;
     }
 
     public static class Builder {
-        private final Map<String, PermissionResult> exactPermissions = new Object2ObjectOpenHashMap<>();
+        private final Map<String, OverrideResult> exactPermissions = new Object2ObjectOpenHashMap<>();
         private final List<KeyMatcher> keyMatchers = new ArrayList<>();
 
         Builder() {
         }
 
-        public Builder add(String key, PermissionResult result) {
+        public Builder add(String key, OverrideResult result) {
             if (key.contains("*")) {
                 this.keyMatchers.add(new KeyMatcher(key, result));
             } else {
@@ -78,15 +78,15 @@ public final class PermissionKeyRules {
 
     static final class KeyMatcher {
         final String[] pattern;
-        final PermissionResult result;
+        final OverrideResult result;
 
-        KeyMatcher(String permission, PermissionResult result) {
+        KeyMatcher(String permission, OverrideResult result) {
             this.pattern = permission.split("\\.");
             this.result = result;
         }
 
         @Nullable
-        PermissionResult test(String[] tokens) {
+        OverrideResult test(String[] tokens) {
             var pattern = this.pattern;
             int patternIdx = 0;
             String endWildcard = null;

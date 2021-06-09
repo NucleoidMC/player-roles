@@ -62,13 +62,13 @@ public final class PlayerRoleManager {
     }
 
     public void onPlayerJoin(ServerPlayerEntity player) {
-        var roleOwner = (PlayerRoleSource) player;
-        this.loadRolesInto(player.getUuid(), roleOwner.getPlayerRoles());
+        var roleSource = (PlayerRoleSource) player;
+        this.loadRolesInto(player.getUuid(), roleSource.getPlayerRoles());
     }
 
     public void onPlayerLeave(ServerPlayerEntity player) {
-        var roleOwner = (PlayerRoleSource) player;
-        var roles = roleOwner.getPlayerRoles();
+        var roleSource = (PlayerRoleSource) player;
+        var roles = roleSource.getPlayerRoles();
         if (roles.isDirty()) {
             try {
                 this.saveRoles(player.getUuid(), roles);
@@ -138,9 +138,9 @@ public final class PlayerRoleManager {
     }
 
     public <R> R updateRoles(MinecraftServer server, UUID uuid, Function<PlayerRoleSet, R> update) {
-        var roleOwner = getRoleOwner(server, uuid);
-        if (roleOwner != null) {
-            return update.apply(roleOwner.getPlayerRoles());
+        var roleSource = getRoleSource(server, uuid);
+        if (roleSource != null) {
+            return update.apply(roleSource.getPlayerRoles());
         } else {
             var roles = new PlayerRoleSet(null);
             this.loadRolesInto(uuid, roles);
@@ -160,9 +160,9 @@ public final class PlayerRoleManager {
     }
 
     public PlayerRoleSet peekRoles(MinecraftServer server, UUID uuid) {
-        var roleOwner = getRoleOwner(server, uuid);
-        if (roleOwner != null) {
-            return roleOwner.getPlayerRoles();
+        var roleSource = getRoleSource(server, uuid);
+        if (roleSource != null) {
+            return roleSource.getPlayerRoles();
         } else {
             var roles = new PlayerRoleSet(null);
             this.loadRolesInto(uuid, roles);
@@ -171,7 +171,7 @@ public final class PlayerRoleManager {
     }
 
     @Nullable
-    private static PlayerRoleSource getRoleOwner(MinecraftServer server, UUID uuid) {
+    private static PlayerRoleSource getRoleSource(MinecraftServer server, UUID uuid) {
         var player = server.getPlayerManager().getPlayer(uuid);
         return (PlayerRoleSource) player;
     }

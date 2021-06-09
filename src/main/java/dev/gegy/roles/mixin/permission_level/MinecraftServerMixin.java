@@ -21,7 +21,7 @@ public abstract class MinecraftServerMixin {
         var player = this.getPlayerManager().getPlayer(profile.getId());
         if (player instanceof PlayerRoleSource roleSource) {
             var roles = roleSource.getPlayerRoles();
-            var permissionLevel = roles.select(PlayerRoles.PERMISSION_LEVEL);
+            var permissionLevel = roles.overrides().select(PlayerRoles.PERMISSION_LEVEL);
             if (permissionLevel != null) {
                 ci.setReturnValue(permissionLevel);
             }

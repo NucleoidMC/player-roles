@@ -1,19 +1,17 @@
 package dev.gegy.roles.store;
 
 import dev.gegy.roles.PlayerRoles;
-import dev.gegy.roles.config.PlayerRolesConfig;
 import dev.gegy.roles.Role;
-import dev.gegy.roles.api.PermissionResult;
-import dev.gegy.roles.api.PlayerRoleSource;
+import dev.gegy.roles.api.override.RoleOverrideReader;
 import dev.gegy.roles.api.RoleWriter;
+import dev.gegy.roles.config.PlayerRolesConfig;
 import dev.gegy.roles.override.RoleOverrideMap;
-import dev.gegy.roles.api.override.RoleOverrideType;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.function.Function;
+import java.util.Iterator;
 import java.util.stream.Stream;
 
 public final class PlayerRoleSet implements RoleWriter {
@@ -33,7 +31,7 @@ public final class PlayerRoleSet implements RoleWriter {
     public void rebuildOverridesAndNotify() {
         this.rebuildOverrides();
         if (this.player != null) {
-            this.overrides.notifyChange((PlayerRoleSource) this.player);
+            this.overrides.notifyChange(this.player);
         }
     }
 
@@ -65,6 +63,11 @@ public final class PlayerRoleSet implements RoleWriter {
     }
 
     @Override
+    public Iterator<Role> iterator() {
+        return this.roles.iterator();
+    }
+
+    @Override
     public Stream<Role> stream() {
         var roleConfig = PlayerRolesConfig.get();
         return Stream.concat(
@@ -74,24 +77,13 @@ public final class PlayerRoleSet implements RoleWriter {
     }
 
     @Override
-    public boolean hasRole(String name) {
+    public boolean has(String name) {
         return name.equals(Role.EVERYONE) || this.roles.containsId(name);
     }
 
     @Override
-    public <T> Stream<T> overrides(RoleOverrideType<T> type) {
-        return this.overrides.streamOf(type);
-    }
-
-    @Override
-    public <T> PermissionResult test(RoleOverrideType<T> type, Function<T, PermissionResult> function) {
-        return this.overrides.test(type, function);
-    }
-
-    @Override
-    @Nullable
-    public <T> T select(RoleOverrideType<T> type) {
-        return this.overrides.select(type);
+    public RoleOverrideReader overrides() {
+        return this.overrides;
     }
 
     public NbtList serialize() {

@@ -21,7 +21,7 @@ public class MessageCommandMixin {
         var entity = source.getEntity();
         if (entity instanceof PlayerRoleSource roleSource && entity instanceof ServerPlayerEntity player) {
             var roles = roleSource.getPlayerRoles();
-            if (roles.test(PlayerRoles.MUTE)) {
+            if (roles.overrides().test(PlayerRoles.MUTE)) {
                 PlayerRoles.sendMuteFeedback(player);
                 ci.setReturnValue(Command.SINGLE_SUCCESS);
             }

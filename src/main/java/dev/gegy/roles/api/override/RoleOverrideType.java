@@ -1,26 +1,28 @@
 package dev.gegy.roles.api.override;
 
 import com.mojang.serialization.Codec;
-import dev.gegy.roles.api.PlayerRoleSource;
-import dev.gegy.roles.override.RoleChangeListener;
-import dev.gegy.roles.util.TinyRegistry;
+import dev.gegy.roles.PlayerRoles;
+import dev.gegy.roles.api.RoleChangeListener;
+import dev.gegy.roles.api.util.TinyRegistry;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 public final class RoleOverrideType<T> {
-    public static final TinyRegistry<RoleOverrideType<?>> REGISTRY = TinyRegistry.newStable();
+    public static final TinyRegistry<RoleOverrideType<?>> REGISTRY = TinyRegistry.create(PlayerRoles.ID);
 
-    private final String key;
+    private final Identifier id;
     private final Codec<T> codec;
     private RoleChangeListener changeListener;
 
-    private RoleOverrideType(String key, Codec<T> codec) {
-        this.key = key;
+    private RoleOverrideType(Identifier id, Codec<T> codec) {
+        this.id = id;
         this.codec = codec;
     }
 
-    public static <T> RoleOverrideType<T> register(String key, Codec<T> codec) {
-        var type = new RoleOverrideType<>(key, codec);
-        REGISTRY.register(key, type);
+    public static <T> RoleOverrideType<T> register(Identifier id, Codec<T> codec) {
+        var type = new RoleOverrideType<>(id, codec);
+        REGISTRY.register(id, type);
         return type;
     }
 
@@ -29,27 +31,27 @@ public final class RoleOverrideType<T> {
         return this;
     }
 
-    public String getKey() {
-        return this.key;
+    public Identifier getId() {
+        return this.id;
     }
 
     public Codec<T> getCodec() {
         return this.codec;
     }
 
-    public void notifyChange(PlayerRoleSource owner) {
+    public void notifyChange(ServerPlayerEntity player) {
         if (this.changeListener != null) {
-            this.changeListener.notifyChange(owner);
+            this.changeListener.notifyChange(player);
         }
     }
 
     @Nullable
-    public static RoleOverrideType<?> byKey(String key) {
-        return REGISTRY.get(key);
+    public static RoleOverrideType<?> byId(Identifier id) {
+        return REGISTRY.get(id);
     }
 
     @Override
     public String toString() {
-        return "RoleOverrideType(" + this.key + ")";
+        return "RoleOverrideType(" + this.id + ")";
     }
 }

@@ -2,10 +2,11 @@ package dev.gegy.roles.override;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Codec;
-import dev.gegy.roles.api.PermissionResult;
-import dev.gegy.roles.api.PlayerRoleSource;
+import dev.gegy.roles.api.override.OverrideResult;
+import dev.gegy.roles.api.override.RoleOverrideReader;
 import dev.gegy.roles.api.override.RoleOverrideType;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
+import net.minecraft.server.network.ServerPlayerEntity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nucleoid.codecs.MoreCodecs;
@@ -18,7 +19,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-public final class RoleOverrideMap {
+public final class RoleOverrideMap implements RoleOverrideReader {
     @SuppressWarnings("unchecked")
     public static final Codec<RoleOverrideMap> CODEC = MoreCodecs.dispatchByMapKey(RoleOverrideType.REGISTRY, t -> MoreCodecs.listOrUnit((Codec<Object>) t.getCodec()))
             .xmap(RoleOverrideMap::new, m -> m.overrides);
@@ -33,9 +34,9 @@ public final class RoleOverrideMap {
         this.overrides = new Reference2ObjectOpenHashMap<>(overrides);
     }
 
-    public void notifyChange(PlayerRoleSource owner) {
+    public void notifyChange(ServerPlayerEntity player) {
         for (var override : this.overrides.keySet()) {
-            override.notifyChange(owner);
+            override.notifyChange(player);
         }
     }
 
@@ -51,14 +52,16 @@ public final class RoleOverrideMap {
         return (List<T>) this.overrides.get(type);
     }
 
+    @Override
     public <T> Stream<T> streamOf(RoleOverrideType<T> type) {
         return this.get(type).stream();
     }
 
-    public <T> PermissionResult test(RoleOverrideType<T> type, Function<T, PermissionResult> function) {
+    @Override
+    public <T> OverrideResult test(RoleOverrideType<T> type, Function<T, OverrideResult> function) {
         var overrides = this.getOrNull(type);
         if (overrides == null) {
-            return PermissionResult.PASS;
+            return OverrideResult.PASS;
         }
 
         for (var override : overrides) {
@@ -68,9 +71,10 @@ public final class RoleOverrideMap {
             }
         }
 
-        return PermissionResult.PASS;
+        return OverrideResult.PASS;
     }
 
+    @Override
     @Nullable
     public <T> T select(RoleOverrideType<T> type) {
         var overrides = this.getOrNull(type);

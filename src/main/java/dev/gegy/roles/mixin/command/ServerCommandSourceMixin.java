@@ -26,7 +26,7 @@ public class ServerCommandSourceMixin {
         var player = playerManager.getPlayer(profile.getId());
         if (player instanceof PlayerRoleSource roleSource) {
             var roles = roleSource.getPlayerRoles();
-            return roles.test(PlayerRoles.COMMAND_FEEDBACK);
+            return roles.overrides().test(PlayerRoles.COMMAND_FEEDBACK);
         }
 
         return false;

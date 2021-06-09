@@ -28,7 +28,7 @@ public class ServerPlayNetworkHandlerMixin {
     private void onGameMessage(ChatMessageC2SPacket packet, CallbackInfo ci) {
         if (this.player instanceof PlayerRoleSource roleSource) {
             var roles = roleSource.getPlayerRoles();
-            if (roles.test(PlayerRoles.MUTE)) {
+            if (roles.overrides().test(PlayerRoles.MUTE)) {
                 String message = packet.getChatMessage();
                 if (!message.startsWith("/")) {
                     PlayerRoles.sendMuteFeedback(this.player);

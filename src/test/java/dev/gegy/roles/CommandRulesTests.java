@@ -1,8 +1,8 @@
 package dev.gegy.roles;
 
-import dev.gegy.roles.override.command.CommandPermissionRules;
+import dev.gegy.roles.override.command.CommandOverrideRules;
 import dev.gegy.roles.override.command.MatchableCommand;
-import dev.gegy.roles.api.PermissionResult;
+import dev.gegy.roles.api.override.OverrideResult;
 import org.junit.jupiter.api.Test;
 
 import java.util.regex.Pattern;
@@ -12,52 +12,52 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 final class CommandRulesTests {
     @Test
     void testAllowExecuteAsDenyExecute() {
-        CommandPermissionRules rules = CommandPermissionRules.builder()
-                .add(matcher("execute as"), PermissionResult.ALLOW)
-                .add(matcher("execute"), PermissionResult.DENY)
+        CommandOverrideRules rules = CommandOverrideRules.builder()
+                .add(matcher("execute as"), OverrideResult.ALLOW)
+                .add(matcher("execute"), OverrideResult.DENY)
                 .build();
 
-        assertEquals(rules.test(command("execute as")), PermissionResult.ALLOW);
-        assertEquals(rules.test(command("execute at")), PermissionResult.DENY);
-        assertEquals(rules.test(command("execute")), PermissionResult.ALLOW);
+        assertEquals(rules.test(command("execute as")), OverrideResult.ALLOW);
+        assertEquals(rules.test(command("execute at")), OverrideResult.DENY);
+        assertEquals(rules.test(command("execute")), OverrideResult.ALLOW);
     }
 
     @Test
     void testAllowExecuteDenyExecuteAs() {
-        CommandPermissionRules rules = CommandPermissionRules.builder()
-                .add(matcher("execute as"), PermissionResult.DENY)
-                .add(matcher("execute"), PermissionResult.ALLOW)
+        CommandOverrideRules rules = CommandOverrideRules.builder()
+                .add(matcher("execute as"), OverrideResult.DENY)
+                .add(matcher("execute"), OverrideResult.ALLOW)
                 .build();
 
-        assertEquals(rules.test(command("execute as")), PermissionResult.DENY);
-        assertEquals(rules.test(command("execute at")), PermissionResult.ALLOW);
-        assertEquals(rules.test(command("execute")), PermissionResult.ALLOW);
+        assertEquals(rules.test(command("execute as")), OverrideResult.DENY);
+        assertEquals(rules.test(command("execute at")), OverrideResult.ALLOW);
+        assertEquals(rules.test(command("execute")), OverrideResult.ALLOW);
     }
 
     @Test
     void testOverrideAllowWildcard() {
-        CommandPermissionRules rules = CommandPermissionRules.builder()
-                .add(matcher("gamemode"), PermissionResult.DENY)
-                .add(matcher(".*"), PermissionResult.ALLOW)
+        CommandOverrideRules rules = CommandOverrideRules.builder()
+                .add(matcher("gamemode"), OverrideResult.DENY)
+                .add(matcher(".*"), OverrideResult.ALLOW)
                 .build();
 
-        assertEquals(rules.test(command("gamemode")), PermissionResult.DENY);
-        assertEquals(rules.test(command("gamemode creative")), PermissionResult.DENY);
-        assertEquals(rules.test(command("foo")), PermissionResult.ALLOW);
-        assertEquals(rules.test(command("bar")), PermissionResult.ALLOW);
+        assertEquals(rules.test(command("gamemode")), OverrideResult.DENY);
+        assertEquals(rules.test(command("gamemode creative")), OverrideResult.DENY);
+        assertEquals(rules.test(command("foo")), OverrideResult.ALLOW);
+        assertEquals(rules.test(command("bar")), OverrideResult.ALLOW);
     }
 
     @Test
     void testOverrideDenyWildcard() {
-        CommandPermissionRules rules = CommandPermissionRules.builder()
-                .add(matcher("gamemode"), PermissionResult.ALLOW)
-                .add(matcher(".*"), PermissionResult.DENY)
+        CommandOverrideRules rules = CommandOverrideRules.builder()
+                .add(matcher("gamemode"), OverrideResult.ALLOW)
+                .add(matcher(".*"), OverrideResult.DENY)
                 .build();
 
-        assertEquals(rules.test(command("gamemode")), PermissionResult.ALLOW);
-        assertEquals(rules.test(command("gamemode creative")), PermissionResult.ALLOW);
-        assertEquals(rules.test(command("foo")), PermissionResult.DENY);
-        assertEquals(rules.test(command("bar")), PermissionResult.DENY);
+        assertEquals(rules.test(command("gamemode")), OverrideResult.ALLOW);
+        assertEquals(rules.test(command("gamemode creative")), OverrideResult.ALLOW);
+        assertEquals(rules.test(command("foo")), OverrideResult.DENY);
+        assertEquals(rules.test(command("bar")), OverrideResult.DENY);
     }
 
     private static Pattern[] matcher(String matcher) {

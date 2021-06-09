@@ -19,7 +19,7 @@ public class TeamMsgCommandMixin {
         var entity = source.getEntity();
         if (entity instanceof PlayerRoleSource && entity instanceof ServerPlayerEntity) {
             var roles = ((PlayerRoleSource) entity).getPlayerRoles();
-            if (roles.test(PlayerRoles.MUTE)) {
+            if (roles.overrides().test(PlayerRoles.MUTE)) {
                 PlayerRoles.sendMuteFeedback((ServerPlayerEntity) entity);
                 ci.setReturnValue(Command.SINGLE_SUCCESS);
             }

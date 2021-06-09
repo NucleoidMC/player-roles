@@ -1,4 +1,4 @@
-package dev.gegy.roles.api;
+package dev.gegy.roles.api.override;
 
 import com.mojang.serialization.Codec;
 import net.fabricmc.fabric.api.util.TriState;
@@ -6,13 +6,13 @@ import net.minecraft.util.StringIdentifiable;
 
 import java.util.Locale;
 
-public enum PermissionResult implements StringIdentifiable {
+public enum OverrideResult implements StringIdentifiable {
     PASS,
     ALLOW,
     DENY,
     HIDDEN;
 
-    public static final Codec<PermissionResult> CODEC = StringIdentifiable.createCodec(PermissionResult::values, PermissionResult::byName);
+    public static final Codec<OverrideResult> CODEC = StringIdentifiable.createCodec(OverrideResult::values, OverrideResult::byName);
 
     public boolean isDefinitive() {
         return this != PASS;
@@ -26,12 +26,12 @@ public enum PermissionResult implements StringIdentifiable {
         return this == DENY;
     }
 
-    public static PermissionResult byName(String name) {
+    public static OverrideResult byName(String name) {
         return switch (name.toLowerCase(Locale.ROOT)) {
-            case "allow", "yes", "true" -> PermissionResult.ALLOW;
-            case "deny", "no", "false" -> PermissionResult.DENY;
-            case "hidden", "hide" -> PermissionResult.HIDDEN;
-            default -> PermissionResult.PASS;
+            case "allow", "yes", "true" -> OverrideResult.ALLOW;
+            case "deny", "no", "false" -> OverrideResult.DENY;
+            case "hidden", "hide" -> OverrideResult.HIDDEN;
+            default -> OverrideResult.PASS;
         };
     }
 

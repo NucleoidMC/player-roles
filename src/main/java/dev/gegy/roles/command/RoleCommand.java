@@ -11,7 +11,7 @@ import com.mojang.brigadier.suggestion.SuggestionProvider;
 import dev.gegy.roles.Role;
 import dev.gegy.roles.api.PlayerRoleSource;
 import dev.gegy.roles.config.PlayerRolesConfig;
-import dev.gegy.roles.override.command.CommandPermissionEvaluator;
+import dev.gegy.roles.override.command.CommandOverride;
 import dev.gegy.roles.store.PlayerRoleManager;
 import dev.gegy.roles.store.PlayerRoleSet;
 import net.minecraft.command.CommandSource;
@@ -144,7 +144,7 @@ public final class RoleCommand {
     }
 
     private static void assertHasPower(ServerCommandSource source, Role role) throws CommandSyntaxException {
-        if (CommandPermissionEvaluator.doesBypassPermissions(source)) return;
+        if (CommandOverride.doesBypassPermissions(source)) return;
 
         int highestPower = getHighestPowerLevel(source);
         if (highestPower <= role.getLevel()) {
@@ -172,7 +172,7 @@ public final class RoleCommand {
 
     private static int getHighestPowerLevel(ServerCommandSource source) {
         var entity = source.getEntity();
-        if (entity == null || CommandPermissionEvaluator.doesBypassPermissions(source)) return Integer.MAX_VALUE;
+        if (entity == null || CommandOverride.doesBypassPermissions(source)) return Integer.MAX_VALUE;
 
         if (entity instanceof PlayerRoleSource roleSource) {
             var roles = roleSource.getPlayerRoles();

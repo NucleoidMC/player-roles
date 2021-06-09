@@ -7,7 +7,8 @@ import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
 import dev.gegy.roles.PlayerRoles;
 
-import java.lang.reflect.Field;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.VarHandle;
 import java.util.Arrays;
 import java.util.function.BiConsumer;
 import java.util.function.Predicate;
@@ -15,22 +16,29 @@ import java.util.function.Predicate;
 public final class CommandRequirementHooks<S> {
     private static final int MAX_CHAIN_LENGTH = 12;
 
-    private final RequirementOverride<S> override;
-    private final Field requirementField;
+    private static final VarHandle REQUIREMENT_HANDLE;
 
-    private CommandRequirementHooks(RequirementOverride<S> override, Field requirementField) {
-        this.override = override;
-        this.requirementField = requirementField;
+    static {
+        try {
+            MethodHandles.Lookup lookup = MethodHandles.lookup();
+            REQUIREMENT_HANDLE = lookup.findVarHandle(CommandNode.class, "requirement", Predicate.class);
+        } catch (ReflectiveOperationException e) {
+            throw new Error(e);
+        }
     }
 
-    public static <S> CommandRequirementHooks<S> tryCreate(RequirementOverride<S> override) throws ReflectiveOperationException {
-        var requirementField = CommandNode.class.getDeclaredField("requirement");
-        requirementField.setAccessible(true);
-        return new CommandRequirementHooks<>(override, requirementField);
+    private final RequirementOverride<S> override;
+
+    private CommandRequirementHooks(RequirementOverride<S> override) {
+        this.override = override;
+    }
+
+    public static <S> CommandRequirementHooks<S> create(RequirementOverride<S> override) {
+        return new CommandRequirementHooks<>(override);
     }
 
     @SuppressWarnings("unchecked")
-    public void hookAll(CommandDispatcher<S> dispatcher) {
+    public void applyTo(CommandDispatcher<S> dispatcher) {
         var nodes = dispatcher.getRoot().getChildren();
 
         Multimap<CommandNode<S>, Predicate<S>> overrides = HashMultimap.create();
@@ -44,7 +52,7 @@ public final class CommandRequirementHooks<S> {
             var requirements = overrides.get(node);
 
             var requirement = this.anyRequirement(requirements.toArray(new Predicate[0]));
-            this.setRequirement(node, requirement);
+            REQUIREMENT_HANDLE.set(node, requirement);
         }
     }
 
@@ -161,15 +169,7 @@ public final class CommandRequirementHooks<S> {
         };
     }
 
-    private void setRequirement(CommandNode<S> node, Predicate<S> requirement) {
-        try {
-            this.requirementField.set(node, requirement);
-        } catch (IllegalAccessException e) {
-            PlayerRoles.LOGGER.error("Failed to hook command node {}", node, e);
-        }
-    }
-
     public interface RequirementOverride<S> {
-        Predicate<S> apply(CommandNode<S>[] nodes, Predicate<S> existing);
+        Predicate<S> apply(CommandNode<S>[] nodes, Predicate<S> parent);
     }
 }

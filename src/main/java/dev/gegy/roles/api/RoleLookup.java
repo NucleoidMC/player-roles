@@ -8,6 +8,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec2f;
 import org.jetbrains.annotations.Nullable;
 
+// TODO
 public final class RoleLookup {
     @Nullable
     public static RoleReader bySource(ServerCommandSource source) {

@@ -24,7 +24,7 @@ public class ServerPlayNetworkHandlerMixin {
     private Text formatChat(Text text, TextStream.Message message) {
         if (this.player instanceof PlayerRoleSource roleSource) {
             var roles = roleSource.getPlayerRoles();
-            var chatStyle = roles.select(PlayerRoles.CHAT_STYLE);
+            var chatStyle = roles.overrides().select(PlayerRoles.CHAT_STYLE);
             if (chatStyle != null) {
                 return chatStyle.make(this.player.getDisplayName(), message.getFiltered());
             }
