@@ -6,13 +6,13 @@ import net.minecraft.util.StringIdentifiable;
 
 import java.util.Locale;
 
-public enum OverrideResult implements StringIdentifiable {
+public enum RoleOverrideResult implements StringIdentifiable {
     PASS,
     ALLOW,
     DENY,
     HIDDEN;
 
-    public static final Codec<OverrideResult> CODEC = StringIdentifiable.createCodec(OverrideResult::values, OverrideResult::byName);
+    public static final Codec<RoleOverrideResult> CODEC = StringIdentifiable.createCodec(RoleOverrideResult::values, RoleOverrideResult::byName);
 
     public boolean isDefinitive() {
         return this != PASS;
@@ -26,12 +26,12 @@ public enum OverrideResult implements StringIdentifiable {
         return this == DENY;
     }
 
-    public static OverrideResult byName(String name) {
+    public static RoleOverrideResult byName(String name) {
         return switch (name.toLowerCase(Locale.ROOT)) {
-            case "allow", "yes", "true" -> OverrideResult.ALLOW;
-            case "deny", "no", "false" -> OverrideResult.DENY;
-            case "hidden", "hide" -> OverrideResult.HIDDEN;
-            default -> OverrideResult.PASS;
+            case "allow", "yes", "true" -> RoleOverrideResult.ALLOW;
+            case "deny", "no", "false" -> RoleOverrideResult.DENY;
+            case "hidden", "hide" -> RoleOverrideResult.HIDDEN;
+            default -> RoleOverrideResult.PASS;
         };
     }
 

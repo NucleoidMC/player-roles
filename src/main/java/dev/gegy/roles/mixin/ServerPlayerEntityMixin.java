@@ -1,7 +1,9 @@
 package dev.gegy.roles.mixin;
 
+import com.google.common.base.Preconditions;
 import com.mojang.authlib.GameProfile;
-import dev.gegy.roles.api.PlayerRoleSource;
+import dev.gegy.roles.PlayerWithRoles;
+import dev.gegy.roles.config.PlayerRolesConfig;
 import dev.gegy.roles.store.PlayerRoleManager;
 import dev.gegy.roles.store.PlayerRoleSet;
 import net.fabricmc.fabric.api.util.NbtType;
@@ -17,22 +19,33 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ServerPlayerEntity.class)
-public abstract class ServerPlayerEntityMixin extends PlayerEntity implements PlayerRoleSource {
+public abstract class ServerPlayerEntityMixin extends PlayerEntity implements PlayerWithRoles {
     @Unique
-    private final PlayerRoleSet playerRoleSet = new PlayerRoleSet((ServerPlayerEntity) (Object) this);
+    private PlayerRoleSet playerRoleSet;
 
     private ServerPlayerEntityMixin(World world, BlockPos pos, float yaw, GameProfile profile) {
         super(world, pos, yaw, profile);
     }
 
     @Override
-    public void notifyPlayerRoleReload() {
-        this.playerRoleSet.rebuildOverridesAndNotify();
+    public PlayerRoleSet loadPlayerRoles(PlayerRolesConfig config) {
+        var self = (ServerPlayerEntity) (Object) this;
+
+        var oldRoles = this.playerRoleSet;
+        var newRoles = new PlayerRoleSet(config.everyone(), self);
+        if (oldRoles != null) {
+            newRoles.reloadFrom(config, oldRoles);
+            newRoles.rebuildOverridesAndNotify();
+        }
+
+        this.playerRoleSet = newRoles;
+
+        return newRoles;
     }
 
     @Override
-    public PlayerRoleSet getPlayerRoles() {
-        return this.playerRoleSet;
+    public PlayerRoleSet getPlayerRoleSet() {
+        return Preconditions.checkNotNull(this.playerRoleSet, "player roles were not initialized");
     }
 
     @Inject(method = "readCustomDataFromNbt", at = @At("RETURN"))
@@ -44,6 +57,9 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity implements Pl
 
     @Inject(method = "copyFrom", at = @At("HEAD"))
     private void copyFrom(ServerPlayerEntity oldPlayer, boolean alive, CallbackInfo ci) {
-        this.playerRoleSet.copyFrom(((PlayerRoleSource) oldPlayer).getPlayerRoles());
+        var newRoles = this.getPlayerRoleSet();
+        var oldRoles = ((PlayerWithRoles) oldPlayer).getPlayerRoleSet();
+
+        newRoles.copyFrom(oldRoles);
     }
 }

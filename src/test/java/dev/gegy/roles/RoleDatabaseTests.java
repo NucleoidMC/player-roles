@@ -1,6 +1,6 @@
 package dev.gegy.roles;
 
-import dev.gegy.roles.store.PlayerIndexedDatabase;
+import dev.gegy.roles.store.db.Uuid2BinaryDatabase;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 
@@ -24,7 +24,7 @@ final class RoleDatabaseTests {
 
     @Test
     void testAddOne() throws IOException {
-        PlayerIndexedDatabase database = createEmptyDatabase();
+        Uuid2BinaryDatabase database = createEmptyDatabase();
         database.put(FOO, encode("foo"));
 
         assertEquals(decode(database.get(FOO)), "foo");
@@ -33,7 +33,7 @@ final class RoleDatabaseTests {
 
     @Test
     void testAddAndUpdateOne() throws IOException {
-        PlayerIndexedDatabase database = createEmptyDatabase();
+        Uuid2BinaryDatabase database = createEmptyDatabase();
         database.put(FOO, encode("foo"));
         assertEquals(decode(database.get(FOO)), "foo");
 
@@ -43,7 +43,7 @@ final class RoleDatabaseTests {
 
     @Test
     void testAddAndRemoveOne() throws IOException {
-        PlayerIndexedDatabase database = createEmptyDatabase();
+        Uuid2BinaryDatabase database = createEmptyDatabase();
         database.put(FOO, encode("foo"));
         assertEquals(decode(database.get(FOO)), "foo");
 
@@ -53,7 +53,7 @@ final class RoleDatabaseTests {
 
     @Test
     void testAddAndShrinkInMiddle() throws IOException {
-        PlayerIndexedDatabase database = createEmptyDatabase();
+        Uuid2BinaryDatabase database = createEmptyDatabase();
         database.put(FOO, encode("foo"));
         database.put(BAR, encode("bar"));
         database.put(BAZ, encode("baz"));
@@ -71,7 +71,7 @@ final class RoleDatabaseTests {
 
     @Test
     void testAddAndGrowInMiddle() throws IOException {
-        PlayerIndexedDatabase database = createEmptyDatabase();
+        Uuid2BinaryDatabase database = createEmptyDatabase();
         database.put(FOO, encode("foo"));
         database.put(BAR, encode("bar"));
         database.put(BAZ, encode("baz"));
@@ -89,7 +89,7 @@ final class RoleDatabaseTests {
 
     @Test
     void testAddAndRemoveInMiddle() throws IOException {
-        PlayerIndexedDatabase database = createEmptyDatabase();
+        Uuid2BinaryDatabase database = createEmptyDatabase();
         database.put(FOO, encode("foo"));
         database.put(BAR, encode("bar"));
         database.put(BAZ, encode("baz"));
@@ -107,7 +107,7 @@ final class RoleDatabaseTests {
 
     @Test
     void testPersistent() throws IOException {
-        PlayerIndexedDatabase database = createEmptyDatabase();
+        Uuid2BinaryDatabase database = createEmptyDatabase();
         database.put(FOO, encode("foo"));
         database.put(BAZ, encode("baz"));
 
@@ -123,7 +123,7 @@ final class RoleDatabaseTests {
     void testBigDatabaseGrow() throws IOException {
         UUID[] uuids = createUuids(30);
 
-        PlayerIndexedDatabase database = createEmptyDatabase();
+        Uuid2BinaryDatabase database = createEmptyDatabase();
         for (UUID uuid : uuids) {
             database.put(uuid, encode(uuid.toString()));
         }
@@ -139,7 +139,7 @@ final class RoleDatabaseTests {
     void testBigDatabaseRemove() throws IOException {
         UUID[] uuids = createUuids(30);
 
-        PlayerIndexedDatabase database = createEmptyDatabase();
+        Uuid2BinaryDatabase database = createEmptyDatabase();
         for (UUID uuid : uuids) {
             database.put(uuid, encode(uuid.toString()));
         }
@@ -154,7 +154,7 @@ final class RoleDatabaseTests {
     void testBigDatabaseShrink() throws IOException {
         UUID[] uuids = createUuids(30);
 
-        PlayerIndexedDatabase database = createEmptyDatabase();
+        Uuid2BinaryDatabase database = createEmptyDatabase();
         for (UUID uuid : uuids) {
             database.put(uuid, encode(uuid.toString()));
         }
@@ -171,7 +171,7 @@ final class RoleDatabaseTests {
         boolean[] set = new boolean[uuids.length];
         Arrays.fill(set, true);
 
-        PlayerIndexedDatabase database = createEmptyDatabase();
+        Uuid2BinaryDatabase database = createEmptyDatabase();
         for (UUID uuid : uuids) {
             database.put(uuid, encode(uuid.toString()));
         }
@@ -211,13 +211,13 @@ final class RoleDatabaseTests {
         return uuids;
     }
 
-    private static PlayerIndexedDatabase createEmptyDatabase() throws IOException {
+    private static Uuid2BinaryDatabase createEmptyDatabase() throws IOException {
         Files.deleteIfExists(DATABASE_PATH);
-        return PlayerIndexedDatabase.open(DATABASE_PATH);
+        return Uuid2BinaryDatabase.open(DATABASE_PATH);
     }
 
-    private static PlayerIndexedDatabase reopenDatabase() throws IOException {
-        return PlayerIndexedDatabase.open(DATABASE_PATH);
+    private static Uuid2BinaryDatabase reopenDatabase() throws IOException {
+        return Uuid2BinaryDatabase.open(DATABASE_PATH);
     }
 
     private static ByteBuffer encode(String text) {

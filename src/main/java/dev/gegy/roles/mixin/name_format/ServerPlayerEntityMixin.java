@@ -2,7 +2,7 @@ package dev.gegy.roles.mixin.name_format;
 
 import com.mojang.authlib.GameProfile;
 import dev.gegy.roles.PlayerRoles;
-import dev.gegy.roles.api.PlayerRoleSource;
+import dev.gegy.roles.api.PlayerRolesApi;
 import dev.gegy.roles.mixin.TeamAccessor;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -13,7 +13,7 @@ import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(ServerPlayerEntity.class)
-public abstract class ServerPlayerEntityMixin extends PlayerEntity implements PlayerRoleSource {
+public abstract class ServerPlayerEntityMixin extends PlayerEntity {
     private ServerPlayerEntityMixin(World world, BlockPos pos, float yaw, GameProfile profile) {
         super(world, pos, yaw, profile);
     }
@@ -24,7 +24,9 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity implements Pl
 
         var team = this.getScoreboardTeam();
         if (team == null || ((TeamAccessor) team).getFormattingColor() == Formatting.RESET) {
-            var nameFormat = this.getPlayerRoles().overrides().select(PlayerRoles.NAME_FORMAT);
+            var roles = PlayerRolesApi.lookup().byPlayer(this);
+
+            var nameFormat = roles.overrides().select(PlayerRoles.NAME_FORMAT);
             if (nameFormat != null) {
                 displayName = nameFormat.apply(displayName.shallowCopy());
             }

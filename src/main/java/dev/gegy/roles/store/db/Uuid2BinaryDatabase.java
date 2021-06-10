@@ -1,4 +1,4 @@
-package dev.gegy.roles.store;
+package dev.gegy.roles.store.db;
 
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import it.unimi.dsi.fastutil.objects.Object2LongMaps;
@@ -7,7 +7,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
@@ -21,7 +20,7 @@ import java.util.UUID;
  * Very simple persistent database indexed by UUID. This implementation is not optimized for performance, but rather
  * for simplicity.
  */
-public final class PlayerIndexedDatabase implements Closeable {
+public final class Uuid2BinaryDatabase implements Closeable {
     private static final int MAX_VALUE_SIZE = 4 * 1024 * 1024;
 
     private static final int UUID_BYTES = 16;
@@ -42,16 +41,16 @@ public final class PlayerIndexedDatabase implements Closeable {
 
     final ByteBuffer[] headerBytes = new ByteBuffer[] { this.uuidBytes, this.sizeBytes };
 
-    private PlayerIndexedDatabase(FileChannel file, Object2LongMap<UUID> pointers) {
+    private Uuid2BinaryDatabase(FileChannel file, Object2LongMap<UUID> pointers) {
         this.file = file;
         this.pointers = pointers;
         this.pointers.defaultReturnValue(NULL_POINTER);
     }
 
-    public static PlayerIndexedDatabase open(Path path) throws IOException {
+    public static Uuid2BinaryDatabase open(Path path) throws IOException {
         var channel = FileChannel.open(path, StandardOpenOption.CREATE, StandardOpenOption.READ, StandardOpenOption.WRITE);
         var pointers = buildPointerIndex(channel);
-        return new PlayerIndexedDatabase(channel, pointers);
+        return new Uuid2BinaryDatabase(channel, pointers);
     }
 
     private static Object2LongMap<UUID> buildPointerIndex(FileChannel channel) throws IOException {
@@ -68,8 +67,8 @@ public final class PlayerIndexedDatabase implements Closeable {
         while (pointer < fileSize) {
             channel.position(pointer);
 
-            clear(uuidBytes);
-            clear(sizeBytes);
+            uuidBytes.clear();
+            sizeBytes.clear();
             channel.read(uuidBytes);
             channel.read(sizeBytes);
 
@@ -93,7 +92,7 @@ public final class PlayerIndexedDatabase implements Closeable {
 
         this.file.position(pointer + UUID_BYTES);
 
-        clear(this.sizeBytes);
+        this.sizeBytes.clear();
         this.readToEnd(this.sizeBytes);
 
         int size = this.sizeBuffer.get(0);
@@ -122,7 +121,7 @@ public final class PlayerIndexedDatabase implements Closeable {
 
         this.file.position(pointer + UUID_BYTES);
 
-        clear(this.sizeBytes);
+        this.sizeBytes.clear();
         this.readToEnd(this.sizeBytes);
 
         int size = validateSize(this.sizeBuffer.get(0));
@@ -144,12 +143,12 @@ public final class PlayerIndexedDatabase implements Closeable {
     }
 
     private ByteBuffer[] writeHeader(UUID key, int size) {
-        clear(this.uuidBytes);
-        clear(this.uuidBuffer);
+        this.uuidBytes.clear();
+        this.uuidBuffer.clear();
         this.uuidBuffer.put(key.getMostSignificantBits()).put(key.getLeastSignificantBits());
 
-        clear(this.sizeBytes);
-        clear(this.sizeBuffer);
+        this.sizeBytes.clear();
+        this.sizeBuffer.clear();
         this.sizeBuffer.put(size);
 
         return this.headerBytes;
@@ -158,7 +157,7 @@ public final class PlayerIndexedDatabase implements Closeable {
     private void update(long pointer, ByteBuffer bytes) throws IOException {
         this.file.position(pointer + UUID_BYTES);
 
-        clear(this.sizeBytes);
+        this.sizeBytes.clear();
         this.readToEnd(this.sizeBytes);
 
         int lastSize = validateSize(this.sizeBuffer.get(0));
@@ -168,8 +167,8 @@ public final class PlayerIndexedDatabase implements Closeable {
             this.shiftAfter(endPointer, newSize - lastSize);
         }
 
-        clear(this.sizeBytes);
-        clear(this.sizeBuffer);
+        this.sizeBytes.clear();
+        this.sizeBuffer.clear();
         this.sizeBuffer.put(newSize);
 
         this.file.position(pointer + UUID_BYTES);
@@ -274,7 +273,7 @@ public final class PlayerIndexedDatabase implements Closeable {
     private static int copyBytes(FileChannel file, ByteBuffer buffer, long source, long destination) throws IOException {
         file.position(source);
 
-        clear(buffer);
+        buffer.clear();
         int read = file.read(buffer);
         buffer.flip();
 
@@ -296,11 +295,5 @@ public final class PlayerIndexedDatabase implements Closeable {
     @Override
     public synchronized void close() throws IOException {
         this.file.close();
-    }
-
-    // in newer Java versions, ByteBuffer overrides the clear method in order to return the right type.
-    // here we upcast to force compatibility when compiling with newer Java versions and running on older.
-    private static void clear(Buffer buffer) {
-        buffer.clear();
     }
 }

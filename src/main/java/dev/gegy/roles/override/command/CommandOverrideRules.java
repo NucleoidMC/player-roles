@@ -1,7 +1,7 @@
 package dev.gegy.roles.override.command;
 
 import com.mojang.serialization.Codec;
-import dev.gegy.roles.api.override.OverrideResult;
+import dev.gegy.roles.api.override.RoleOverrideResult;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,7 +21,7 @@ public final class CommandOverrideRules {
             }
     );
 
-    public static final Codec<CommandOverrideRules> CODEC = Codec.unboundedMap(PATTERN_CODEC, OverrideResult.CODEC)
+    public static final Codec<CommandOverrideRules> CODEC = Codec.unboundedMap(PATTERN_CODEC, RoleOverrideResult.CODEC)
             .xmap(map -> {
                 var rules = CommandOverrideRules.builder();
                 map.forEach(rules::add);
@@ -40,14 +40,14 @@ public final class CommandOverrideRules {
         return new Builder();
     }
 
-    public OverrideResult test(MatchableCommand command) {
+    public RoleOverrideResult test(MatchableCommand command) {
         for (var rule : this.rules) {
             var result = rule.test(command);
             if (result.isDefinitive()) {
                 return result;
             }
         }
-        return OverrideResult.PASS;
+        return RoleOverrideResult.PASS;
     }
 
     @Override
@@ -61,7 +61,7 @@ public final class CommandOverrideRules {
         Builder() {
         }
 
-        public Builder add(Pattern[] patterns, OverrideResult result) {
+        public Builder add(Pattern[] patterns, RoleOverrideResult result) {
             this.rules.add(new Rule(patterns, result));
             return this;
         }
@@ -73,14 +73,14 @@ public final class CommandOverrideRules {
         }
     }
 
-    private record Rule(Pattern[] patterns, OverrideResult result) {
-        OverrideResult test(MatchableCommand command) {
+    private record Rule(Pattern[] patterns, RoleOverrideResult result) {
+        RoleOverrideResult test(MatchableCommand command) {
             if (this.result.isAllowed()) {
-                return command.matchesAllow(this.patterns) ? this.result : OverrideResult.PASS;
+                return command.matchesAllow(this.patterns) ? this.result : RoleOverrideResult.PASS;
             } else if (this.result.isDenied()) {
-                return command.matchesDeny(this.patterns) ? this.result : OverrideResult.PASS;
+                return command.matchesDeny(this.patterns) ? this.result : RoleOverrideResult.PASS;
             }
-            return OverrideResult.PASS;
+            return RoleOverrideResult.PASS;
         }
 
         int size() {

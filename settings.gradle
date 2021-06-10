@@ -10,3 +10,4 @@ pluginManagement {
 }
 
 rootProject.name = 'player-roles'
+include 'api'

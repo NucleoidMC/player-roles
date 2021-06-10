@@ -2,7 +2,7 @@ package dev.gegy.roles.override.permission;
 
 import com.mojang.serialization.Codec;
 import dev.gegy.roles.PlayerRoles;
-import dev.gegy.roles.api.PlayerRoleSource;
+import dev.gegy.roles.api.PlayerRolesApi;
 import dev.gegy.roles.api.override.RoleOverrideType;
 import me.lucko.fabric.api.permissions.v0.PermissionCheckEvent;
 import net.fabricmc.fabric.api.util.TriState;
@@ -22,13 +22,11 @@ public record PermissionKeyOverride(PermissionKeyRules rules) {
 
         PermissionCheckEvent.EVENT.register((source, permission) -> {
             if (source instanceof ServerCommandSource serverSource) {
-                var entity = serverSource.getEntity();
-                if (entity instanceof PlayerRoleSource roleSource) {
-                    var roles = roleSource.getPlayerRoles();
-                    var result = roles.overrides().test(override, permissions -> permissions.rules.test(permission));
-                    return result.asTriState();
-                }
+                var roles = PlayerRolesApi.lookup().bySource(serverSource);
+                var result = roles.overrides().test(override, permissions -> permissions.rules.test(permission));
+                return result.asTriState();
             }
+
             return TriState.DEFAULT;
         });
     }

@@ -2,7 +2,7 @@ package dev.gegy.roles.mixin.command;
 
 import com.mojang.authlib.GameProfile;
 import dev.gegy.roles.PlayerRoles;
-import dev.gegy.roles.api.PlayerRoleSource;
+import dev.gegy.roles.api.PlayerRolesApi;
 import net.minecraft.server.PlayerManager;
 import net.minecraft.server.command.ServerCommandSource;
 import org.spongepowered.asm.mixin.Mixin;
@@ -24,11 +24,7 @@ public class ServerCommandSourceMixin {
         }
 
         var player = playerManager.getPlayer(profile.getId());
-        if (player instanceof PlayerRoleSource roleSource) {
-            var roles = roleSource.getPlayerRoles();
-            return roles.overrides().test(PlayerRoles.COMMAND_FEEDBACK);
-        }
-
-        return false;
+        var roles = PlayerRolesApi.lookup().byPlayer(player);
+        return roles.overrides().test(PlayerRoles.COMMAND_FEEDBACK);
     }
 }

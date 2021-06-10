@@ -1,7 +1,7 @@
-package dev.gegy.roles.api;
+package dev.gegy.roles.api.override;
 
 import net.minecraft.server.network.ServerPlayerEntity;
 
 public interface RoleChangeListener {
-    void notifyChange(ServerPlayerEntity player);
+    void onRoleChange(ServerPlayerEntity player);
 }

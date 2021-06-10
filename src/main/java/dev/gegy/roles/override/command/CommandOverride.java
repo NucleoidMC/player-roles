@@ -3,8 +3,8 @@ package dev.gegy.roles.override.command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.serialization.Codec;
 import dev.gegy.roles.PlayerRoles;
-import dev.gegy.roles.api.RoleLookup;
-import dev.gegy.roles.api.override.OverrideResult;
+import dev.gegy.roles.api.PlayerRolesApi;
+import dev.gegy.roles.api.override.RoleOverrideResult;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.server.command.ServerCommandSource;
 
@@ -36,38 +36,38 @@ public record CommandOverride(CommandOverrideRules rules) {
     }
 
     private static void hookCommands(CommandDispatcher<ServerCommandSource> dispatcher) {
-        var hooks = CommandRequirementHooks.<ServerCommandSource>create((nodes, parent) -> {
-            var command = MatchableCommand.compile(nodes);
+        try {
+            var hooks = CommandRequirementHooks.<ServerCommandSource>tryCreate((nodes, parent) -> {
+                var command = MatchableCommand.compile(nodes);
 
-            return source -> {
-                return switch (canUseCommand(source, command)) {
-                    case ALLOW -> true;
-                    case DENY -> false;
-                    case HIDDEN -> !CommandTestContext.isSuggesting();
-                    default -> parent.test(source);
+                return source -> {
+                    return switch (canUseCommand(source, command)) {
+                        case ALLOW -> true;
+                        case DENY -> false;
+                        case HIDDEN -> !CommandTestContext.isSuggesting();
+                        default -> parent.test(source);
+                    };
                 };
-            };
-        });
+            });
 
-        hooks.applyTo(dispatcher);
+            hooks.applyTo(dispatcher);
+        } catch (ReflectiveOperationException e) {
+            PlayerRoles.LOGGER.error("Failed to reflect into command requirements!", e);
+        }
     }
 
-    private static OverrideResult canUseCommand(ServerCommandSource source, MatchableCommand command) {
-        if (doesBypassPermissions(source)) return OverrideResult.PASS;
+    private static RoleOverrideResult canUseCommand(ServerCommandSource source, MatchableCommand command) {
+        if (doesBypassPermissions(source)) return RoleOverrideResult.PASS;
 
-        var roles = RoleLookup.bySource(source);
-        if (roles != null) {
-            return roles.overrides().test(PlayerRoles.COMMANDS, m -> m.test(command));
-        }
-
-        return OverrideResult.PASS;
+        var roles = PlayerRolesApi.lookup().bySource(source);
+        return roles.overrides().test(PlayerRoles.COMMANDS, m -> m.test(command));
     }
 
     public static boolean doesBypassPermissions(ServerCommandSource source) {
         return source.hasPermissionLevel(4);
     }
 
-    public OverrideResult test(MatchableCommand command) {
+    public RoleOverrideResult test(MatchableCommand command) {
         return this.rules.test(command);
     }
 }

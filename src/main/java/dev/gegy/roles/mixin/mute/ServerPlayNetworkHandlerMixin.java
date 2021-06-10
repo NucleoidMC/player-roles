@@ -1,7 +1,7 @@
 package dev.gegy.roles.mixin.mute;
 
 import dev.gegy.roles.PlayerRoles;
-import dev.gegy.roles.api.PlayerRoleSource;
+import dev.gegy.roles.api.PlayerRolesApi;
 import net.minecraft.network.packet.c2s.play.ChatMessageC2SPacket;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -26,14 +26,12 @@ public class ServerPlayNetworkHandlerMixin {
             cancellable = true
     )
     private void onGameMessage(ChatMessageC2SPacket packet, CallbackInfo ci) {
-        if (this.player instanceof PlayerRoleSource roleSource) {
-            var roles = roleSource.getPlayerRoles();
-            if (roles.overrides().test(PlayerRoles.MUTE)) {
-                String message = packet.getChatMessage();
-                if (!message.startsWith("/")) {
-                    PlayerRoles.sendMuteFeedback(this.player);
-                    ci.cancel();
-                }
+        var roles = PlayerRolesApi.lookup().byPlayer(this.player);
+        if (roles.overrides().test(PlayerRoles.MUTE)) {
+            String message = packet.getChatMessage();
+            if (!message.startsWith("/")) {
+                PlayerRoles.sendMuteFeedback(this.player);
+                ci.cancel();
             }
         }
     }

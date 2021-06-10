@@ -1,6 +1,9 @@
 package dev.gegy.roles;
 
 import com.mojang.serialization.Codec;
+import dev.gegy.roles.api.PlayerRolesApi;
+import dev.gegy.roles.api.RoleLookup;
+import dev.gegy.roles.api.RoleReader;
 import dev.gegy.roles.api.override.RoleOverrideType;
 import dev.gegy.roles.command.RoleCommand;
 import dev.gegy.roles.config.PlayerRolesConfig;
@@ -12,16 +15,21 @@ import dev.gegy.roles.store.PlayerRoleManager;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.entity.Entity;
+import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 public final class PlayerRoles implements ModInitializer {
     public static final String ID = "player_roles";
     public static final Logger LOGGER = LogManager.getLogger(ID);
+
+    public static final String EVERYONE = "everyone";
 
     public static final RoleOverrideType<CommandOverride> COMMANDS = registerOverride("commands", CommandOverride.CODEC)
             .withChangeListener(player -> {
@@ -39,6 +47,38 @@ public final class PlayerRoles implements ModInitializer {
 
     private static <T> RoleOverrideType<T> registerOverride(String id, Codec<T> codec) {
         return RoleOverrideType.register(PlayerRoles.identifier(id), codec);
+    }
+
+    static {
+        PlayerRolesApi.setRoleLookup(new RoleLookup() {
+            @Override
+            @NotNull
+            public RoleReader byEntity(Entity entity) {
+                if (entity instanceof PlayerWithRoles player) {
+                    return player.getPlayerRoleSet();
+                }
+                return RoleReader.EMPTY;
+            }
+
+            @Override
+            @NotNull
+            public RoleReader bySource(ServerCommandSource source) {
+                var entity = source.getEntity();
+                if (entity != null) {
+                    return this.byEntity(entity);
+                }
+
+                if (source instanceof IdentifiableCommandSource identifiable) {
+                    return switch (identifiable.player_roles$getIdentityType()) {
+                        case COMMAND_BLOCK -> PlayerRolesConfig.get().getCommandBlockRoles();
+                        case FUNCTION -> PlayerRolesConfig.get().getFunctionRoles();
+                        default -> RoleReader.EMPTY;
+                    };
+                }
+
+                return RoleReader.EMPTY;
+            }
+        });
     }
 
     @Override

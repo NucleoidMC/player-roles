@@ -8,8 +8,9 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
-import dev.gegy.roles.Role;
-import dev.gegy.roles.api.PlayerRoleSource;
+import dev.gegy.roles.SimpleRole;
+import dev.gegy.roles.api.PlayerRolesApi;
+import dev.gegy.roles.api.Role;
 import dev.gegy.roles.config.PlayerRolesConfig;
 import dev.gegy.roles.override.command.CommandOverride;
 import dev.gegy.roles.store.PlayerRoleManager;
@@ -24,8 +25,10 @@ import net.minecraft.text.Style;
 import net.minecraft.text.Texts;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 
@@ -84,7 +87,7 @@ public final class RoleCommand {
     }
     // @formatter:on
 
-    private static int updateRoles(ServerCommandSource source, Collection<GameProfile> players, String roleName, BiPredicate<PlayerRoleSet, Role> apply, String success) throws CommandSyntaxException {
+    private static int updateRoles(ServerCommandSource source, Collection<GameProfile> players, String roleName, BiPredicate<PlayerRoleSet, SimpleRole> apply, String success) throws CommandSyntaxException {
         var role = getRole(roleName);
         assertHasPower(source, role);
 
@@ -110,7 +113,7 @@ public final class RoleCommand {
 
         var roles = roleManager.peekRoles(server, player.getId())
                 .stream().collect(Collectors.toList());
-        var rolesComponent = Texts.join(roles, role -> new LiteralText(role.getName()).setStyle(Style.EMPTY.withColor(Formatting.GRAY)));
+        var rolesComponent = Texts.join(roles, role -> new LiteralText(role.getId()).setStyle(Style.EMPTY.withColor(Formatting.GRAY)));
         source.sendFeedback(new TranslatableText("Found %s roles on player: %s", roles.size(), rolesComponent), false);
 
         return Command.SINGLE_SUCCESS;
@@ -122,12 +125,8 @@ public final class RoleCommand {
         server.execute(() -> {
             var errors = PlayerRolesConfig.setup();
 
-            var players = server.getPlayerManager().getPlayerList();
-            for (var entity : players) {
-                if (entity instanceof PlayerRoleSource roleSource) {
-                    roleSource.notifyPlayerRoleReload();
-                }
-            }
+            var roleManager = PlayerRoleManager.get();
+            roleManager.onRoleReload(server, PlayerRolesConfig.get());
 
             if (errors.isEmpty()) {
                 source.sendFeedback(new TranslatableText("Role configuration successfully reloaded"), false);
@@ -143,16 +142,18 @@ public final class RoleCommand {
         return Command.SINGLE_SUCCESS;
     }
 
-    private static void assertHasPower(ServerCommandSource source, Role role) throws CommandSyntaxException {
-        if (CommandOverride.doesBypassPermissions(source)) return;
+    private static void assertHasPower(ServerCommandSource source, SimpleRole role) throws CommandSyntaxException {
+        if (hasAdminPower(source)) {
+            return;
+        }
 
-        int highestPower = getHighestPowerLevel(source);
-        if (highestPower <= role.getLevel()) {
+        var highestRole = getHighestRole(source);
+        if (highestRole == null || role.compareTo(highestRole) <= 0) {
             throw ROLE_POWER_TOO_LOW.create();
         }
     }
 
-    private static Role getRole(String roleName) throws CommandSyntaxException {
+    private static SimpleRole getRole(String roleName) throws CommandSyntaxException {
         var role = PlayerRolesConfig.get().get(roleName);
         if (role == null) throw ROLE_NOT_FOUND.create(roleName);
         return role;
@@ -160,26 +161,29 @@ public final class RoleCommand {
 
     private static SuggestionProvider<ServerCommandSource> roleSuggestions() {
         return (ctx, builder) -> {
-            int highestPowerLevel = getHighestPowerLevel(ctx.getSource());
+            var source = ctx.getSource();
+
+            boolean admin = hasAdminPower(source);
+            var highestRole = getHighestRole(source);
+            Comparator<Role> comparator = Comparator.nullsLast(Comparator.naturalOrder());
+
             return CommandSource.suggestMatching(
                     PlayerRolesConfig.get().stream()
-                            .filter(role -> role.getLevel() < highestPowerLevel)
-                            .map(Role::getName),
+                            .filter(role -> admin || comparator.compare(role, highestRole) < 0)
+                            .map(SimpleRole::getId),
                     builder
             );
         };
     }
 
-    private static int getHighestPowerLevel(ServerCommandSource source) {
-        var entity = source.getEntity();
-        if (entity == null || CommandOverride.doesBypassPermissions(source)) return Integer.MAX_VALUE;
+    @Nullable
+    private static Role getHighestRole(ServerCommandSource source) {
+        return PlayerRolesApi.lookup().bySource(source).stream()
+                .max(Comparator.naturalOrder())
+                .orElse(null);
+    }
 
-        if (entity instanceof PlayerRoleSource roleSource) {
-            var roles = roleSource.getPlayerRoles();
-            var levels = roles.stream().mapToInt(Role::getLevel);
-            return levels.max().orElse(0);
-        }
-
-        return 0;
+    private static boolean hasAdminPower(ServerCommandSource source) {
+        return source.getEntity() == null || CommandOverride.doesBypassPermissions(source);
     }
 }

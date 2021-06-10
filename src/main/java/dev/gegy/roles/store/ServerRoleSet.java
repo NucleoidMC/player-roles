@@ -1,44 +1,27 @@
 package dev.gegy.roles.store;
 
-import dev.gegy.roles.Role;
-import dev.gegy.roles.api.RoleWriter;
+import dev.gegy.roles.api.Role;
+import dev.gegy.roles.api.RoleReader;
 import dev.gegy.roles.api.override.RoleOverrideReader;
 import dev.gegy.roles.override.RoleOverrideMap;
+import it.unimi.dsi.fastutil.objects.ObjectSortedSet;
 
 import java.util.Iterator;
 import java.util.stream.Stream;
 
-public final class ServerRoleSet implements RoleWriter {
-    private final RoleSet roles = new RoleSet();
+public final class ServerRoleSet implements RoleReader {
+    private final ObjectSortedSet<Role> roles;
     private final RoleOverrideMap overrides = new RoleOverrideMap();
 
-    public ServerRoleSet() {
-        this.rebuildOverrides();
-    }
-
-    private void rebuildOverrides() {
-        this.overrides.clear();
+    private ServerRoleSet(ObjectSortedSet<Role> roles) {
+        this.roles = roles;
         for (var role : this.roles) {
             this.overrides.addAll(role.getOverrides());
         }
     }
 
-    @Override
-    public boolean add(Role role) {
-        if (this.roles.add(role)) {
-            this.rebuildOverrides();
-            return true;
-        }
-        return false;
-    }
-
-    @Override
-    public boolean remove(Role role) {
-        if (this.roles.remove(role)) {
-            this.rebuildOverrides();
-            return true;
-        }
-        return false;
+    public static ServerRoleSet of(ObjectSortedSet<Role> roles) {
+        return new ServerRoleSet(roles);
     }
 
     @Override
@@ -52,8 +35,8 @@ public final class ServerRoleSet implements RoleWriter {
     }
 
     @Override
-    public boolean has(String name) {
-        return this.roles.containsId(name);
+    public boolean has(Role role) {
+        return this.roles.contains(role);
     }
 
     @Override

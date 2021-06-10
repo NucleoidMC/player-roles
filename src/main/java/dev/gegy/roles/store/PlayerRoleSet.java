@@ -1,11 +1,13 @@
 package dev.gegy.roles.store;
 
 import dev.gegy.roles.PlayerRoles;
-import dev.gegy.roles.Role;
-import dev.gegy.roles.api.override.RoleOverrideReader;
+import dev.gegy.roles.api.Role;
+import dev.gegy.roles.api.RoleProvider;
 import dev.gegy.roles.api.RoleWriter;
-import dev.gegy.roles.config.PlayerRolesConfig;
+import dev.gegy.roles.api.override.RoleOverrideReader;
 import dev.gegy.roles.override.RoleOverrideMap;
+import it.unimi.dsi.fastutil.objects.ObjectAVLTreeSet;
+import it.unimi.dsi.fastutil.objects.ObjectSortedSet;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -15,16 +17,20 @@ import java.util.Iterator;
 import java.util.stream.Stream;
 
 public final class PlayerRoleSet implements RoleWriter {
+    private final Role everyoneRole;
+
     @Nullable
     private final ServerPlayerEntity player;
 
-    private final RoleSet roles = new RoleSet();
+    private final ObjectSortedSet<Role> roles = new ObjectAVLTreeSet<>();
     private final RoleOverrideMap overrides = new RoleOverrideMap();
 
     private boolean dirty;
 
-    public PlayerRoleSet(@Nullable ServerPlayerEntity player) {
+    public PlayerRoleSet(Role everyoneRole, @Nullable ServerPlayerEntity player) {
+        this.everyoneRole = everyoneRole;
         this.player = player;
+
         this.rebuildOverrides();
     }
 
@@ -69,16 +75,15 @@ public final class PlayerRoleSet implements RoleWriter {
 
     @Override
     public Stream<Role> stream() {
-        var roleConfig = PlayerRolesConfig.get();
         return Stream.concat(
                 this.roles.stream(),
-                Stream.of(roleConfig.everyone())
+                Stream.of(this.everyoneRole)
         );
     }
 
     @Override
-    public boolean has(String name) {
-        return name.equals(Role.EVERYONE) || this.roles.containsId(name);
+    public boolean has(Role role) {
+        return role == this.everyoneRole || this.roles.contains(role);
     }
 
     @Override
@@ -89,19 +94,18 @@ public final class PlayerRoleSet implements RoleWriter {
     public NbtList serialize() {
         var list = new NbtList();
         for (var role : this.roles) {
-            list.add(NbtString.of(role.getName()));
+            list.add(NbtString.of(role.getId()));
         }
         return list;
     }
 
-    public void deserialize(NbtList list) {
-        var config = PlayerRolesConfig.get();
-
+    public void deserialize(RoleProvider roleProvider, NbtList list) {
         this.roles.clear();
+
         for (int i = 0; i < list.size(); i++) {
             var name = list.getString(i);
-            var role = config.get(name);
-            if (role == null || name.equalsIgnoreCase(Role.EVERYONE)) {
+            var role = roleProvider.get(name);
+            if (role == null || name.equalsIgnoreCase(PlayerRoles.EVERYONE)) {
                 this.dirty = true;
                 PlayerRoles.LOGGER.warn("Encountered invalid role '{}'", name);
                 continue;
@@ -123,6 +127,13 @@ public final class PlayerRoleSet implements RoleWriter {
 
     public boolean isEmpty() {
         return this.roles.isEmpty();
+    }
+
+    public void reloadFrom(RoleProvider roleProvider, PlayerRoleSet roles) {
+        var nbt = roles.serialize();
+        this.deserialize(roleProvider, nbt);
+
+        this.dirty |= roles.dirty;
     }
 
     public void copyFrom(PlayerRoleSet roles) {

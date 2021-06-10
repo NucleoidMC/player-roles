@@ -4,8 +4,10 @@
   "package": "dev.gegy.roles.mixin",
   "compatibilityLevel": "JAVA_16",
   "mixins": [
+    "CommandBlockExecutorMixin",
+    "CommandFunctionMixin",
     "PlayerManagerMixin",
-    "ServerCommandSourceAccessor",
+    "ServerCommandSourceMixin",
     "ServerPlayerEntityMixin",
     "TeamAccessor",
     "chat_style.ServerPlayNetworkHandlerMixin",

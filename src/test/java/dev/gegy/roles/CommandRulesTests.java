@@ -2,7 +2,7 @@ package dev.gegy.roles;
 
 import dev.gegy.roles.override.command.CommandOverrideRules;
 import dev.gegy.roles.override.command.MatchableCommand;
-import dev.gegy.roles.api.override.OverrideResult;
+import dev.gegy.roles.api.override.RoleOverrideResult;
 import org.junit.jupiter.api.Test;
 
 import java.util.regex.Pattern;
@@ -13,51 +13,51 @@ final class CommandRulesTests {
     @Test
     void testAllowExecuteAsDenyExecute() {
         CommandOverrideRules rules = CommandOverrideRules.builder()
-                .add(matcher("execute as"), OverrideResult.ALLOW)
-                .add(matcher("execute"), OverrideResult.DENY)
+                .add(matcher("execute as"), RoleOverrideResult.ALLOW)
+                .add(matcher("execute"), RoleOverrideResult.DENY)
                 .build();
 
-        assertEquals(rules.test(command("execute as")), OverrideResult.ALLOW);
-        assertEquals(rules.test(command("execute at")), OverrideResult.DENY);
-        assertEquals(rules.test(command("execute")), OverrideResult.ALLOW);
+        assertEquals(rules.test(command("execute as")), RoleOverrideResult.ALLOW);
+        assertEquals(rules.test(command("execute at")), RoleOverrideResult.DENY);
+        assertEquals(rules.test(command("execute")), RoleOverrideResult.ALLOW);
     }
 
     @Test
     void testAllowExecuteDenyExecuteAs() {
         CommandOverrideRules rules = CommandOverrideRules.builder()
-                .add(matcher("execute as"), OverrideResult.DENY)
-                .add(matcher("execute"), OverrideResult.ALLOW)
+                .add(matcher("execute as"), RoleOverrideResult.DENY)
+                .add(matcher("execute"), RoleOverrideResult.ALLOW)
                 .build();
 
-        assertEquals(rules.test(command("execute as")), OverrideResult.DENY);
-        assertEquals(rules.test(command("execute at")), OverrideResult.ALLOW);
-        assertEquals(rules.test(command("execute")), OverrideResult.ALLOW);
+        assertEquals(rules.test(command("execute as")), RoleOverrideResult.DENY);
+        assertEquals(rules.test(command("execute at")), RoleOverrideResult.ALLOW);
+        assertEquals(rules.test(command("execute")), RoleOverrideResult.ALLOW);
     }
 
     @Test
     void testOverrideAllowWildcard() {
         CommandOverrideRules rules = CommandOverrideRules.builder()
-                .add(matcher("gamemode"), OverrideResult.DENY)
-                .add(matcher(".*"), OverrideResult.ALLOW)
+                .add(matcher("gamemode"), RoleOverrideResult.DENY)
+                .add(matcher(".*"), RoleOverrideResult.ALLOW)
                 .build();
 
-        assertEquals(rules.test(command("gamemode")), OverrideResult.DENY);
-        assertEquals(rules.test(command("gamemode creative")), OverrideResult.DENY);
-        assertEquals(rules.test(command("foo")), OverrideResult.ALLOW);
-        assertEquals(rules.test(command("bar")), OverrideResult.ALLOW);
+        assertEquals(rules.test(command("gamemode")), RoleOverrideResult.DENY);
+        assertEquals(rules.test(command("gamemode creative")), RoleOverrideResult.DENY);
+        assertEquals(rules.test(command("foo")), RoleOverrideResult.ALLOW);
+        assertEquals(rules.test(command("bar")), RoleOverrideResult.ALLOW);
     }
 
     @Test
     void testOverrideDenyWildcard() {
         CommandOverrideRules rules = CommandOverrideRules.builder()
-                .add(matcher("gamemode"), OverrideResult.ALLOW)
-                .add(matcher(".*"), OverrideResult.DENY)
+                .add(matcher("gamemode"), RoleOverrideResult.ALLOW)
+                .add(matcher(".*"), RoleOverrideResult.DENY)
                 .build();
 
-        assertEquals(rules.test(command("gamemode")), OverrideResult.ALLOW);
-        assertEquals(rules.test(command("gamemode creative")), OverrideResult.ALLOW);
-        assertEquals(rules.test(command("foo")), OverrideResult.DENY);
-        assertEquals(rules.test(command("bar")), OverrideResult.DENY);
+        assertEquals(rules.test(command("gamemode")), RoleOverrideResult.ALLOW);
+        assertEquals(rules.test(command("gamemode creative")), RoleOverrideResult.ALLOW);
+        assertEquals(rules.test(command("foo")), RoleOverrideResult.DENY);
+        assertEquals(rules.test(command("bar")), RoleOverrideResult.DENY);
     }
 
     private static Pattern[] matcher(String matcher) {

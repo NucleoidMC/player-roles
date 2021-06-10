@@ -8,8 +8,12 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.JsonOps;
 import dev.gegy.roles.PlayerRoles;
-import dev.gegy.roles.Role;
+import dev.gegy.roles.SimpleRole;
+import dev.gegy.roles.api.PlayerRolesApi;
+import dev.gegy.roles.api.Role;
+import dev.gegy.roles.api.RoleProvider;
 import dev.gegy.roles.store.ServerRoleSet;
+import it.unimi.dsi.fastutil.objects.ObjectAVLTreeSet;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -23,21 +27,21 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-public final class PlayerRolesConfig {
+public final class PlayerRolesConfig implements RoleProvider {
     private static final JsonParser JSON = new JsonParser();
 
-    private static PlayerRolesConfig instance = new PlayerRolesConfig(Collections.emptyList(), Role.empty(Role.EVERYONE));
+    private static PlayerRolesConfig instance = new PlayerRolesConfig(Collections.emptyList(), SimpleRole.empty(PlayerRoles.EVERYONE));
 
-    private final ImmutableMap<String, Role> roles;
-    private final Role everyone;
+    private final ImmutableMap<String, SimpleRole> roles;
+    private final SimpleRole everyone;
 
     private ServerRoleSet commandBlockRoles;
     private ServerRoleSet functionRoles;
 
-    private PlayerRolesConfig(List<Role> roles, Role everyone) {
-        ImmutableMap.Builder<String, Role> roleMap = ImmutableMap.builder();
-        for (Role role : roles) {
-            roleMap.put(role.getName(), role);
+    private PlayerRolesConfig(List<SimpleRole> roles, SimpleRole everyone) {
+        ImmutableMap.Builder<String, SimpleRole> roleMap = ImmutableMap.builder();
+        for (SimpleRole role : roles) {
+            roleMap.put(role.getId(), role);
         }
         this.roles = roleMap.build();
 
@@ -45,12 +49,12 @@ public final class PlayerRolesConfig {
     }
 
     private ServerRoleSet buildRoles(Predicate<RoleApplyConfig> apply) {
-        var roles = new ServerRoleSet();
+        var roleSet = new ObjectAVLTreeSet<Role>();
         this.roles.values().stream()
                 .filter(role -> apply.test(role.getApply()))
-                .forEach(roles::add);
+                .forEach(roleSet::add);
 
-        return roles;
+        return ServerRoleSet.of(roleSet);
     }
 
     public static PlayerRolesConfig get() {
@@ -70,7 +74,10 @@ public final class PlayerRolesConfig {
 
         try (var reader = Files.newBufferedReader(path)) {
             var root = JSON.parse(reader);
-            instance = parse(new Dynamic<>(JsonOps.INSTANCE, root), errorConsumer);
+            var config = parse(new Dynamic<>(JsonOps.INSTANCE, root), errorConsumer);
+            instance = config;
+
+            PlayerRolesApi.setRoleProvider(config);
         } catch (IOException e) {
             errorConsumer.report("Failed to read roles.json configuration", e);
             PlayerRoles.LOGGER.warn("Failed to load roles.json configuration", e);
@@ -107,16 +114,16 @@ public final class PlayerRolesConfig {
     private static <T> PlayerRolesConfig parse(Dynamic<T> root, ConfigErrorConsumer error) {
         var roleConfigs = RoleConfigMap.parse(root, error);
 
-        var everyone = Role.empty(Role.EVERYONE);
-        List<Role> roles = new ArrayList<>();
+        var everyone = SimpleRole.empty(PlayerRoles.EVERYONE);
+        List<SimpleRole> roles = new ArrayList<>();
 
-        int level = 1;
+        int index = 1;
         for (Pair<String, RoleConfig> entry : roleConfigs) {
             String name = entry.getFirst();
             RoleConfig roleConfig = entry.getSecond();
 
-            if (!name.equals(Role.EVERYONE)) {
-                roles.add(roleConfig.create(name, level++));
+            if (!name.equalsIgnoreCase(PlayerRoles.EVERYONE)) {
+                roles.add(roleConfig.create(name, index++));
             } else {
                 everyone = roleConfig.create(name, 0);
             }
@@ -125,13 +132,14 @@ public final class PlayerRolesConfig {
         return new PlayerRolesConfig(roles, everyone);
     }
 
+    @Override
     @Nullable
-    public Role get(String name) {
+    public SimpleRole get(String name) {
         return this.roles.get(name);
     }
 
     @NotNull
-    public Role everyone() {
+    public SimpleRole everyone() {
         return this.everyone;
     }
 
@@ -151,7 +159,7 @@ public final class PlayerRolesConfig {
         return functionRoles;
     }
 
-    public Stream<Role> stream() {
+    public Stream<SimpleRole> stream() {
         return this.roles.values().stream();
     }
 }

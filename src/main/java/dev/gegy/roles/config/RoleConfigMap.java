@@ -3,7 +3,7 @@ package dev.gegy.roles.config;
 import com.google.common.collect.Iterators;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Dynamic;
-import dev.gegy.roles.Role;
+import dev.gegy.roles.PlayerRoles;
 import dev.gegy.roles.override.RoleOverrideMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.jetbrains.annotations.NotNull;
@@ -35,7 +35,7 @@ public final class RoleConfigMap implements Iterable<Pair<String, RoleConfig>> {
         var roleBuilder = new Builder();
 
         for (var entry : roleEntries) {
-            var name = entry.getFirst().asString(Role.EVERYONE).toLowerCase(Locale.ROOT);
+            var name = entry.getFirst().asString(PlayerRoles.EVERYONE).toLowerCase(Locale.ROOT);
             var roleRoot = entry.getSecond();
 
             var roleConfigResult = RoleConfig.CODEC.parse(roleRoot);

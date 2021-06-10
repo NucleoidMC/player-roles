@@ -2,7 +2,6 @@ package dev.gegy.roles.override;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Codec;
-import dev.gegy.roles.api.override.OverrideResult;
 import dev.gegy.roles.api.override.RoleOverrideReader;
 import dev.gegy.roles.api.override.RoleOverrideType;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
@@ -16,8 +15,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Stream;
 
 public final class RoleOverrideMap implements RoleOverrideReader {
     @SuppressWarnings("unchecked")
@@ -40,12 +37,14 @@ public final class RoleOverrideMap implements RoleOverrideReader {
         }
     }
 
+    @Override
     @NotNull
     @SuppressWarnings("unchecked")
     public <T> List<T> get(RoleOverrideType<T> type) {
         return (List<T>) this.overrides.getOrDefault(type, ImmutableList.of());
     }
 
+    @Override
     @Nullable
     @SuppressWarnings("unchecked")
     public <T> List<T> getOrNull(RoleOverrideType<T> type) {
@@ -53,46 +52,17 @@ public final class RoleOverrideMap implements RoleOverrideReader {
     }
 
     @Override
-    public <T> Stream<T> streamOf(RoleOverrideType<T> type) {
-        return this.get(type).stream();
-    }
-
-    @Override
-    public <T> OverrideResult test(RoleOverrideType<T> type, Function<T, OverrideResult> function) {
-        var overrides = this.getOrNull(type);
-        if (overrides == null) {
-            return OverrideResult.PASS;
-        }
-
-        for (var override : overrides) {
-            var result = function.apply(override);
-            if (result.isDefinitive()) {
-                return result;
-            }
-        }
-
-        return OverrideResult.PASS;
-    }
-
-    @Override
-    @Nullable
-    public <T> T select(RoleOverrideType<T> type) {
-        var overrides = this.getOrNull(type);
-        if (overrides != null) {
-            for (var override : overrides) {
-                return override;
-            }
-        }
-        return null;
+    public Set<RoleOverrideType<?>> typeSet() {
+        return this.overrides.keySet();
     }
 
     public void clear() {
         this.overrides.clear();
     }
 
-    public void addAll(RoleOverrideMap map) {
-        for (var type : map.keySet()) {
-            this.addAllUnchecked(type, map.get(type));
+    public void addAll(RoleOverrideReader overrides) {
+        for (var type : overrides.typeSet()) {
+            this.addAllUnchecked(type, overrides.get(type));
         }
     }
 
@@ -112,9 +82,5 @@ public final class RoleOverrideMap implements RoleOverrideReader {
     @SuppressWarnings("unchecked")
     private <T> List<T> getOrCreateOverrides(RoleOverrideType<T> type) {
         return (List<T>) this.overrides.computeIfAbsent(type, t -> new ArrayList<>());
-    }
-
-    public Set<RoleOverrideType<?>> keySet() {
-        return this.overrides.keySet();
     }
 }

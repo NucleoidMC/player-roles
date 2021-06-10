@@ -2,7 +2,7 @@ package dev.gegy.roles.mixin.permission_level;
 
 import com.mojang.authlib.GameProfile;
 import dev.gegy.roles.PlayerRoles;
-import dev.gegy.roles.api.PlayerRoleSource;
+import dev.gegy.roles.api.PlayerRolesApi;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.PlayerManager;
 import org.spongepowered.asm.mixin.Mixin;
@@ -19,8 +19,8 @@ public abstract class MinecraftServerMixin {
     @Inject(method = "getPermissionLevel", at = @At("HEAD"), cancellable = true)
     public void getPermissionLevel(GameProfile profile, CallbackInfoReturnable<Integer> ci) {
         var player = this.getPlayerManager().getPlayer(profile.getId());
-        if (player instanceof PlayerRoleSource roleSource) {
-            var roles = roleSource.getPlayerRoles();
+        if (player != null) {
+            var roles = PlayerRolesApi.lookup().byPlayer(player);
             var permissionLevel = roles.overrides().select(PlayerRoles.PERMISSION_LEVEL);
             if (permissionLevel != null) {
                 ci.setReturnValue(permissionLevel);

@@ -2,7 +2,7 @@ package dev.gegy.roles.config;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.gegy.roles.Role;
+import dev.gegy.roles.SimpleRole;
 import dev.gegy.roles.override.RoleOverrideMap;
 import org.jetbrains.annotations.Nullable;
 import xyz.nucleoid.codecs.MoreCodecs;
@@ -38,7 +38,7 @@ public final class RoleConfig {
         this.apply = apply;
     }
 
-    public Role create(String name, int level) {
-        return new Role(name, this.overrides, level, this.apply != null ? this.apply : RoleApplyConfig.DEFAULT);
+    public SimpleRole create(String name, int index) {
+        return new SimpleRole(name, this.overrides, index, this.apply != null ? this.apply : RoleApplyConfig.DEFAULT);
     }
 }
