@@ -3,7 +3,7 @@ package dev.gegy.roles.store;
 import dev.gegy.roles.PlayerRoles;
 import dev.gegy.roles.api.Role;
 import dev.gegy.roles.api.RoleProvider;
-import dev.gegy.roles.api.RoleWriter;
+import dev.gegy.roles.api.RoleReader;
 import dev.gegy.roles.api.override.RoleOverrideReader;
 import dev.gegy.roles.override.RoleOverrideMap;
 import it.unimi.dsi.fastutil.objects.ObjectAVLTreeSet;
@@ -16,7 +16,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Iterator;
 import java.util.stream.Stream;
 
-public final class PlayerRoleSet implements RoleWriter {
+public final class PlayerRoleSet implements RoleReader {
     private final Role everyoneRole;
 
     @Nullable
@@ -46,7 +46,6 @@ public final class PlayerRoleSet implements RoleWriter {
         this.stream().forEach(role -> this.overrides.addAll(role.getOverrides()));
     }
 
-    @Override
     public boolean add(Role role) {
         if (this.roles.add(role)) {
             this.dirty = true;
@@ -57,7 +56,6 @@ public final class PlayerRoleSet implements RoleWriter {
         return false;
     }
 
-    @Override
     public boolean remove(Role role) {
         if (this.roles.remove(role)) {
             this.dirty = true;
