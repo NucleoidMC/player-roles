@@ -57,9 +57,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity implements Pl
 
     @Inject(method = "copyFrom", at = @At("HEAD"))
     private void copyFrom(ServerPlayerEntity oldPlayer, boolean alive, CallbackInfo ci) {
-        var newRoles = this.getPlayerRoleSet();
         var oldRoles = ((PlayerWithRoles) oldPlayer).getPlayerRoleSet();
-
-        newRoles.copyFrom(oldRoles);
+        this.playerRoleSet = oldRoles.copy();
     }
 }

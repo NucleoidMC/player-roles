@@ -141,4 +141,10 @@ public final class PlayerRoleSet implements RoleReader {
 
         this.rebuildOverrides();
     }
+
+    public PlayerRoleSet copy() {
+        PlayerRoleSet copy = new PlayerRoleSet(this.everyoneRole, this.player);
+        copy.copyFrom(this);
+        return copy;
+    }
 }
