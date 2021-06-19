@@ -23,6 +23,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -159,7 +160,16 @@ public final class PlayerRolesConfig implements RoleProvider {
         return functionRoles;
     }
 
-    public Stream<SimpleRole> stream() {
-        return this.roles.values().stream();
+    @NotNull
+    @Override
+    @SuppressWarnings("unchecked")
+    public Iterator<Role> iterator() {
+        return (Iterator<Role>) (Iterator) this.roles.values().iterator();
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public Stream<Role> stream() {
+        return (Stream<Role>) (Stream) this.roles.values().stream();
     }
 }

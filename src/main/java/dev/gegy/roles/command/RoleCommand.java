@@ -170,7 +170,7 @@ public final class RoleCommand {
             return CommandSource.suggestMatching(
                     PlayerRolesConfig.get().stream()
                             .filter(role -> admin || comparator.compare(role, highestRole) < 0)
-                            .map(SimpleRole::getId),
+                            .map(Role::getId),
                     builder
             );
         };

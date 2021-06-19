@@ -39,7 +39,8 @@ public interface RoleOverrideReader {
         }
     };
 
-    @Nullable <T> Collection<T> getOrNull(RoleOverrideType<T> type);
+    @Nullable
+    <T> Collection<T> getOrNull(RoleOverrideType<T> type);
 
     @NotNull
     default <T> Collection<T> get(RoleOverrideType<T> type) {

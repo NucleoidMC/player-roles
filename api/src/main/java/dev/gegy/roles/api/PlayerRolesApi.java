@@ -3,7 +3,7 @@ package dev.gegy.roles.api;
 public final class PlayerRolesApi {
     public static final String ID = "player_roles";
 
-    private static RoleProvider provider = id -> null;
+    private static RoleProvider provider = RoleProvider.EMPTY;
     private static RoleLookup lookup = RoleLookup.EMPTY;
 
     public static void setRoleProvider(RoleProvider provider) {
