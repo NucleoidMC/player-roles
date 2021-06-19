@@ -39,7 +39,7 @@ public final class PlayerRoles implements ModInitializer {
                 }
             });
 
-    public static final RoleOverrideType<ChatFormatOverride> CHAT_STYLE = registerOverride("chat_format", ChatFormatOverride.CODEC);
+    public static final RoleOverrideType<ChatFormatOverride> CHAT_FORMAT = registerOverride("chat_format", ChatFormatOverride.CODEC);
     public static final RoleOverrideType<NameStyleOverride> NAME_FORMAT = registerOverride("name_style", NameStyleOverride.CODEC);
     public static final RoleOverrideType<Boolean> COMMAND_FEEDBACK = registerOverride("command_feedback", Codec.BOOL);
     public static final RoleOverrideType<Boolean> MUTE = registerOverride("mute", Codec.BOOL);

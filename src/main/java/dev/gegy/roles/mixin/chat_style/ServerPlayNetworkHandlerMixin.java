@@ -18,14 +18,14 @@ public class ServerPlayNetworkHandlerMixin {
 
     @ModifyVariable(
             method = "handleMessage",
-            ordinal = 0,
+            ordinal = 1,
             at = @At(value = "STORE", ordinal = 0)
     )
     private Text formatChat(Text text, TextStream.Message message) {
         var roles = PlayerRolesApi.lookup().byPlayer(this.player);
-        var chatStyle = roles.overrides().select(PlayerRoles.CHAT_STYLE);
-        if (chatStyle != null) {
-            return chatStyle.make(this.player.getDisplayName(), message.getFiltered());
+        var chatFormat = roles.overrides().select(PlayerRoles.CHAT_FORMAT);
+        if (chatFormat != null) {
+            return chatFormat.make(this.player.getDisplayName(), message.getFiltered());
         }
         return text;
     }
