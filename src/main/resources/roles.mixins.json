@@ -18,7 +18,10 @@
     "mute.ServerPlayNetworkHandlerMixin",
     "mute.TeamMsgCommandMixin",
     "name_format.ServerPlayerEntityMixin",
-    "permission_level.MinecraftServerMixin"
+    "permission_level.MinecraftServerMixin",
+    "entity_selectors.EntityArgumentTypeMixin",
+    "entity_selectors.EntitySelectorMixin",
+    "entity_selectors.MessageArgumentTypeMixin"
   ],
   "injectors": {
     "defaultRequire": 1
