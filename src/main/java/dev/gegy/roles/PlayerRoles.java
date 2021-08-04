@@ -44,6 +44,7 @@ public final class PlayerRoles implements ModInitializer {
     public static final RoleOverrideType<Boolean> COMMAND_FEEDBACK = registerOverride("command_feedback", Codec.BOOL);
     public static final RoleOverrideType<Boolean> MUTE = registerOverride("mute", Codec.BOOL);
     public static final RoleOverrideType<Integer> PERMISSION_LEVEL = registerOverride("permission_level", Codec.intRange(0, 4));
+    public static final RoleOverrideType<Boolean> ENTITY_SELECTORS = registerOverride("entity_selectors", Codec.BOOL);
 
     private static <T> RoleOverrideType<T> registerOverride(String id, Codec<T> codec) {
         return RoleOverrideType.register(PlayerRoles.identifier(id), codec);

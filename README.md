@@ -49,7 +49,7 @@ The other roles that are specified function as overrides on top of the `everyone
 
 #### Overrides
 Within each role declaration, we list a set of overrides. Overrides are the generic system that this mod uses to change game behavior based on roles.
-Currently, the supported override types are `commands`, `name_style`, `chat_format`, `mute`, `command_feedback` and `permission_level`.
+Currently, the supported override types are `commands`, `name_style`, `chat_format`, `mute`, `command_feedback`, `permission_level` and `entity_selectors`.
 
 It is important to consider how overrides are applied when multiple roles target the same things. Conflicts like this are resolved by always choosing the role with the highest level.
 So, in the case of the example: although `everyone` declares every command except `help` to be disallowed, because `admin` and `spectator` have higher levels, they will override this behaviour.
@@ -118,6 +118,15 @@ The `command_feedback` override allows specific roles to receive this same kind 
 Command feedback is declared like:
 ```json
 "command_feedback": true
+```
+
+#### entity_selectors
+Normally, only command sources with a permission level of two or higher can use entity selectors.
+The `entity_selectors` override allows specific roles to use entity selectors.
+
+Entity selectors can be allowed like:
+```json
+"entity_selectors": true
 ```
 
 #### Other configuration
