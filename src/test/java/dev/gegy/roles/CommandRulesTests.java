@@ -48,6 +48,18 @@ final class CommandRulesTests {
     }
 
     @Test
+    void testOverrideAllowSpecificGameMode() {
+        CommandOverrideRules rules = CommandOverrideRules.builder()
+                .add(matcher("gamemode (spectator|survival)"), RoleOverrideResult.ALLOW)
+                .add(matcher("gamemode"), RoleOverrideResult.DENY)
+                .build();
+
+        assertEquals(rules.test(command("gamemode creative")), RoleOverrideResult.DENY);
+        assertEquals(rules.test(command("gamemode survival")), RoleOverrideResult.ALLOW);
+        assertEquals(rules.test(command("gamemode spectator")), RoleOverrideResult.ALLOW);
+    }
+
+    @Test
     void testOverrideDenyWildcard() {
         CommandOverrideRules rules = CommandOverrideRules.builder()
                 .add(matcher("gamemode"), RoleOverrideResult.ALLOW)

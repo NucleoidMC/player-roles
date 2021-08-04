@@ -89,7 +89,7 @@ public final class RoleCommand {
 
     private static int updateRoles(ServerCommandSource source, Collection<GameProfile> players, String roleName, BiPredicate<PlayerRoleSet, SimpleRole> apply, String success) throws CommandSyntaxException {
         var role = getRole(roleName);
-        assertHasPower(source, role);
+        requireHasPower(source, role);
 
         var roleManager = PlayerRoleManager.get();
         MinecraftServer server = source.getMinecraftServer();
@@ -142,7 +142,7 @@ public final class RoleCommand {
         return Command.SINGLE_SUCCESS;
     }
 
-    private static void assertHasPower(ServerCommandSource source, SimpleRole role) throws CommandSyntaxException {
+    private static void requireHasPower(ServerCommandSource source, SimpleRole role) throws CommandSyntaxException {
         if (hasAdminPower(source)) {
             return;
         }
@@ -179,7 +179,7 @@ public final class RoleCommand {
     @Nullable
     private static Role getHighestRole(ServerCommandSource source) {
         return PlayerRolesApi.lookup().bySource(source).stream()
-                .max(Comparator.naturalOrder())
+                .min(Comparator.naturalOrder())
                 .orElse(null);
     }
 
