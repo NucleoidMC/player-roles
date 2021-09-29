@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import dev.gegy.roles.api.PlayerRolesApi;
 import dev.gegy.roles.api.RoleLookup;
 import dev.gegy.roles.api.RoleReader;
+import dev.gegy.roles.api.VirtualServerCommandSource;
 import dev.gegy.roles.api.override.RoleOverrideType;
 import dev.gegy.roles.command.RoleCommand;
 import dev.gegy.roles.config.PlayerRolesConfig;
@@ -67,6 +68,10 @@ public final class PlayerRoles implements ModInitializer {
                 var entity = source.getEntity();
                 if (entity != null) {
                     return this.byEntity(entity);
+                }
+
+                if (source instanceof VirtualServerCommandSource virtualSource) {
+                    return virtualSource.getRoles();
                 }
 
                 if (source instanceof IdentifiableCommandSource identifiable) {
