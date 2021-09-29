@@ -21,11 +21,7 @@ public class VirtualServerCommandSource extends ServerCommandSource {
     private final RoleReader roles;
 
     public VirtualServerCommandSource(RoleReader roles, CommandOutput output, Vec3d pos, Vec2f rot, ServerWorld world, int level, String simpleName, Text name, MinecraftServer server, @Nullable Entity entity) {
-        this(roles, output, pos, rot, world, level, simpleName, name, server, entity, false, (context, success, result) -> {}, EntityAnchorArgumentType.EntityAnchor.FEET);
-    }
-
-    protected VirtualServerCommandSource(RoleReader roles, CommandOutput output, Vec3d pos, Vec2f rot, ServerWorld world, int level, String simpleName, Text name, MinecraftServer server, @Nullable Entity entity, boolean silent, ResultConsumer<ServerCommandSource> consumer, EntityAnchorArgumentType.EntityAnchor entityAnchor) {
-        super(output, pos, rot, world, level, simpleName, name, server, entity, silent, consumer, entityAnchor);
+        super(output, pos, rot, world, level, simpleName, name, server, entity, false, (context, success, result) -> {}, EntityAnchorArgumentType.EntityAnchor.FEET);
         this.roles = roles;
     }
 
