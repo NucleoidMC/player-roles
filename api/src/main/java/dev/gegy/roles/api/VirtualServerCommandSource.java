@@ -1,6 +1,5 @@
 package dev.gegy.roles.api;
 
-import com.mojang.brigadier.ResultConsumer;
 import net.minecraft.command.argument.EntityAnchorArgumentType;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.MinecraftServer;
@@ -13,11 +12,11 @@ import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * An extension of {@link ServerCommandSource} that allows specifying a
- * custom list of roles to use instead of the default empty set when no
+ * An extension of {@link ServerCommandSource} that implements {@link RoleOwner}
+ * to allow a custom list of roles to use instead of the default empty set when no
  * entity is passed.
  */
-public class VirtualServerCommandSource extends ServerCommandSource {
+public class VirtualServerCommandSource extends ServerCommandSource implements RoleOwner {
     private final RoleReader roles;
 
     public VirtualServerCommandSource(RoleReader roles, CommandOutput output, Vec3d pos, Vec2f rot, ServerWorld world, int level, String simpleName, Text name, MinecraftServer server, @Nullable Entity entity) {
@@ -25,6 +24,7 @@ public class VirtualServerCommandSource extends ServerCommandSource {
         this.roles = roles;
     }
 
+    @Override
     public RoleReader getRoles() {
         return this.roles;
     }
