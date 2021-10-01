@@ -1,9 +1,7 @@
 package dev.gegy.roles;
 
 import com.mojang.serialization.Codec;
-import dev.gegy.roles.api.PlayerRolesApi;
-import dev.gegy.roles.api.RoleLookup;
-import dev.gegy.roles.api.RoleReader;
+import dev.gegy.roles.api.*;
 import dev.gegy.roles.api.override.RoleOverrideType;
 import dev.gegy.roles.command.RoleCommand;
 import dev.gegy.roles.config.PlayerRolesConfig;
@@ -58,6 +56,11 @@ public final class PlayerRoles implements ModInitializer {
                 if (entity instanceof PlayerWithRoles player) {
                     return player.getPlayerRoleSet();
                 }
+
+                if (entity instanceof RoleOwner roleOwner) {
+                    return roleOwner.getRoles();
+                }
+
                 return RoleReader.EMPTY;
             }
 
@@ -67,6 +70,10 @@ public final class PlayerRoles implements ModInitializer {
                 var entity = source.getEntity();
                 if (entity != null) {
                     return this.byEntity(entity);
+                }
+
+                if (source instanceof RoleOwner roleOwner) {
+                    return roleOwner.getRoles();
                 }
 
                 if (source instanceof IdentifiableCommandSource identifiable) {
