@@ -17,7 +17,7 @@ public class ServerPlayNetworkHandlerMixin {
     public ServerPlayerEntity player;
 
     @Inject(
-            method = "onGameMessage",
+            method = "onChatMessage",
             at = @At(
                     value = "INVOKE",
                     target = "Ljava/lang/String;startsWith(Ljava/lang/String;)Z",

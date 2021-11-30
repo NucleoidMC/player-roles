@@ -2,7 +2,7 @@
   "required": true,
   "minVersion": "0.8",
   "package": "dev.gegy.roles.mixin",
-  "compatibilityLevel": "JAVA_16",
+  "compatibilityLevel": "JAVA_17",
   "mixins": [
     "CommandBlockExecutorMixin",
     "CommandFunctionMixin",
@@ -14,14 +14,14 @@
     "command.CommandDispatcherMixin",
     "command.CommandManagerMixin",
     "command.ServerCommandSourceMixin",
+    "entity_selectors.EntityArgumentTypeMixin",
+    "entity_selectors.EntitySelectorMixin",
+    "entity_selectors.MessageArgumentTypeMixin",
     "mute.MessageCommandMixin",
     "mute.ServerPlayNetworkHandlerMixin",
     "mute.TeamMsgCommandMixin",
     "name_format.ServerPlayerEntityMixin",
-    "permission_level.MinecraftServerMixin",
-    "entity_selectors.EntityArgumentTypeMixin",
-    "entity_selectors.EntitySelectorMixin",
-    "entity_selectors.MessageArgumentTypeMixin"
+    "permission_level.MinecraftServerMixin"
   ],
   "injectors": {
     "defaultRequire": 1
