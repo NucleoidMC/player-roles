@@ -19,11 +19,7 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.GameProfileArgumentType;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Style;
-import net.minecraft.text.Texts;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.Nullable;
 
@@ -92,7 +88,7 @@ public final class RoleCommand {
         requireHasPower(source, role);
 
         var roleManager = PlayerRoleManager.get();
-        MinecraftServer server = source.getMinecraftServer();
+        MinecraftServer server = source.getServer();
 
         int count = 0;
         for (var player : players) {
@@ -109,7 +105,7 @@ public final class RoleCommand {
 
     private static int listRoles(ServerCommandSource source, GameProfile player) {
         var roleManager = PlayerRoleManager.get();
-        var server = source.getMinecraftServer();
+        var server = source.getServer();
 
         var roles = roleManager.peekRoles(server, player.getId())
                 .stream().collect(Collectors.toList());
@@ -120,7 +116,7 @@ public final class RoleCommand {
     }
 
     private static int reloadRoles(ServerCommandSource source) {
-        var server = source.getMinecraftServer();
+        var server = source.getServer();
 
         server.execute(() -> {
             var errors = PlayerRolesConfig.setup();
