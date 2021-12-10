@@ -29,8 +29,6 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public final class PlayerRolesConfig implements RoleProvider {
-    private static final JsonParser JSON = new JsonParser();
-
     private static PlayerRolesConfig instance = new PlayerRolesConfig(Collections.emptyList(), SimpleRole.empty(PlayerRoles.EVERYONE));
 
     private final ImmutableMap<String, SimpleRole> roles;
@@ -74,7 +72,7 @@ public final class PlayerRolesConfig implements RoleProvider {
         ConfigErrorConsumer errorConsumer = errors::add;
 
         try (var reader = Files.newBufferedReader(path)) {
-            var root = JSON.parse(reader);
+            var root = JsonParser.parseReader(reader);
             var config = parse(new Dynamic<>(JsonOps.INSTANCE, root), errorConsumer);
             instance = config;
 
