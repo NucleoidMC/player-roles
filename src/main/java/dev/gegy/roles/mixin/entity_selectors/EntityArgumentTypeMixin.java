@@ -18,9 +18,7 @@ public class EntityArgumentTypeMixin {
         
         if (source instanceof ServerCommandSource serverSource) {
             var roles = PlayerRolesApi.lookup().bySource(serverSource);
-            if (roles.overrides().test(PlayerRoles.ENTITY_SELECTORS)) {
-                return true;
-            }
+            return roles.overrides().test(PlayerRoles.ENTITY_SELECTORS);
         }
 
         return false;

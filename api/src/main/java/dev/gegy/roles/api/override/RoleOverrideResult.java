@@ -1,7 +1,6 @@
 package dev.gegy.roles.api.override;
 
 import com.mojang.serialization.Codec;
-import net.fabricmc.fabric.api.util.TriState;
 import net.minecraft.util.StringIdentifiable;
 
 import java.util.Locale;
@@ -32,14 +31,6 @@ public enum RoleOverrideResult implements StringIdentifiable {
             case "deny", "no", "false" -> RoleOverrideResult.DENY;
             case "hidden", "hide" -> RoleOverrideResult.HIDDEN;
             default -> RoleOverrideResult.PASS;
-        };
-    }
-
-    public TriState asTriState() {
-        return switch (this) {
-            case ALLOW, HIDDEN -> TriState.TRUE;
-            case DENY -> TriState.FALSE;
-            default -> TriState.DEFAULT;
         };
     }
 

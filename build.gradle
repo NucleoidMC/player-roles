@@ -1,24 +1,29 @@
 plugins {
-  id 'fabric-loom' version '0.10-SNAPSHOT' apply false
-  id 'maven-publish'
+  id "fabric-loom" version "0.10-SNAPSHOT" apply false
+  id "maven-publish"
 }
 
 allprojects {
-  apply plugin: 'fabric-loom'
-  apply plugin: 'maven-publish'
-
-  sourceCompatibility = JavaVersion.VERSION_17
-  targetCompatibility = JavaVersion.VERSION_17
+  apply plugin: "fabric-loom"
+  apply plugin: "maven-publish"
 
   version = project.mod_version
   group = project.maven_group
+
+  java {
+    toolchain.languageVersion = JavaLanguageVersion.of(17)
+    withSourcesJar()
+  }
+
+  tasks.withType(JavaCompile).configureEach {
+    it.options.encoding = "UTF-8"
+    it.options.release = 17
+  }
 
   dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
-
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
   }
 
   processResources {
@@ -27,15 +32,6 @@ allprojects {
     filesMatching("fabric.mod.json") {
       expand "version": project.version
     }
-  }
-
-  tasks.withType(JavaCompile).configureEach {
-    it.options.encoding = "UTF-8"
-    it.options.release = 17
-  }
-
-  java {
-    withSourcesJar()
   }
 
   jar {
@@ -80,29 +76,26 @@ archivesBaseName = project.archives_base_name
 
 repositories {
   mavenCentral()
-  maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
-  maven { url 'https://maven.nucleoid.xyz' }
-  maven { url 'https://maven.gegy.dev' }
+  maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
+  maven { url "https://maven.nucleoid.xyz" }
+  maven { url "https://maven.gegy.dev" }
 }
 
 dependencies {
-  implementation include(project(':api'))
+  implementation include(project(path: ":api", configuration: "namedElements"))
 
-  modCompileOnly 'me.lucko:fabric-permissions-api:0.1-SNAPSHOT'
+  modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+  modCompileOnly "me.lucko:fabric-permissions-api:0.1-SNAPSHOT"
 
-  modImplementation include('xyz.nucleoid:more-codecs:0.1.4')
+  modImplementation include("xyz.nucleoid:more-codecs:0.1.4")
 
-  testImplementation platform('org.junit:junit-bom:5.7.0')
-  testImplementation 'org.junit.jupiter:junit-jupiter'
-
-  modRuntime("supercoder79:databreaker:0.2.7") {
-    exclude module: "fabric-loader"
-  }
+  testImplementation platform("org.junit:junit-bom:5.7.0")
+  testImplementation "org.junit.jupiter:junit-jupiter"
 }
 
-/*test {
+test {
   useJUnitPlatform()
   testLogging {
     events "passed", "skipped", "failed"
   }
-}*/
+}

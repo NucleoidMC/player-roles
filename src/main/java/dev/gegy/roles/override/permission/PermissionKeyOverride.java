@@ -24,7 +24,11 @@ public record PermissionKeyOverride(PermissionKeyRules rules) {
             if (source instanceof ServerCommandSource serverSource) {
                 var roles = PlayerRolesApi.lookup().bySource(serverSource);
                 var result = roles.overrides().test(override, permissions -> permissions.rules.test(permission));
-                return result.asTriState();
+                return switch (result) {
+                    case ALLOW -> TriState.TRUE;
+                    case DENY -> TriState.FALSE;
+                    default -> TriState.DEFAULT;
+                };
             }
 
             return TriState.DEFAULT;
