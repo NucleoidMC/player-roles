@@ -34,13 +34,18 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity implements Pl
         var oldRoles = this.playerRoleSet;
         var newRoles = new PlayerRoleSet(config.everyone(), self);
         if (oldRoles != null) {
-            newRoles.reloadFrom(config, oldRoles);
-            newRoles.rebuildOverridesAndNotify();
+            this.reloadPlayerRoles(config, newRoles, oldRoles);
+        } else {
+            this.playerRoleSet = newRoles;
         }
 
-        this.playerRoleSet = newRoles;
-
         return newRoles;
+    }
+
+    private void reloadPlayerRoles(PlayerRolesConfig config, PlayerRoleSet newRoles, PlayerRoleSet oldRoles) {
+        newRoles.reloadFrom(config, oldRoles);
+        this.playerRoleSet = newRoles;
+        newRoles.rebuildOverridesAndNotify();
     }
 
     @Override
