@@ -91,6 +91,8 @@ public final class PlayerRoles implements ModInitializer {
 
     @Override
     public void onInitialize() {
+        registerModIntegrations();
+
         var errors = PlayerRolesConfig.setup();
         if (!errors.isEmpty()) {
             LOGGER.warn("Failed to load player-roles config! ({} errors)", errors.size());
@@ -100,8 +102,6 @@ public final class PlayerRoles implements ModInitializer {
         }
 
         PlayerRoleManager.setup();
-
-        registerModIntegrations();
 
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
             RoleCommand.register(dispatcher);
