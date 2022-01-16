@@ -87,7 +87,7 @@ dependencies {
   modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
   modCompileOnly "me.lucko:fabric-permissions-api:0.1-SNAPSHOT"
 
-  modImplementation include("xyz.nucleoid:more-codecs:0.1.4")
+  modImplementation include("xyz.nucleoid:more-codecs:0.2.2+1.18")
 
   testImplementation platform("org.junit:junit-bom:5.7.0")
   testImplementation "org.junit.jupiter:junit-jupiter"

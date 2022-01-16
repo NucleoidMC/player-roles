@@ -101,15 +101,23 @@ public final class PlayerRoles implements ModInitializer {
 
         PlayerRoleManager.setup();
 
-        if (FabricLoader.getInstance().isModLoaded("fabric-permissions-api-v0")) {
-            PermissionKeyOverride.register();
-        }
+        registerModIntegrations();
 
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
             RoleCommand.register(dispatcher);
         });
 
         CommandOverride.initialize();
+    }
+
+    private static void registerModIntegrations() {
+        if (FabricLoader.getInstance().isModLoaded("fabric-permissions-api-v0")) {
+            registerPermissionKeyOverride();
+        }
+    }
+
+    private static void registerPermissionKeyOverride() {
+        PermissionKeyOverride.register();
     }
 
     public static void sendMuteFeedback(ServerPlayerEntity player) {
