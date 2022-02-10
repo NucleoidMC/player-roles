@@ -10,7 +10,7 @@
     "ServerCommandSourceMixin",
     "ServerPlayerEntityMixin",
     "TeamAccessor",
-    "chat_style.ServerPlayNetworkHandlerMixin",
+    "chat_format.ServerPlayNetworkHandlerMixin",
     "command.CommandDispatcherMixin",
     "command.CommandManagerMixin",
     "command.ServerCommandSourceMixin",
@@ -20,7 +20,7 @@
     "mute.MessageCommandMixin",
     "mute.ServerPlayNetworkHandlerMixin",
     "mute.TeamMsgCommandMixin",
-    "name_format.ServerPlayerEntityMixin",
+    "name_style.ServerPlayerEntityMixin",
     "permission_level.MinecraftServerMixin"
   ],
   "injectors": {

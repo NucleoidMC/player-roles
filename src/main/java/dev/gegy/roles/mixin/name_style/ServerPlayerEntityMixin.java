@@ -1,4 +1,4 @@
-package dev.gegy.roles.mixin.name_format;
+package dev.gegy.roles.mixin.name_style;
 
 import com.mojang.authlib.GameProfile;
 import dev.gegy.roles.PlayerRoles;
