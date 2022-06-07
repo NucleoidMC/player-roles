@@ -20,7 +20,7 @@
     "mute.MessageCommandMixin",
     "mute.ServerPlayNetworkHandlerMixin",
     "mute.TeamMsgCommandMixin",
-    "name_style.ServerPlayerEntityMixin",
+    "name_decoration.ServerPlayerEntityMixin",
     "permission_level.MinecraftServerMixin"
   ],
   "injectors": {

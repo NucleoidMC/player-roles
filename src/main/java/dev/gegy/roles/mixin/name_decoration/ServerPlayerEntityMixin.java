@@ -1,4 +1,4 @@
-package dev.gegy.roles.mixin.name_style;
+package dev.gegy.roles.mixin.name_decoration;
 
 import com.mojang.authlib.GameProfile;
 import dev.gegy.roles.PlayerRoles;
@@ -26,9 +26,9 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity {
         if (team == null || ((TeamAccessor) team).getFormattingColor() == Formatting.RESET) {
             var roles = PlayerRolesApi.lookup().byPlayer(this);
 
-            var nameFormat = roles.overrides().select(PlayerRoles.NAME_FORMAT);
-            if (nameFormat != null) {
-                displayName = nameFormat.apply(displayName.shallowCopy());
+            var nameDecoration = roles.overrides().select(PlayerRoles.NAME_DECORATION);
+            if (nameDecoration != null) {
+                displayName = nameDecoration.apply(displayName.shallowCopy());
             }
         }
 

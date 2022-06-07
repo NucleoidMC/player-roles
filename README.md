@@ -8,8 +8,10 @@ The roles.json file is located in the config directory (`<root>/config/roles.jso
   "admin": {
     "level": 100,
     "overrides": {
-      "name_style": ["red", "bold"],
-      "chat_format": "<%s*> %s",
+      "name_decoration": {
+        "style": ["red", "bold"],
+        "suffix": {"text": "*"}
+      },
       "permission_level": 4,
       "command_feedback": true,
       "commands": {
@@ -49,7 +51,7 @@ The other roles that are specified function as overrides on top of the `everyone
 
 #### Overrides
 Within each role declaration, we list a set of overrides. Overrides are the generic system that this mod uses to change game behavior based on roles.
-Currently, the supported override types are `commands`, `name_style`, `chat_format`, `mute`, `command_feedback`, `permission_level` and `entity_selectors`.
+Currently, the supported override types are `commands`, `name_decoration`, `chat_format`, `mute`, `command_feedback`, `permission_level` and `entity_selectors`.
 
 It is important to consider how overrides are applied when multiple roles target the same things. Conflicts like this are resolved by always choosing the role with the highest level.
 So, in the case of the example: although `everyone` declares every command except `help` to be disallowed, because `admin` and `spectator` have higher levels, they will override this behaviour.
@@ -84,15 +86,25 @@ For example:
 ...which would format as `Gegy says: hi!`
 
 It is worth nothing that color codes can be used here, but they *will not apply to the player name*.
-To apply color to a player name, you should use the `name_style` override.
+To apply color to a player name, you should use the `name_decoration` override.
 
-##### name style
-The `name_style` override modifies the name color for players with that role. This has lower priority than scoreboard team colors.
+##### name decoration
+The `name_decoration` override modifies how the names of players with a role are displayed. This can be used to override name colors as well as prepend or append text.
+This has lower priority than scoreboard team colors.
 
-Name style is declared like:
+Name decoration might be declared like:
 ```json
-"name_style": ["red", "bold", "underline"]
+"name_decoration": {
+  "prefix": {"text": "[Prefix] ", "color": "green"},
+  "suffix": {"text": "-Suffix"},
+  "style": ["#ff0000", "bold", "underline"]
+}
 ```
+
+Three fields can be optionally declared:
+ - `style`: accepts a list of text formatting types or hex colors
+ - `prefix`: accepts a text component that is prepended before the name
+ - `suffix`: accepts a text component that is appended after the name
 
 ##### permission level
 The `permission_level` override sets the vanilla [permission level](https://minecraft.gamepedia.com/Server.properties#op-permission-level) for assigned players. 
@@ -160,13 +172,15 @@ For example:
   },
   "bar": {
     "overrides": {
-      "name_style": "red"
+      "name_decoration": {
+        "style": "red"
+      }
     }
   }
 }
 ```
 
-With this configuration, the `foo` role will inherit the red `name_style`.
+With this configuration, the `foo` role will inherit the red `name_decoration`.
 
 #### Applying roles in-game
 Once you've made modifications to the `roles.json` file, you can reload it by using the `/role reload`.
