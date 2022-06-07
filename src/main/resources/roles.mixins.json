@@ -10,7 +10,6 @@
     "ServerCommandSourceMixin",
     "ServerPlayerEntityMixin",
     "TeamAccessor",
-    "chat_format.ServerPlayNetworkHandlerMixin",
     "command.CommandDispatcherMixin",
     "command.CommandManagerMixin",
     "command.ServerCommandSourceMixin",

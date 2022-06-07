@@ -51,7 +51,7 @@ The other roles that are specified function as overrides on top of the `everyone
 
 #### Overrides
 Within each role declaration, we list a set of overrides. Overrides are the generic system that this mod uses to change game behavior based on roles.
-Currently, the supported override types are `commands`, `name_decoration`, `chat_format`, `mute`, `command_feedback`, `permission_level` and `entity_selectors`.
+Currently, the supported override types are `commands`, `name_decoration`, `mute`, `command_feedback`, `permission_level` and `entity_selectors`.
 
 It is important to consider how overrides are applied when multiple roles target the same things. Conflicts like this are resolved by always choosing the role with the highest level.
 So, in the case of the example: although `everyone` declares every command except `help` to be disallowed, because `admin` and `spectator` have higher levels, they will override this behaviour.
@@ -73,20 +73,6 @@ For example:
 
 The commands override can additionally make use of the `hidden` rule result, which will allow the command to be used, 
 while hiding it from command suggestions.
-
-##### chat format
-The `chat_format` override is used to change how player messages appear in the chat.
-It is declared simply as a string formatter pattern. Every instance of `%s` is replaced by a formatter argument.
-The first `%s` is replaced by the player name, and the second is replaced by the message.
-
-For example:
-```json
-"chat_format": "%s says: %s"
-```
-...which would format as `Gegy says: hi!`
-
-It is worth nothing that color codes can be used here, but they *will not apply to the player name*.
-To apply color to a player name, you should use the `name_decoration` override.
 
 ##### name decoration
 The `name_decoration` override modifies how the names of players with a role are displayed. This can be used to override name colors as well as prepend or append text.
