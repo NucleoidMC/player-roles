@@ -9,17 +9,13 @@ import dev.gegy.roles.api.PlayerRolesApi;
 import net.minecraft.command.argument.MessageArgumentType;
 import net.minecraft.server.command.ServerCommandSource;
 
-@Mixin(MessageArgumentType.class)
+@Mixin(MessageArgumentType.MessageFormat.class)
 public class MessageArgumentTypeMixin {
-    @Redirect(method = "getMessage", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/command/ServerCommandSource;hasPermissionLevel(I)Z"))
-    private static boolean hasPermissionLevel(ServerCommandSource source, int level) {
+    @Redirect(method = "format(Lnet/minecraft/server/command/ServerCommandSource;)Lnet/minecraft/text/Text;", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/command/ServerCommandSource;hasPermissionLevel(I)Z"))
+    private boolean canUseEntitySelectors(ServerCommandSource source, int level) {
         if (source.hasPermissionLevel(level)) return true;
 
         var roles = PlayerRolesApi.lookup().bySource(source);
-        if (roles.overrides().test(PlayerRoles.ENTITY_SELECTORS)) {
-            return true;
-        }
-
-        return false;
+        return roles.overrides().test(PlayerRoles.ENTITY_SELECTORS);
     }
 }

@@ -33,15 +33,15 @@ import static net.minecraft.server.command.CommandManager.literal;
 
 public final class RoleCommand {
     public static final DynamicCommandExceptionType ROLE_NOT_FOUND = new DynamicCommandExceptionType(arg -> {
-        return new TranslatableText("Role with name '%s' was not found!", arg);
+        return Text.translatable("Role with name '%s' was not found!", arg);
     });
 
     public static final SimpleCommandExceptionType ROLE_POWER_TOO_LOW = new SimpleCommandExceptionType(
-            new LiteralText("You do not have sufficient power to manage this role")
+            Text.literal("You do not have sufficient power to manage this role")
     );
 
     public static final SimpleCommandExceptionType TOO_MANY_SELECTED = new SimpleCommandExceptionType(
-            new LiteralText("Too many players selected!")
+            Text.literal("Too many players selected!")
     );
 
     // @formatter:off
@@ -98,7 +98,7 @@ public final class RoleCommand {
             }
         }
 
-        source.sendFeedback(new TranslatableText(success, roleName, count), true);
+        source.sendFeedback(Text.translatable(success, roleName, count), true);
 
         return Command.SINGLE_SUCCESS;
     }
@@ -109,8 +109,8 @@ public final class RoleCommand {
 
         var roles = roleManager.peekRoles(server, player.getId())
                 .stream().collect(Collectors.toList());
-        var rolesComponent = Texts.join(roles, role -> new LiteralText(role.getId()).setStyle(Style.EMPTY.withColor(Formatting.GRAY)));
-        source.sendFeedback(new TranslatableText("Found %s roles on player: %s", roles.size(), rolesComponent), false);
+        var rolesComponent = Texts.join(roles, role -> Text.literal(role.getId()).setStyle(Style.EMPTY.withColor(Formatting.GRAY)));
+        source.sendFeedback(Text.translatable("Found %s roles on player: %s", roles.size(), rolesComponent), false);
 
         return Command.SINGLE_SUCCESS;
     }
@@ -125,9 +125,9 @@ public final class RoleCommand {
             roleManager.onRoleReload(server, PlayerRolesConfig.get());
 
             if (errors.isEmpty()) {
-                source.sendFeedback(new TranslatableText("Role configuration successfully reloaded"), false);
+                source.sendFeedback(Text.translatable("Role configuration successfully reloaded"), false);
             } else {
-                MutableText errorFeedback = new LiteralText("Failed to reload roles configuration!");
+                MutableText errorFeedback = Text.literal("Failed to reload roles configuration!");
                 for (String error : errors) {
                     errorFeedback = errorFeedback.append("\n - " + error);
                 }

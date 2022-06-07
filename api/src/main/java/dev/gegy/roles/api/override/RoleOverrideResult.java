@@ -11,7 +11,7 @@ public enum RoleOverrideResult implements StringIdentifiable {
     DENY,
     HIDDEN;
 
-    public static final Codec<RoleOverrideResult> CODEC = StringIdentifiable.createCodec(RoleOverrideResult::values, RoleOverrideResult::byName);
+    public static final Codec<RoleOverrideResult> CODEC = StringIdentifiable.createCodec(RoleOverrideResult::values);
 
     public boolean isDefinitive() {
         return this != PASS;

@@ -39,7 +39,7 @@ public record NameDecorationOverride(
 		public static final Codec<AddPrefix> CODEC = MoreCodecs.TEXT.xmap(AddPrefix::new, AddPrefix::prefix);
 
 		public MutableText apply(final MutableText name) {
-			return new LiteralText("").append(this.prefix).append(name);
+			return Text.empty().append(this.prefix).append(name);
 		}
 	}
 

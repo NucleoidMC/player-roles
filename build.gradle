@@ -1,5 +1,5 @@
 plugins {
-  id "fabric-loom" version "0.10-SNAPSHOT" apply false
+  id "fabric-loom" version "0.12-SNAPSHOT" apply false
   id "maven-publish"
 }
 
@@ -92,9 +92,6 @@ dependencies {
   testImplementation platform("org.junit:junit-bom:5.7.0")
   testImplementation "org.junit.jupiter:junit-jupiter"
 
-  modRuntime("supercoder79:databreaker:0.2.8") {
-    exclude module: "fabric-loader"
-  }
 }
 
 test {
