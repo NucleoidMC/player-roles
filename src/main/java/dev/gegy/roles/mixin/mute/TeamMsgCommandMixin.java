@@ -3,6 +3,7 @@ package dev.gegy.roles.mixin.mute;
 import com.mojang.brigadier.Command;
 import dev.gegy.roles.PlayerRoles;
 import dev.gegy.roles.api.PlayerRolesApi;
+import net.minecraft.command.argument.MessageArgumentType;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.command.TeamMsgCommand;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -15,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(TeamMsgCommand.class)
 public class TeamMsgCommandMixin {
     @Inject(method = "execute", at = @At("HEAD"), cancellable = true)
-    private static void execute(ServerCommandSource source, Text message, CallbackInfoReturnable<Integer> ci) {
+    private static void execute(ServerCommandSource source, MessageArgumentType.SignedMessage message, CallbackInfoReturnable<Integer> ci) {
         var entity = source.getEntity();
         if (entity instanceof ServerPlayerEntity player) {
             var roles = PlayerRolesApi.lookup().byPlayer(player);
