@@ -12,6 +12,8 @@ import dev.gegy.roles.override.permission.PermissionKeyOverride;
 import dev.gegy.roles.store.PlayerRoleManager;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.message.v1.ServerMessageDecoratorEvent;
+import net.fabricmc.fabric.api.message.v1.ServerMessageEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.command.ServerCommandSource;
@@ -22,6 +24,8 @@ import net.minecraft.util.Identifier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.concurrent.CompletableFuture;
 
 public final class PlayerRoles implements ModInitializer {
     public static final String ID = "player_roles";
@@ -108,6 +112,19 @@ public final class PlayerRoles implements ModInitializer {
         });
 
         CommandOverride.initialize();
+
+        ServerMessageDecoratorEvent.EVENT.register(ServerMessageDecoratorEvent.STYLING_PHASE, (sender, message) -> {
+            if (sender == null) {
+                return CompletableFuture.completedFuture(message);
+            }
+            var roles = PlayerRolesApi.lookup().byPlayer(sender);
+            var chatFormat = roles.overrides().select(PlayerRoles.CHAT_FORMAT);
+            if (chatFormat != null) {
+                return CompletableFuture.completedFuture(chatFormat.make(sender.getDisplayName(), message.getString()));
+            } else {
+                return CompletableFuture.completedFuture(message);
+            }
+        });
     }
 
     private static void registerModIntegrations() {
