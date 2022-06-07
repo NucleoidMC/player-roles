@@ -1,7 +1,6 @@
 package dev.gegy.roles.override;
 
 import com.mojang.serialization.Codec;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 
@@ -94,7 +93,7 @@ public final class ChatFormatOverride {
 
         void pushText(Text text) {
             this.flushStringBuilder();
-            this.appendText(text.shallowCopy());
+            this.appendText(text.copyContentOnly());
         }
 
         void pushString(String string) {
@@ -104,7 +103,7 @@ public final class ChatFormatOverride {
         private void flushStringBuilder() {
             var builder = this.builder;
             if (builder.length() > 0) {
-                var text = new LiteralText(builder.toString());
+                var text = Text.literal(builder.toString());
                 builder.setLength(0);
                 this.appendText(text);
             }

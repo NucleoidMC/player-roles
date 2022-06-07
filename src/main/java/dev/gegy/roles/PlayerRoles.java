@@ -11,12 +11,12 @@ import dev.gegy.roles.override.command.CommandOverride;
 import dev.gegy.roles.override.permission.PermissionKeyOverride;
 import dev.gegy.roles.store.PlayerRoleManager;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import org.apache.logging.log4j.LogManager;
@@ -103,7 +103,7 @@ public final class PlayerRoles implements ModInitializer {
 
         PlayerRoleManager.setup();
 
-        CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
+        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
             RoleCommand.register(dispatcher);
         });
 
@@ -121,7 +121,7 @@ public final class PlayerRoles implements ModInitializer {
     }
 
     public static void sendMuteFeedback(ServerPlayerEntity player) {
-        player.sendMessage(new LiteralText("You are muted!").formatted(Formatting.RED), true);
+        player.sendMessage(Text.literal("You are muted!").formatted(Formatting.RED), true);
     }
 
     public static Identifier identifier(String path) {

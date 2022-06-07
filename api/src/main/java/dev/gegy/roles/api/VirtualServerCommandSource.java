@@ -2,6 +2,7 @@ package dev.gegy.roles.api;
 
 import net.minecraft.command.argument.EntityAnchorArgumentType;
 import net.minecraft.entity.Entity;
+import net.minecraft.network.message.CommandArgumentSigner;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.CommandOutput;
 import net.minecraft.server.command.ServerCommandSource;
@@ -20,7 +21,7 @@ public class VirtualServerCommandSource extends ServerCommandSource implements R
     private final RoleReader roles;
 
     public VirtualServerCommandSource(RoleReader roles, CommandOutput output, Vec3d pos, Vec2f rot, ServerWorld world, int level, String simpleName, Text name, MinecraftServer server, @Nullable Entity entity) {
-        super(output, pos, rot, world, level, simpleName, name, server, entity, false, (context, success, result) -> {}, EntityAnchorArgumentType.EntityAnchor.FEET);
+        super(output, pos, rot, world, level, simpleName, name, server, entity);
         this.roles = roles;
     }
 
