@@ -12,7 +12,7 @@ import net.minecraft.server.command.ServerCommandSource;
 @Mixin(MessageArgumentType.MessageFormat.class)
 public class MessageArgumentTypeMixin {
     @Redirect(method = "format", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/command/ServerCommandSource;hasPermissionLevel(I)Z"))
-    private static boolean hasPermissionLevel(ServerCommandSource source, int level) {
+    private boolean hasPermissionLevel(ServerCommandSource source, int level) {
         if (source.hasPermissionLevel(level)) return true;
 
         var roles = PlayerRolesApi.lookup().bySource(source);
