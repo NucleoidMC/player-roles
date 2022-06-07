@@ -8,6 +8,7 @@ import dev.gegy.roles.api.RoleReader;
 import dev.gegy.roles.api.override.RoleOverrideType;
 import dev.gegy.roles.command.RoleCommand;
 import dev.gegy.roles.config.PlayerRolesConfig;
+import dev.gegy.roles.override.ChatTypeOverride;
 import dev.gegy.roles.override.NameDecorationOverride;
 import dev.gegy.roles.override.command.CommandOverride;
 import dev.gegy.roles.override.permission.PermissionKeyOverride;
@@ -39,6 +40,7 @@ public final class PlayerRoles implements ModInitializer {
                 }
             });
 
+    public static final RoleOverrideType<ChatTypeOverride> CHAT_TYPE = registerOverride("chat_type", ChatTypeOverride.CODEC);
     public static final RoleOverrideType<NameDecorationOverride> NAME_DECORATION = registerOverride("name_decoration", NameDecorationOverride.CODEC);
     public static final RoleOverrideType<Boolean> COMMAND_FEEDBACK = registerOverride("command_feedback", Codec.BOOL);
     public static final RoleOverrideType<Boolean> MUTE = registerOverride("mute", Codec.BOOL);

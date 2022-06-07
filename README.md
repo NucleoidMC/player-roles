@@ -51,7 +51,7 @@ The other roles that are specified function as overrides on top of the `everyone
 
 #### Overrides
 Within each role declaration, we list a set of overrides. Overrides are the generic system that this mod uses to change game behavior based on roles.
-Currently, the supported override types are `commands`, `name_decoration`, `mute`, `command_feedback`, `permission_level` and `entity_selectors`.
+Currently, the supported override types are `commands`, `name_decoration`, `chat_type`, `mute`, `command_feedback`, `permission_level` and `entity_selectors`.
 
 It is important to consider how overrides are applied when multiple roles target the same things. Conflicts like this are resolved by always choosing the role with the highest level.
 So, in the case of the example: although `everyone` declares every command except `help` to be disallowed, because `admin` and `spectator` have higher levels, they will override this behaviour.
@@ -91,6 +91,45 @@ Three fields can be optionally declared:
  - `style`: accepts a list of text formatting types or hex colors
  - `prefix`: accepts a text component that is prepended before the name
  - `suffix`: accepts a text component that is appended after the name
+
+#### chat type
+The `chat_type` override allows the chat message decorations to be replaced for all players with a role.
+This integrates with the Vanilla `minecraft:chat_type` registry, which can be altered with a datapack.
+
+The `chat_type` override declares simply the `chat_type` that should be used:
+```json
+"chat_type": "minecraft:say_command"
+```
+
+This example will replace all messages for players with a given role to apply the `say_command` style.
+
+It is important to note that Vanilla chat type registry is loaded from the datapack on server start, and cannot be hot-reloaded like the player roles config.
+
+Custom chat types can be declared in `data/<namespace>/chat_type/<name>`. For example, we might declare a `data/mydatapack/chat_type/admin.json`:
+```json
+{
+  "chat": {
+    "decoration": {
+      "parameters": ["sender", "content"],
+      "style": {},
+      "translation_key": "%s: %s <- an admin said this!"
+    }
+  },
+  "narration": {
+    "decoration": {
+      "parameters": ["sender", "content"],
+      "style": {},
+      "translation_key": "chat.type.text.narrate"
+    },
+    "priority": "chat"
+  }
+}
+```
+
+Which can be then referenced in an override like:
+```json
+"chat_type": "mydatapack:admin"
+```
 
 ##### permission level
 The `permission_level` override sets the vanilla [permission level](https://minecraft.gamepedia.com/Server.properties#op-permission-level) for assigned players. 
