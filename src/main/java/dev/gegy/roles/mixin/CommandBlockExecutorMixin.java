@@ -15,6 +15,6 @@ public class CommandBlockExecutorMixin {
         var identifiableSource = (IdentifiableCommandSource) source;
         identifiableSource.player_roles$setIdentityType(IdentifiableCommandSource.Type.COMMAND_BLOCK);
 
-        return commandManager.execute(source, command);
+        return commandManager.executeWithPrefix(source, command);
     }
 }

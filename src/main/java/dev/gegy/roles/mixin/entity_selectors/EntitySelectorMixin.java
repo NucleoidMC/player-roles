@@ -16,10 +16,6 @@ public class EntitySelectorMixin {
         if (source.hasPermissionLevel(level)) return true;
         
         var roles = PlayerRolesApi.lookup().bySource(source);
-        if (roles.overrides().test(PlayerRoles.ENTITY_SELECTORS)) {
-            return true;
-        }
-
-        return false;
+        return roles.overrides().test(PlayerRoles.ENTITY_SELECTORS);
     }
 }

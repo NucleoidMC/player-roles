@@ -15,6 +15,7 @@ import dev.gegy.roles.override.permission.PermissionKeyOverride;
 import dev.gegy.roles.store.PlayerRoleManager;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.message.v1.ServerMessageEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.command.ServerCommandSource;
@@ -111,6 +112,9 @@ public final class PlayerRoles implements ModInitializer {
         });
 
         CommandOverride.initialize();
+
+        ServerMessageEvents.ALLOW_CHAT_MESSAGE.register((message, sender, params) -> trySendChat(sender));
+        ServerMessageEvents.ALLOW_COMMAND_MESSAGE.register((message, source, params) -> trySendChat(source));
     }
 
     private static void registerModIntegrations() {
@@ -123,8 +127,18 @@ public final class PlayerRoles implements ModInitializer {
         PermissionKeyOverride.register();
     }
 
-    public static void sendMuteFeedback(ServerPlayerEntity player) {
-        player.sendMessage(Text.literal("You are muted!").formatted(Formatting.RED), true);
+    public static boolean trySendChat(ServerCommandSource source) {
+        final ServerPlayerEntity player = source.getPlayer();
+        return player == null || trySendChat(player);
+    }
+
+    public static boolean trySendChat(ServerPlayerEntity player) {
+        var roles = PlayerRolesApi.lookup().byPlayer(player);
+        if (roles.overrides().test(PlayerRoles.MUTE)) {
+            player.sendMessage(Text.literal("You are muted!").formatted(Formatting.RED), true);
+            return false;
+        }
+        return true;
     }
 
     public static Identifier identifier(String path) {

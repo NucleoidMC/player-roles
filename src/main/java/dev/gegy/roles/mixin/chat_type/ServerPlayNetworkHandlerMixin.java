@@ -18,7 +18,7 @@ public class ServerPlayNetworkHandlerMixin {
 	@Shadow
 	public ServerPlayerEntity player;
 
-	@ModifyArg(method = "handleDecoratedMessage", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/PlayerManager;broadcast(Lnet/minecraft/server/filter/FilteredMessage;Lnet/minecraft/server/network/ServerPlayerEntity;Lnet/minecraft/util/registry/RegistryKey;)V"))
+	@ModifyArg(method = "handleDecoratedMessage", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/message/MessageType;params(Lnet/minecraft/util/registry/RegistryKey;Lnet/minecraft/entity/Entity;)Lnet/minecraft/network/message/MessageType$Parameters;"))
 	private RegistryKey<MessageType> overrideChatType(RegistryKey<MessageType> defaultChatType) {
 		var roles = PlayerRolesApi.lookup().byPlayer(this.player);
 

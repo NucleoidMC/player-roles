@@ -18,7 +18,6 @@
     "entity_selectors.EntitySelectorMixin",
     "entity_selectors.MessageArgumentTypeMixin",
     "mute.MessageCommandMixin",
-    "mute.ServerPlayNetworkHandlerMixin",
     "mute.TeamMsgCommandMixin",
     "name_decoration.ServerPlayerEntityMixin",
     "permission_level.MinecraftServerMixin"
