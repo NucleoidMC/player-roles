@@ -6,6 +6,8 @@
   "mixins": [
     "CommandBlockExecutorMixin",
     "CommandFunctionMixin",
+    "EntitySelectorOptionsMixin",
+    "EntitySelectorReaderMixin",
     "PlayerManagerMixin",
     "ServerCommandSourceMixin",
     "ServerPlayerEntityMixin",
