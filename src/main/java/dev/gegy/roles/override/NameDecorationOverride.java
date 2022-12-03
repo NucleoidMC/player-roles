@@ -2,8 +2,12 @@ package dev.gegy.roles.override;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.text.*;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Style;
+import net.minecraft.text.Text;
+import net.minecraft.text.TextColor;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.dynamic.Codecs;
 import org.jetbrains.annotations.Nullable;
 import xyz.nucleoid.codecs.MoreCodecs;
 
@@ -36,7 +40,7 @@ public record NameDecorationOverride(
 	}
 
 	public record AddPrefix(Text prefix) {
-		public static final Codec<AddPrefix> CODEC = MoreCodecs.TEXT.xmap(AddPrefix::new, AddPrefix::prefix);
+		public static final Codec<AddPrefix> CODEC = Codecs.TEXT.xmap(AddPrefix::new, AddPrefix::prefix);
 
 		public MutableText apply(final MutableText name) {
 			return Text.empty().append(this.prefix).append(name);
@@ -44,7 +48,7 @@ public record NameDecorationOverride(
 	}
 
 	public record AddSuffix(Text suffix) {
-		public static final Codec<AddSuffix> CODEC = MoreCodecs.TEXT.xmap(AddSuffix::new, AddSuffix::suffix);
+		public static final Codec<AddSuffix> CODEC = Codecs.TEXT.xmap(AddSuffix::new, AddSuffix::suffix);
 
 		public MutableText apply(final MutableText name) {
 			return name.append(this.suffix);

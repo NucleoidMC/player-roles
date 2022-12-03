@@ -1,5 +1,5 @@
 plugins {
-  id "fabric-loom" version "0.12-SNAPSHOT" apply false
+  id "fabric-loom" version "1.0-SNAPSHOT" apply false
   id "maven-publish"
 }
 
@@ -87,7 +87,7 @@ dependencies {
   modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
   modCompileOnly "me.lucko:fabric-permissions-api:0.1-SNAPSHOT"
 
-  modImplementation include("xyz.nucleoid:more-codecs:0.2.2+1.18")
+  modImplementation include("xyz.nucleoid:more-codecs:0.3.0+1.19.3")
 
   testImplementation platform("org.junit:junit-bom:5.7.0")
   testImplementation "org.junit.jupiter:junit-jupiter"

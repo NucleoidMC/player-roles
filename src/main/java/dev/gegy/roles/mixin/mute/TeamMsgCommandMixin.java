@@ -1,28 +1,25 @@
 package dev.gegy.roles.mixin.mute;
 
-import com.mojang.brigadier.Command;
 import dev.gegy.roles.PlayerRoles;
-import net.minecraft.command.argument.MessageArgumentType;
+import net.minecraft.entity.Entity;
 import net.minecraft.network.message.SignedMessage;
+import net.minecraft.scoreboard.Team;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.command.TeamMsgCommand;
+import net.minecraft.server.network.ServerPlayerEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.Set;
+import java.util.List;
 
 @Mixin(TeamMsgCommand.class)
 public class TeamMsgCommandMixin {
 	@Inject(method = "execute", at = @At("HEAD"), cancellable = true)
-	private static void execute(ServerCommandSource source, MessageArgumentType.SignedMessage message, CallbackInfoReturnable<Integer> ci) {
+	private static void execute(ServerCommandSource source, Entity entity, Team team, List<ServerPlayerEntity> recipients, SignedMessage message, CallbackInfo ci) {
 		if (!PlayerRoles.trySendChat(source)) {
-			final SignedMessage signedMessage = message.signedArgument();
-			if (!signedMessage.headerSignature().isEmpty()) {
-				source.getServer().getPlayerManager().sendMessageHeader(signedMessage, Set.of());
-			}
-			ci.setReturnValue(Command.SINGLE_SUCCESS);
+			ci.cancel();
 		}
 	}
 }
