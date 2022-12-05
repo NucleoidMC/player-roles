@@ -18,6 +18,7 @@ import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.message.v1.ServerMessageEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.entity.Entity;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
@@ -26,6 +27,8 @@ import net.minecraft.util.Identifier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.UUID;
 
 public final class PlayerRoles implements ModInitializer {
     public static final String ID = "player_roles";
@@ -47,6 +50,7 @@ public final class PlayerRoles implements ModInitializer {
     public static final RoleOverrideType<Boolean> MUTE = registerOverride("mute", Codec.BOOL);
     public static final RoleOverrideType<Integer> PERMISSION_LEVEL = registerOverride("permission_level", Codec.intRange(0, 4));
     public static final RoleOverrideType<Boolean> ENTITY_SELECTORS = registerOverride("entity_selectors", Codec.BOOL);
+    public static final RoleOverrideType<Boolean> BYPASS_PLAYER_LIMIT = registerOverride("bypass_player_limit", Codec.BOOL);
 
     private static <T> RoleOverrideType<T> registerOverride(String id, Codec<T> codec) {
         return RoleOverrideType.register(PlayerRoles.identifier(id), codec);
@@ -139,6 +143,10 @@ public final class PlayerRoles implements ModInitializer {
             return false;
         }
         return true;
+    }
+
+    public static boolean canBypassPlayerLimit(MinecraftServer server, UUID playerUuid) {
+        return PlayerRoleManager.get().peekRoles(server, playerUuid).overrides().test(PlayerRoles.BYPASS_PLAYER_LIMIT);
     }
 
     public static Identifier identifier(String path) {
