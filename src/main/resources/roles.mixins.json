@@ -12,6 +12,7 @@
     "ServerCommandSourceMixin",
     "ServerPlayerEntityMixin",
     "TeamAccessor",
+    "bypass_limit.DedicatedPlayerManagerMixin",
     "chat_type.ServerPlayNetworkHandlerMixin",
     "command.CommandDispatcherMixin",
     "command.CommandManagerMixin",
