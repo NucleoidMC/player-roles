@@ -54,7 +54,7 @@ public final class TinyRegistry<T> implements Codec<T>, Iterable<T> {
                     var id = this.parseId(pair.getFirst());
                     var entry = this.get(id);
                     if (entry == null) {
-                        return DataResult.error("Unknown registry key: " + pair.getFirst());
+                        return DataResult.error(() ->"Unknown registry key: " + pair.getFirst());
                     }
                     return DataResult.success(Pair.of(entry, pair.getSecond()));
                 });
@@ -72,7 +72,7 @@ public final class TinyRegistry<T> implements Codec<T>, Iterable<T> {
     public <U> DataResult<U> encode(T input, DynamicOps<U> ops, U prefix) {
         var id = this.getId(input);
         if (id == null) {
-            return DataResult.error("Unknown registry element " + input);
+            return DataResult.error(() -> "Unknown registry element " + input);
         }
         return ops.mergeToPrimitive(prefix, ops.createString(id.toString()));
     }

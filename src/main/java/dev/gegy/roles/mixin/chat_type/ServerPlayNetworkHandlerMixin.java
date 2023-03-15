@@ -23,6 +23,10 @@ public class ServerPlayNetworkHandlerMixin {
 		var roles = PlayerRolesApi.lookup().byPlayer(this.player);
 
 		var override = roles.overrides().select(PlayerRoles.CHAT_TYPE);
-		return Util.mapOrElse(override, ChatTypeOverride::chatType, defaultChatType);
+
+		if (override != null) {
+			return override.chatType();
+		}
+		return defaultChatType;
 	}
 }
