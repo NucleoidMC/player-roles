@@ -22,14 +22,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public final class PlayerRolesConfig implements RoleProvider {
-    private static PlayerRolesConfig instance = new PlayerRolesConfig(Collections.emptyList(), SimpleRole.empty(PlayerRoles.EVERYONE));
+    private static PlayerRolesConfig instance = new PlayerRolesConfig(List.of(), SimpleRole.empty(PlayerRoles.EVERYONE));
 
     private final ImmutableMap<String, SimpleRole> roles;
     private final SimpleRole everyone;
@@ -145,7 +144,7 @@ public final class PlayerRolesConfig implements RoleProvider {
     public ServerRoleSet getCommandBlockRoles() {
         var commandBlockRoles = this.commandBlockRoles;
         if (commandBlockRoles == null) {
-            this.commandBlockRoles = commandBlockRoles = this.buildRoles(apply -> apply.commandBlock);
+            this.commandBlockRoles = commandBlockRoles = this.buildRoles(RoleApplyConfig::commandBlock);
         }
         return commandBlockRoles;
     }
@@ -153,7 +152,7 @@ public final class PlayerRolesConfig implements RoleProvider {
     public ServerRoleSet getFunctionRoles() {
         var functionRoles = this.functionRoles;
         if (functionRoles == null) {
-            this.functionRoles = functionRoles = this.buildRoles(apply -> apply.functions);
+            this.functionRoles = functionRoles = this.buildRoles(RoleApplyConfig::functions);
         }
         return functionRoles;
     }
@@ -162,12 +161,12 @@ public final class PlayerRolesConfig implements RoleProvider {
     @Override
     @SuppressWarnings("unchecked")
     public Iterator<Role> iterator() {
-        return (Iterator<Role>) (Iterator) this.roles.values().iterator();
+        return (Iterator<Role>) (Iterator<? extends Role>) this.roles.values().iterator();
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public Stream<Role> stream() {
-        return (Stream<Role>) (Stream) this.roles.values().stream();
+        return (Stream<Role>) (Stream<? extends Role>) this.roles.values().stream();
     }
 }

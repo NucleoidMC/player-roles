@@ -29,10 +29,10 @@ public abstract class EntitySelectorOptionsMixin {
                         return (role != null && PlayerRolesApi.lookup().byEntity(entity).has(role)) != isNegated;
                     });
                     if (!isNegated) {
-                        ((ExtendedEntitySelectorReader)reader).setSelectsRole(true);
+                        ((ExtendedEntitySelectorReader) reader).setSelectsRole(true);
                     }
                 },
-                reader -> !((ExtendedEntitySelectorReader)reader).selectsRole(),
+                reader -> !((ExtendedEntitySelectorReader) reader).selectsRole(),
                 Text.literal("Player Role")
         );
     }

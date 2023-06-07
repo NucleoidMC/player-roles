@@ -1,8 +1,8 @@
 package dev.gegy.roles;
 
+import dev.gegy.roles.api.override.RoleOverrideResult;
 import dev.gegy.roles.override.command.CommandOverrideRules;
 import dev.gegy.roles.override.command.MatchableCommand;
-import dev.gegy.roles.api.override.RoleOverrideResult;
 import org.junit.jupiter.api.Test;
 
 import java.util.regex.Pattern;

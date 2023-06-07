@@ -11,14 +11,12 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 public final class RoleConfig {
-    public static final Codec<RoleConfig> CODEC = RecordCodecBuilder.create(instance -> {
-        return instance.group(
-                Codec.intRange(0, Integer.MAX_VALUE).optionalFieldOf("level", 0).forGetter(c -> c.level),
-                MoreCodecs.propagatingOptionalFieldOf(RoleOverrideMap.CODEC, "overrides", (Supplier<RoleOverrideMap>) RoleOverrideMap::new).forGetter(c -> c.overrides),
-                MoreCodecs.arrayOrUnit(Codec.STRING, String[]::new).optionalFieldOf("includes", new String[0]).forGetter(c -> c.includes),
-                RoleApplyConfig.CODEC.optionalFieldOf("apply").forGetter(c -> Optional.ofNullable(c.apply))
-        ).apply(instance, RoleConfig::new);
-    });
+    public static final Codec<RoleConfig> CODEC = RecordCodecBuilder.create(i -> i.group(
+            Codec.intRange(0, Integer.MAX_VALUE).optionalFieldOf("level", 0).forGetter(c -> c.level),
+            MoreCodecs.propagatingOptionalFieldOf(RoleOverrideMap.CODEC, "overrides", (Supplier<RoleOverrideMap>) RoleOverrideMap::new).forGetter(c -> c.overrides),
+            MoreCodecs.arrayOrUnit(Codec.STRING, String[]::new).optionalFieldOf("includes", new String[0]).forGetter(c -> c.includes),
+            RoleApplyConfig.CODEC.optionalFieldOf("apply").forGetter(c -> Optional.ofNullable(c.apply))
+    ).apply(i, RoleConfig::new));
 
     public final int level;
     public final RoleOverrideMap overrides;

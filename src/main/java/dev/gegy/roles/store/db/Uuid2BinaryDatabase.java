@@ -31,15 +31,15 @@ public final class Uuid2BinaryDatabase implements Closeable {
 
     private static final ByteOrder BYTE_ORDER = ByteOrder.BIG_ENDIAN;
 
-    final FileChannel file;
-    final Object2LongMap<UUID> pointers;
+    private final FileChannel file;
+    private final Object2LongMap<UUID> pointers;
 
-    final ByteBuffer uuidBytes = ByteBuffer.allocate(16).order(BYTE_ORDER);
-    final ByteBuffer sizeBytes = ByteBuffer.allocate(4).order(BYTE_ORDER);
-    final LongBuffer uuidBuffer = this.uuidBytes.asLongBuffer();
-    final IntBuffer sizeBuffer = this.sizeBytes.asIntBuffer();
+    private final ByteBuffer uuidBytes = ByteBuffer.allocate(16).order(BYTE_ORDER);
+    private final ByteBuffer sizeBytes = ByteBuffer.allocate(4).order(BYTE_ORDER);
+    private final LongBuffer uuidBuffer = this.uuidBytes.asLongBuffer();
+    private final IntBuffer sizeBuffer = this.sizeBytes.asIntBuffer();
 
-    final ByteBuffer[] headerBytes = new ByteBuffer[] { this.uuidBytes, this.sizeBytes };
+    private final ByteBuffer[] headerBytes = new ByteBuffer[] { this.uuidBytes, this.sizeBytes };
 
     private Uuid2BinaryDatabase(FileChannel file, Object2LongMap<UUID> pointers) {
         this.file = file;

@@ -40,13 +40,11 @@ public record CommandOverride(CommandOverrideRules rules) {
             var hooks = CommandRequirementHooks.<ServerCommandSource>tryCreate((nodes, parent) -> {
                 var command = MatchableCommand.compile(nodes);
 
-                return source -> {
-                    return switch (canUseCommand(source, command)) {
-                        case ALLOW -> true;
-                        case DENY -> false;
-                        case HIDDEN -> !CommandTestContext.isSuggesting();
-                        default -> parent.test(source);
-                    };
+                return source -> switch (canUseCommand(source, command)) {
+                    case ALLOW -> true;
+                    case DENY -> false;
+                    case HIDDEN -> !CommandTestContext.isSuggesting();
+                    default -> parent.test(source);
                 };
             });
 
@@ -57,7 +55,9 @@ public record CommandOverride(CommandOverrideRules rules) {
     }
 
     private static RoleOverrideResult canUseCommand(ServerCommandSource source, MatchableCommand command) {
-        if (doesBypassPermissions(source)) return RoleOverrideResult.PASS;
+        if (doesBypassPermissions(source)) {
+            return RoleOverrideResult.PASS;
+        }
 
         var roles = PlayerRolesApi.lookup().bySource(source);
         return roles.overrides().test(PlayerRoles.COMMANDS, m -> m.test(command));
