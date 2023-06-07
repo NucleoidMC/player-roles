@@ -98,7 +98,8 @@ public final class RoleCommand {
             }
         }
 
-        source.sendFeedback(Text.translatable(success, roleName, count), true);
+        int finalCount = count;
+        source.sendFeedback(() -> Text.translatable(success, roleName, finalCount), true);
 
         return Command.SINGLE_SUCCESS;
     }
@@ -107,10 +108,11 @@ public final class RoleCommand {
         var roleManager = PlayerRoleManager.get();
         var server = source.getServer();
 
-        var roles = roleManager.peekRoles(server, player.getId())
-                .stream().collect(Collectors.toList());
-        var rolesComponent = Texts.join(roles, role -> Text.literal(role.getId()).setStyle(Style.EMPTY.withColor(Formatting.GRAY)));
-        source.sendFeedback(Text.translatable("Found %s roles on player: %s", roles.size(), rolesComponent), false);
+        var roles = roleManager.peekRoles(server, player.getId()).stream().toList();
+        source.sendFeedback(() -> {
+            var rolesComponent = Texts.join(roles, role -> Text.literal(role.getId()).setStyle(Style.EMPTY.withColor(Formatting.GRAY)));
+            return Text.translatable("Found %s roles on player: %s", roles.size(), rolesComponent);
+        }, false);
 
         return Command.SINGLE_SUCCESS;
     }
@@ -125,7 +127,7 @@ public final class RoleCommand {
             roleManager.onRoleReload(server, PlayerRolesConfig.get());
 
             if (errors.isEmpty()) {
-                source.sendFeedback(Text.translatable("Role configuration successfully reloaded"), false);
+                source.sendFeedback(() -> Text.literal("Role configuration successfully reloaded"), false);
             } else {
                 MutableText errorFeedback = Text.literal("Failed to reload roles configuration!");
                 for (String error : errors) {
