@@ -61,8 +61,9 @@ public final class PlayerRoles implements ModInitializer {
             @Override
             @NotNull
             public RoleReader byEntity(Entity entity) {
-                if (entity instanceof PlayerWithRoles player) {
-                    return player.getPlayerRoleSet();
+                var onlineRoles = PlayerRoleManager.get().getOnlinePlayerRoles(entity);
+                if (onlineRoles != null) {
+                    return onlineRoles;
                 }
 
                 if (entity instanceof RoleOwner roleOwner) {

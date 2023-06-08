@@ -1,9 +1,11 @@
 package dev.gegy.roles.store;
 
-import dev.gegy.roles.PlayerWithRoles;
 import dev.gegy.roles.config.PlayerRolesConfig;
 import dev.gegy.roles.store.db.PlayerRoleDatabase;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -12,6 +14,7 @@ import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Function;
@@ -20,6 +23,7 @@ public final class PlayerRoleManager {
     private static PlayerRoleManager instance;
 
     private final PlayerRoleDatabase database;
+    private final Map<UUID, PlayerRoleSet> onlinePlayerRoles = new Object2ObjectOpenHashMap<>();
 
     private PlayerRoleManager(PlayerRoleDatabase database) {
         this.database = database;
@@ -55,13 +59,14 @@ public final class PlayerRoleManager {
 
     public void onPlayerJoin(ServerPlayerEntity player) {
         var config = PlayerRolesConfig.get();
-        var roles = ((PlayerWithRoles) player).loadPlayerRoles(config);
+        var roles = new PlayerRoleSet(config.everyone(), player);
         this.database.tryLoadInto(player.getUuid(), roles);
+        this.onlinePlayerRoles.put(player.getUuid(), roles);
     }
 
     public void onPlayerLeave(ServerPlayerEntity player) {
-        var roles = ((PlayerWithRoles) player).getPlayerRoleSet();
-        if (roles.isDirty()) {
+        var roles = this.onlinePlayerRoles.remove(player.getUuid());
+        if (roles != null && roles.isDirty()) {
             this.database.trySave(player.getUuid(), roles);
             roles.setDirty(false);
         }
@@ -69,7 +74,12 @@ public final class PlayerRoleManager {
 
     public void onRoleReload(MinecraftServer server, PlayerRolesConfig config) {
         for (var player : server.getPlayerManager().getPlayerList()) {
-            ((PlayerWithRoles) player).loadPlayerRoles(config);
+            var newRoles = new PlayerRoleSet(config.everyone(), player);
+            var oldRoles = this.onlinePlayerRoles.put(player.getUuid(), newRoles);
+            if (oldRoles != null) {
+                newRoles.reloadFrom(config, oldRoles);
+                newRoles.rebuildOverridesAndNotify();
+            }
         }
     }
 
@@ -83,14 +93,16 @@ public final class PlayerRoleManager {
         }
     }
 
-    public void addLegacyRoles(PlayerWithRoles player, NbtList nbt) {
-        var roles = player.getPlayerRoleSet();
-        roles.deserialize(PlayerRolesConfig.get(), nbt);
-        roles.setDirty(true);
+    public void addLegacyRoles(ServerPlayerEntity player, NbtList nbt) {
+        var roles = this.onlinePlayerRoles.get(player.getUuid());
+        if (roles != null) {
+            roles.deserialize(PlayerRolesConfig.get(), nbt);
+            roles.setDirty(true);
+        }
     }
 
     public <R> R updateRoles(MinecraftServer server, UUID uuid, Function<PlayerRoleSet, R> update) {
-        var roles = getOnlinePlayerRoles(server, uuid);
+        var roles = this.onlinePlayerRoles.get(uuid);
         if (roles != null) {
             return update.apply(roles);
         } else {
@@ -107,7 +119,7 @@ public final class PlayerRoleManager {
     }
 
     public PlayerRoleSet peekRoles(MinecraftServer server, UUID uuid) {
-        var roles = getOnlinePlayerRoles(server, uuid);
+        var roles = this.onlinePlayerRoles.get(uuid);
         return roles != null ? roles : this.loadOfflinePlayerRoles(uuid);
     }
 
@@ -121,12 +133,10 @@ public final class PlayerRoleManager {
     }
 
     @Nullable
-    private static PlayerRoleSet getOnlinePlayerRoles(MinecraftServer server, UUID uuid) {
-        var player = server.getPlayerManager().getPlayer(uuid);
-        if (player != null) {
-            return ((PlayerWithRoles) player).getPlayerRoleSet();
-        } else {
-            return null;
+    public PlayerRoleSet getOnlinePlayerRoles(Entity entity) {
+        if (entity instanceof PlayerEntity) {
+            return this.onlinePlayerRoles.get(entity.getUuid());
         }
+        return null;
     }
 }
