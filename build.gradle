@@ -45,12 +45,7 @@ allprojects {
       publications {
         mavenJava(MavenPublication) {
           artifactId = project.archivesBaseName
-          artifact(remapJar) {
-            builtBy remapJar
-          }
-          artifact(sourcesJar) {
-            builtBy remapSourcesJar
-          }
+          from components.java
         }
       }
 
