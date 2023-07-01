@@ -83,7 +83,8 @@ Name decoration might be declared like:
 "name_decoration": {
   "prefix": {"text": "[Prefix] ", "color": "green"},
   "suffix": {"text": "-Suffix"},
-  "style": ["#ff0000", "bold", "underline"]
+  "style": ["#ff0000", "bold", "underline"],
+  "contexts": ["chat", "tab_list"]
 }
 ```
 
@@ -91,6 +92,9 @@ Three fields can be optionally declared:
  - `style`: accepts a list of text formatting types or hex colors
  - `prefix`: accepts a text component that is prepended before the name
  - `suffix`: accepts a text component that is appended after the name
+ - `contexts`: accepts a set of possible contexts defining where this decoration should be applied
+   - Accepts: `chat` and `tab_list`
+   - Default: applies to all possible contexts
 
 #### Chat Types
 The `chat_type` override allows the chat message decorations to be replaced for all players with a role.

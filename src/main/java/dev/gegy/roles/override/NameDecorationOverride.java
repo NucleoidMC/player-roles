@@ -1,32 +1,42 @@
 package dev.gegy.roles.override;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.text.TextColor;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.dynamic.Codecs;
 import org.jetbrains.annotations.Nullable;
 import xyz.nucleoid.codecs.MoreCodecs;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 
 public record NameDecorationOverride(
 		Optional<AddPrefix> prefix,
 		Optional<AddSuffix> suffix,
-		Optional<ApplyStyle> applyStyle
+		Optional<ApplyStyle> applyStyle,
+		EnumSet<Context> contexts
 ) {
+	private static final EnumSet<Context> DEFAULT_CONTEXTS = EnumSet.allOf(Context.class);
+
 	public static final Codec<NameDecorationOverride> CODEC = RecordCodecBuilder.create(i -> i.group(
 			AddPrefix.CODEC.optionalFieldOf("prefix").forGetter(NameDecorationOverride::prefix),
 			AddSuffix.CODEC.optionalFieldOf("suffix").forGetter(NameDecorationOverride::suffix),
-			ApplyStyle.CODEC.optionalFieldOf("style").forGetter(NameDecorationOverride::applyStyle)
+			ApplyStyle.CODEC.optionalFieldOf("style").forGetter(NameDecorationOverride::applyStyle),
+			Context.SET_CODEC.optionalFieldOf("contexts", DEFAULT_CONTEXTS).forGetter(NameDecorationOverride::contexts)
 	).apply(i, NameDecorationOverride::new));
 
-	public MutableText apply(MutableText name) {
+	public MutableText apply(MutableText name, Context context) {
+		if (!this.contexts.contains(context)) {
+			return name;
+		}
 		if (this.applyStyle.isPresent()) {
 			name = this.applyStyle.get().apply(name);
 		}
@@ -99,6 +109,35 @@ public record NameDecorationOverride(
 				style = style.withColor(this.color);
 			}
 			return style;
+		}
+	}
+
+	public enum Context implements StringIdentifiable {
+		CHAT("chat"),
+		TAB_LIST("tab_list"),
+		;
+
+		public static final com.mojang.serialization.Codec<Context> CODEC = StringIdentifiable.createCodec(Context::values);
+
+		public static final com.mojang.serialization.Codec<EnumSet<Context>> SET_CODEC = Context.CODEC.listOf().comapFlatMap(list -> {
+			var set = EnumSet.noneOf(Context.class);
+			for (var context : list) {
+				if (!set.add(context)) {
+					return DataResult.error(() -> "Duplicate entry in set: " + context.name());
+				}
+			}
+			return DataResult.success(set);
+		}, ArrayList::new);
+
+		private final String name;
+
+		Context(final String name) {
+			this.name = name;
+		}
+
+		@Override
+		public String asString() {
+			return this.name;
 		}
 	}
 }

@@ -18,6 +18,7 @@ import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.message.v1.ServerMessageEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.entity.Entity;
+import net.minecraft.network.packet.s2c.play.PlayerListS2CPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -45,7 +46,11 @@ public final class PlayerRoles implements ModInitializer {
             });
 
     public static final RoleOverrideType<ChatTypeOverride> CHAT_TYPE = registerOverride("chat_type", ChatTypeOverride.CODEC);
-    public static final RoleOverrideType<NameDecorationOverride> NAME_DECORATION = registerOverride("name_decoration", NameDecorationOverride.CODEC);
+    public static final RoleOverrideType<NameDecorationOverride> NAME_DECORATION = registerOverride("name_decoration", NameDecorationOverride.CODEC)
+            .withChangeListener(player -> {
+                var packet = new PlayerListS2CPacket(PlayerListS2CPacket.Action.UPDATE_DISPLAY_NAME, player);
+                player.getServer().getPlayerManager().sendToAll(packet);
+            });
     public static final RoleOverrideType<Boolean> COMMAND_FEEDBACK = registerOverride("command_feedback", Codec.BOOL);
     public static final RoleOverrideType<Boolean> MUTE = registerOverride("mute", Codec.BOOL);
     public static final RoleOverrideType<Integer> PERMISSION_LEVEL = registerOverride("permission_level", Codec.intRange(0, 4));
