@@ -13,7 +13,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 
 public final class CommandRequirementHooks<S> {
-    private static final int MAX_CHAIN_LENGTH = 12;
+    private static final int MAX_CHAIN_LENGTH = 16;
 
     private final RequirementOverride<S> override;
     private final Field requirementField;
