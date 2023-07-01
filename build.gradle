@@ -1,5 +1,5 @@
 plugins {
-  id "fabric-loom" version "1.0.+" apply false
+  id "fabric-loom" version "1.2-SNAPSHOT" apply false
   id "maven-publish"
 }
 
@@ -67,7 +67,9 @@ allprojects {
   }
 }
 
-archivesBaseName = project.archives_base_name
+base {
+  archivesName = project.archives_base_name
+}
 
 repositories {
   mavenCentral()
