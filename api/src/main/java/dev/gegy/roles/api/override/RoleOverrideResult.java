@@ -1,5 +1,6 @@
 package dev.gegy.roles.api.override;
 
+import com.mojang.serialization.Codec;
 import net.minecraft.util.StringIdentifiable;
 
 import java.util.Locale;
