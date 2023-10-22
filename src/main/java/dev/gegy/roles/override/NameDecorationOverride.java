@@ -1,12 +1,10 @@
 package dev.gegy.roles.override;
 
+import com.google.gson.JsonObject;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.text.TextColor;
+import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.dynamic.Codecs;
@@ -22,6 +20,7 @@ public record NameDecorationOverride(
 		Optional<AddPrefix> prefix,
 		Optional<AddSuffix> suffix,
 		Optional<ApplyStyle> applyStyle,
+		Optional<OnHover> onHover,
 		EnumSet<Context> contexts
 ) {
 	private static final EnumSet<Context> DEFAULT_CONTEXTS = EnumSet.allOf(Context.class);
@@ -30,6 +29,7 @@ public record NameDecorationOverride(
 			AddPrefix.CODEC.optionalFieldOf("prefix").forGetter(NameDecorationOverride::prefix),
 			AddSuffix.CODEC.optionalFieldOf("suffix").forGetter(NameDecorationOverride::suffix),
 			ApplyStyle.CODEC.optionalFieldOf("style").forGetter(NameDecorationOverride::applyStyle),
+			OnHover.CODEC.optionalFieldOf("hover").forGetter(NameDecorationOverride::onHover),
 			Context.SET_CODEC.optionalFieldOf("contexts", DEFAULT_CONTEXTS).forGetter(NameDecorationOverride::contexts)
 	).apply(i, NameDecorationOverride::new));
 
@@ -39,6 +39,9 @@ public record NameDecorationOverride(
 		}
 		if (this.applyStyle.isPresent()) {
 			name = this.applyStyle.get().apply(name);
+		}
+		if (this.onHover.isPresent()) {
+			name = this.onHover.get().apply(name);
 		}
 		if (this.prefix.isPresent()) {
 			name = this.prefix.get().apply(name);
@@ -109,6 +112,17 @@ public record NameDecorationOverride(
 				style = style.withColor(this.color);
 			}
 			return style;
+		}
+	}
+
+	public record OnHover(HoverEvent event) {
+		private static final Codec<OnHover> CODEC = MoreCodecs.withJson(HoverEvent::toJson,
+				j -> j instanceof JsonObject jo
+						? Optional.ofNullable(HoverEvent.fromJson(jo)).map(DataResult::success).orElse(DataResult.error(() -> "Invalid Hover Event"))
+						: DataResult.error(() -> "Expected an object"))
+				.xmap(OnHover::new, OnHover::event);
+		public MutableText apply(MutableText text) {
+			return text.setStyle(text.getStyle().withHoverEvent(this.event));
 		}
 	}
 

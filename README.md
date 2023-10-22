@@ -84,6 +84,7 @@ Name decoration might be declared like:
   "prefix": {"text": "[Prefix] ", "color": "green"},
   "suffix": {"text": "-Suffix"},
   "style": ["#ff0000", "bold", "underline"],
+  "hover": {"action": "show_text", "contents": "hello!"},
   "contexts": ["chat", "tab_list"]
 }
 ```
@@ -92,6 +93,13 @@ Three fields can be optionally declared:
  - `style`: accepts a list of text formatting types or hex colors
  - `prefix`: accepts a text component that is prepended before the name
  - `suffix`: accepts a text component that is appended after the name
+ - `hover`: accepts an object with `action` and `contents`. Acceptable values for `contents` depends on `action`:
+   - `action` is `show_text`: `contents` accepts a text component shown as a tooltip when the name is hovered
+   - `action` is `show_item`: `contents` accepts an ItemStack as JSON, shown as a tooltip when the name is hovered
+   - `action` is `show_entity`: `contents` accepts an object with the following properties, to show an entity as a tooltip when the name is hovered:
+     - `type`: an entity type
+     - `id`: the UUID of an entity
+     - `name`: an optional text component name for the entity
  - `contexts`: accepts a set of possible contexts defining where this decoration should be applied
    - Accepts: `chat` and `tab_list`
    - Default: applies to all possible contexts
