@@ -3,6 +3,7 @@ package dev.gegy.roles.override;
 import com.google.gson.JsonObject;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
@@ -53,7 +54,7 @@ public record NameDecorationOverride(
 	}
 
 	public record AddPrefix(Text prefix) {
-		public static final Codec<AddPrefix> CODEC = Codecs.TEXT.xmap(AddPrefix::new, AddPrefix::prefix);
+		public static final Codec<AddPrefix> CODEC = TextCodecs.CODEC.xmap(AddPrefix::new, AddPrefix::prefix);
 
 		public MutableText apply(final MutableText name) {
 			return Text.empty().append(this.prefix).append(name);
@@ -61,7 +62,7 @@ public record NameDecorationOverride(
 	}
 
 	public record AddSuffix(Text suffix) {
-		public static final Codec<AddSuffix> CODEC = Codecs.TEXT.xmap(AddSuffix::new, AddSuffix::suffix);
+		public static final Codec<AddSuffix> CODEC = TextCodecs.CODEC.xmap(AddSuffix::new, AddSuffix::suffix);
 
 		public MutableText apply(final MutableText name) {
 			return name.append(this.suffix);
@@ -79,9 +80,9 @@ public record NameDecorationOverride(
 						if (format != null) {
 							formats.add(format);
 						} else {
-							var parsedColor = TextColor.parse(formatKey);
-							if (parsedColor != null) {
-								color = parsedColor;
+							var parsedColor = TextColor.parse(formatKey).result();
+							if (parsedColor.isPresent()) {
+								color = parsedColor.get();
 							}
 						}
 					}
@@ -116,11 +117,7 @@ public record NameDecorationOverride(
 	}
 
 	public record OnHover(HoverEvent event) {
-		private static final Codec<OnHover> CODEC = MoreCodecs.withJson(HoverEvent::toJson,
-				j -> j instanceof JsonObject jo
-						? Optional.ofNullable(HoverEvent.fromJson(jo)).map(DataResult::success).orElse(DataResult.error(() -> "Invalid Hover Event"))
-						: DataResult.error(() -> "Expected an object"))
-				.xmap(OnHover::new, OnHover::event);
+		private static final Codec<OnHover> CODEC = HoverEvent.CODEC.xmap(OnHover::new, OnHover::event);
 		public MutableText apply(MutableText text) {
 			return text.setStyle(text.getStyle().withHoverEvent(this.event));
 		}

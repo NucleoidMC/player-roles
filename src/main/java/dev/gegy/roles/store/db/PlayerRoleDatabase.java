@@ -5,6 +5,7 @@ import dev.gegy.roles.store.PlayerRoleSet;
 import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtIo;
+import net.minecraft.nbt.NbtTagSizeTracker;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -73,7 +74,7 @@ public final class PlayerRoleDatabase implements Closeable {
         var config = PlayerRolesConfig.get();
 
         try (var input = new ByteArrayInputStream(bytes.array())) {
-            var nbt = NbtIo.readCompressed(input);
+            var nbt = NbtIo.readCompressed(input, NbtTagSizeTracker.ofUnlimitedBytes());
             roles.deserialize(config, nbt.getList("roles", NbtType.STRING));
         }
     }
