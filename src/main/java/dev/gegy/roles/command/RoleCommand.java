@@ -34,9 +34,9 @@ import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
 public final class RoleCommand {
-    public static final DynamicCommandExceptionType ROLE_NOT_FOUND = new DynamicCommandExceptionType(arg -> {
-        return Text.translatable("Role with name '%s' was not found!", arg);
-    });
+    public static final DynamicCommandExceptionType ROLE_NOT_FOUND = new DynamicCommandExceptionType(arg ->
+            Text.stringifiedTranslatable("Role with name '%s' was not found!", arg)
+    );
 
     public static final SimpleCommandExceptionType ROLE_POWER_TOO_LOW = new SimpleCommandExceptionType(
             Text.literal("You do not have sufficient power to manage this role")

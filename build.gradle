@@ -1,5 +1,5 @@
 plugins {
-  id "fabric-loom" version "1.2-SNAPSHOT" apply false
+  id 'fabric-loom' version '1.6.+' apply false
   id "maven-publish"
 }
 
@@ -11,13 +11,13 @@ allprojects {
   group = project.maven_group
 
   java {
-    toolchain.languageVersion = JavaLanguageVersion.of(17)
+    toolchain.languageVersion = JavaLanguageVersion.of(21)
     withSourcesJar()
   }
 
   tasks.withType(JavaCompile).configureEach {
     it.options.encoding = "UTF-8"
-    it.options.release = 17
+    it.options.release = 21
   }
 
   dependencies {
@@ -85,8 +85,6 @@ dependencies {
   modCompileOnly "me.lucko:fabric-permissions-api:0.1-SNAPSHOT"
 
   modImplementation include("xyz.nucleoid:more-codecs:0.3.3+1.20.2")
-
-  implementation include(annotationProcessor("io.github.llamalad7:mixinextras-fabric:0.2.0-rc.5"))
 
   testImplementation platform("org.junit:junit-bom:5.7.0")
   testImplementation "org.junit.jupiter:junit-jupiter"

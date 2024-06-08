@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class MinecraftServerMixin {
     @Inject(method = "getPermissionLevel", at = @At("HEAD"), cancellable = true)
     public void getPermissionLevel(GameProfile profile, CallbackInfoReturnable<Integer> ci) {
-        var roles = PlayerRoleManager.get().peekRoles((MinecraftServer)(Object)this, profile.getId());
+        var roles = PlayerRoleManager.get().peekRoles((MinecraftServer) (Object) this, profile.getId());
         var permissionLevel = roles.overrides().select(PlayerRoles.PERMISSION_LEVEL);
         if (permissionLevel != null) {
             ci.setReturnValue(permissionLevel);

@@ -5,7 +5,7 @@ import com.mojang.serialization.DataResult;
 public interface ConfigErrorConsumer {
     void report(String message);
 
-    default void report(String message, DataResult.PartialResult<?> error) {
+    default void report(String message, DataResult.Error<?> error) {
         this.report(message + ": " + error.message());
     }
 

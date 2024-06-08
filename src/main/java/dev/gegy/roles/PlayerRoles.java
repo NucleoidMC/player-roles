@@ -1,5 +1,6 @@
 package dev.gegy.roles;
 
+import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import dev.gegy.roles.api.PlayerRolesApi;
 import dev.gegy.roles.api.RoleLookup;
@@ -25,15 +26,14 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
 
 import java.util.UUID;
 
 public final class PlayerRoles implements ModInitializer {
     public static final String ID = "player_roles";
-    public static final Logger LOGGER = LogManager.getLogger(ID);
+    public static final Logger LOGGER = LogUtils.getLogger();
 
     public static final String EVERYONE = "everyone";
 

@@ -1,13 +1,13 @@
 package dev.gegy.roles.store.db;
 
+import com.mojang.logging.LogUtils;
 import dev.gegy.roles.config.PlayerRolesConfig;
 import dev.gegy.roles.store.PlayerRoleSet;
-import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtIo;
-import net.minecraft.nbt.NbtTagSizeTracker;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import net.minecraft.nbt.NbtSizeTracker;
+import org.slf4j.Logger;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -18,7 +18,7 @@ import java.nio.file.Path;
 import java.util.UUID;
 
 public final class PlayerRoleDatabase implements Closeable {
-    private static final Logger LOGGER = LogManager.getLogger(PlayerRoleDatabase.class);
+    private static final Logger LOGGER = LogUtils.getLogger();
 
     private final Uuid2BinaryDatabase binary;
 
@@ -74,8 +74,8 @@ public final class PlayerRoleDatabase implements Closeable {
         var config = PlayerRolesConfig.get();
 
         try (var input = new ByteArrayInputStream(bytes.array())) {
-            var nbt = NbtIo.readCompressed(input, NbtTagSizeTracker.ofUnlimitedBytes());
-            roles.deserialize(config, nbt.getList("roles", NbtType.STRING));
+            var nbt = NbtIo.readCompressed(input, NbtSizeTracker.ofUnlimitedBytes());
+            roles.deserialize(config, nbt.getList("roles", NbtElement.STRING_TYPE));
         }
     }
 

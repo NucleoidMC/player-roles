@@ -28,27 +28,19 @@ public final class RoleConfigMap implements Iterable<Pair<String, RoleConfig>> {
         this.roleOrder = roleOrder;
     }
 
-    public static <T> RoleConfigMap parse(Dynamic<T> root, ConfigErrorConsumer error) {
-        var roleEntries = root.asMapOpt().result().orElse(Stream.empty())
-                .collect(Collectors.toList());
+    public static <T> RoleConfigMap parse(Dynamic<T> root, ConfigErrorConsumer errorConsumer) {
+        var roleEntries = root.asMapOpt().result().orElse(Stream.empty()).toList();
 
         var roleBuilder = new Builder();
 
         for (var entry : roleEntries) {
             var name = entry.getFirst().asString(PlayerRoles.EVERYONE).toLowerCase(Locale.ROOT);
-            var roleRoot = entry.getSecond();
-
-            var roleConfigResult = RoleConfig.CODEC.parse(roleRoot);
-            if (roleConfigResult.error().isPresent()) {
-                error.report("Failed to parse role config for '" + name + "'", roleConfigResult.error().get());
-                continue;
-            }
-
-            var role = roleConfigResult.result().get();
-            roleBuilder.add(name, role);
+            RoleConfig.CODEC.parse(entry.getSecond())
+                    .ifSuccess(role -> roleBuilder.add(name, role))
+                    .ifError(error -> errorConsumer.report("Failed to parse role config for '" + name + "'", error));
         }
 
-        return roleBuilder.build(error);
+        return roleBuilder.build(errorConsumer);
     }
 
     @Nullable

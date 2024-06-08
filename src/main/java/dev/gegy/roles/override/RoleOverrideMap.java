@@ -18,13 +18,17 @@ import java.util.Set;
 
 public final class RoleOverrideMap implements RoleOverrideReader {
     @SuppressWarnings("unchecked")
-    public static final Codec<RoleOverrideMap> CODEC = MoreCodecs.dispatchByMapKey(RoleOverrideType.REGISTRY, t -> MoreCodecs.listOrUnit((Codec<Object>) t.getCodec()))
+    public static final Codec<RoleOverrideMap> CODEC = Codec.dispatchedMap(RoleOverrideType.REGISTRY, t -> MoreCodecs.listOrUnit((Codec<Object>) t.getCodec()))
             .xmap(RoleOverrideMap::new, m -> m.overrides);
 
     private final Map<RoleOverrideType<?>, List<Object>> overrides;
 
     public RoleOverrideMap() {
         this.overrides = new Reference2ObjectOpenHashMap<>();
+    }
+
+    public RoleOverrideMap(RoleOverrideMap map) {
+        this(map.overrides);
     }
 
     private RoleOverrideMap(Map<RoleOverrideType<?>, List<Object>> overrides) {
