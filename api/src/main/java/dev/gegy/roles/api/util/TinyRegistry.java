@@ -61,10 +61,10 @@ public final class TinyRegistry<T> implements Codec<T>, Iterable<T> {
     }
 
     private Identifier parseId(String string) {
-        if (string.indexOf(':') != -1) {
-            return new Identifier(string);
+        if (string.indexOf(Identifier.NAMESPACE_SEPARATOR) != -1) {
+            return Identifier.of(string);
         } else {
-            return new Identifier(this.defaultNamespace, string);
+            return Identifier.of(this.defaultNamespace, string);
         }
     }
 
