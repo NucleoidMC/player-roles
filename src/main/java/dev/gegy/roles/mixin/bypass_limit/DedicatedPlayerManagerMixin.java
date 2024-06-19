@@ -7,7 +7,7 @@ import net.minecraft.registry.ServerDynamicRegistryType;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.PlayerManager;
 import net.minecraft.server.dedicated.DedicatedPlayerManager;
-import net.minecraft.world.WorldSaveHandler;
+import net.minecraft.world.PlayerSaveHandler;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(DedicatedPlayerManager.class)
 public class DedicatedPlayerManagerMixin extends PlayerManager {
-    public DedicatedPlayerManagerMixin(MinecraftServer server, CombinedDynamicRegistries<ServerDynamicRegistryType> registryManager, WorldSaveHandler saveHandler, int maxPlayers) {
+    public DedicatedPlayerManagerMixin(MinecraftServer server, CombinedDynamicRegistries<ServerDynamicRegistryType> registryManager, PlayerSaveHandler saveHandler, int maxPlayers) {
         super(server, registryManager, saveHandler, maxPlayers);
     }
 

@@ -7,6 +7,7 @@ import dev.gegy.roles.api.RoleLookup;
 import dev.gegy.roles.api.RoleOwner;
 import dev.gegy.roles.api.RoleReader;
 import dev.gegy.roles.api.override.RoleOverrideType;
+import dev.gegy.roles.command.PlayerRolesEntitySelectorOptions;
 import dev.gegy.roles.command.RoleCommand;
 import dev.gegy.roles.config.PlayerRolesConfig;
 import dev.gegy.roles.override.ChatTypeOverride;
@@ -121,6 +122,8 @@ public final class PlayerRoles implements ModInitializer {
             RoleCommand.register(dispatcher);
         });
 
+        PlayerRolesEntitySelectorOptions.register();
+
         CommandOverride.initialize();
 
         ServerMessageEvents.ALLOW_CHAT_MESSAGE.register((message, sender, params) -> trySendChat(sender));
@@ -156,6 +159,6 @@ public final class PlayerRoles implements ModInitializer {
     }
 
     public static Identifier identifier(String path) {
-        return new Identifier(ID, path);
+        return Identifier.of(ID, path);
     }
 }
