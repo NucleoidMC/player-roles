@@ -15,7 +15,7 @@
     "command.CommandDispatcherMixin",
     "command.CommandManagerMixin",
     "command.ServerCommandSourceMixin",
-    "entity_selectors.EntityArgumentTypeMixin",
+    "entity_selectors.EntitySelectorReaderMixin",
     "entity_selectors.EntitySelectorMixin",
     "entity_selectors.MessageArgumentTypeMixin",
     "mute.MessageCommandMixin",
