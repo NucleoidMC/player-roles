@@ -11,7 +11,7 @@ import net.minecraft.util.Identifier;
 
 public final class PlayerRolesEntitySelectorOptions {
     private static final Identifier ID = PlayerRoles.identifier("role");
-    private static final Text DESCRIPTION = Text.literal("Player Role");
+    private static final Text DESCRIPTION = Text.translatable("text.player_roles.player_role");
 
     public static void register() {
         EntitySelectorOptionRegistry.register(ID, DESCRIPTION, PlayerRolesEntitySelectorOptions::handle, PlayerRolesEntitySelectorOptions::canUse);
