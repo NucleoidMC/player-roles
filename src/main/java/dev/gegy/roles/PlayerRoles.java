@@ -148,7 +148,7 @@ public final class PlayerRoles implements ModInitializer {
     public static boolean trySendChat(ServerPlayerEntity player) {
         var roles = PlayerRolesApi.lookup().byPlayer(player);
         if (roles.overrides().test(PlayerRoles.MUTE)) {
-            player.sendMessage(Text.literal("You are muted!").formatted(Formatting.RED), true);
+            player.sendMessage(Text.translatable("text.player_roles.muted").formatted(Formatting.RED), true);
             return false;
         }
         return true;

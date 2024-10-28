@@ -35,15 +35,15 @@ import static net.minecraft.server.command.CommandManager.literal;
 
 public final class RoleCommand {
     public static final DynamicCommandExceptionType ROLE_NOT_FOUND = new DynamicCommandExceptionType(arg ->
-            Text.stringifiedTranslatable("Role with name '%s' was not found!", arg)
+            Text.translatable("text.player_roles.role_not_found", arg)
     );
 
     public static final SimpleCommandExceptionType ROLE_POWER_TOO_LOW = new SimpleCommandExceptionType(
-            Text.literal("You do not have sufficient power to manage this role")
+            Text.translatable("text.player_roles.role_power_too_low")
     );
 
     public static final SimpleCommandExceptionType TOO_MANY_SELECTED = new SimpleCommandExceptionType(
-            Text.literal("Too many players selected!")
+            Text.translatable("text.player_roles.too_many_selected")
     );
 
     // @formatter:off
@@ -57,7 +57,7 @@ public final class RoleCommand {
                         var source = ctx.getSource();
                         var targets = GameProfileArgumentType.getProfileArgument(ctx, "targets");
                         var roleName = StringArgumentType.getString(ctx, "role");
-                        return updateRoles(source, targets, roleName, PlayerRoleSet::add, "'%s' assigned to %s players");
+                        return updateRoles(source, targets, roleName, PlayerRoleSet::add, "text.player_roles.role_assign");
                     })
                 )))
                 .then(literal("remove")
@@ -67,7 +67,7 @@ public final class RoleCommand {
                         var source = ctx.getSource();
                         var targets = GameProfileArgumentType.getProfileArgument(ctx, "targets");
                         var roleName = StringArgumentType.getString(ctx, "role");
-                        return updateRoles(source, targets, roleName, PlayerRoleSet::remove, "'%s' removed from %s players");
+                        return updateRoles(source, targets, roleName, PlayerRoleSet::remove, "text.player_roles.role_remove");
                     })
                 )))
                 .then(literal("list")
@@ -113,7 +113,7 @@ public final class RoleCommand {
         var roles = roleManager.peekRoles(server, player.getId()).stream().toList();
         source.sendFeedback(() -> {
             var rolesComponent = Texts.join(roles, role -> Text.literal(role.getId()).setStyle(Style.EMPTY.withColor(Formatting.GRAY)));
-            return Text.translatable("Found %s roles on player: %s", roles.size(), rolesComponent);
+            return Text.translatable("text.player_roles.player_role_list", roles.size(), rolesComponent);
         }, false);
 
         return Command.SINGLE_SUCCESS;
@@ -129,9 +129,9 @@ public final class RoleCommand {
             roleManager.onRoleReload(server, PlayerRolesConfig.get());
 
             if (errors.isEmpty()) {
-                source.sendFeedback(() -> Text.literal("Role configuration successfully reloaded"), false);
+                source.sendFeedback(() -> Text.translatable("text.player_roles.successful_reload"), false);
             } else {
-                MutableText errorFeedback = Text.literal("Failed to reload roles configuration!");
+                MutableText errorFeedback = Text.translatable("text.player_roles.failed_reload");
                 for (String error : errors) {
                     errorFeedback = errorFeedback.append("\n - " + error);
                 }

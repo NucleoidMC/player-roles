@@ -1,0 +1,12 @@
+{
+  "text.player_roles.role_not_found": "Role with name '%s' was not found!",
+  "text.player_roles.role_power_too_low": "You do not have sufficient power to manage this role",
+  "text.player_roles.too_many_selected": "Too many players selected!",
+  "text.player_roles.successful_reload": "Role configuration successfully reloaded",
+  "text.player_roles.failed_reload": "Failed to reload roles configuration!",
+  "text.player_roles.player_role_list": "Found %s roles on player: %s",
+  "text.player_roles.role_assign": "'%s' assigned to %s players",
+  "text.player_roles.role_remove": "'%s' removed from %s players",
+  "text.player_roles.muted": "You are muted!",
+  "text.player_roles.player_role": "Player Role"
+}

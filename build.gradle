@@ -85,6 +85,7 @@ dependencies {
   modCompileOnly "me.lucko:fabric-permissions-api:0.1-SNAPSHOT"
 
   modImplementation include("xyz.nucleoid:more-codecs:0.3.3+1.20.2")
+  modImplementation include("xyz.nucleoid:server-translations-api:2.3.1+1.21-pre2")
 
   testImplementation platform("org.junit:junit-bom:5.7.0")
   testImplementation "org.junit.jupiter:junit-jupiter"
