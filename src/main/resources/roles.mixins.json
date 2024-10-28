@@ -17,7 +17,6 @@
     "command.ServerCommandSourceMixin",
     "entity_selectors.EntitySelectorReaderMixin",
     "entity_selectors.EntitySelectorMixin",
-    "entity_selectors.MessageArgumentTypeMixin",
     "mute.MessageCommandMixin",
     "mute.TeamMsgCommandMixin",
     "name_decoration.ServerPlayerEntityMixin",
