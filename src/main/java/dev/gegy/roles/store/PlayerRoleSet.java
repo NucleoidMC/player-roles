@@ -14,6 +14,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.stream.Stream;
 
 public final class PlayerRoleSet implements RoleReader {
@@ -97,11 +98,10 @@ public final class PlayerRoleSet implements RoleReader {
         return list;
     }
 
-    public void deserialize(RoleProvider roleProvider, NbtList list) {
+    public void deserialize(RoleProvider roleProvider, List<String> names) {
         this.roles.clear();
 
-        for (int i = 0; i < list.size(); i++) {
-            var name = list.getString(i);
+        for (var name : names) {
             var role = roleProvider.get(name);
             if (role == null || name.equalsIgnoreCase(PlayerRoles.EVERYONE)) {
                 this.dirty = true;
@@ -128,8 +128,8 @@ public final class PlayerRoleSet implements RoleReader {
     }
 
     public void reloadFrom(RoleProvider roleProvider, PlayerRoleSet roles) {
-        var nbt = roles.serialize();
-        this.deserialize(roleProvider, nbt);
+        var names = this.roles.stream().map(Role::getId).toList();
+        this.deserialize(roleProvider, names);
 
         this.dirty |= roles.dirty;
     }
