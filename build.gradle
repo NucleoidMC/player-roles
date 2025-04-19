@@ -79,7 +79,8 @@ repositories {
 }
 
 dependencies {
-  implementation include(project(path: ":api", configuration: "namedElements"))
+  implementation project(path: ":api", configuration: "namedElements")
+  include project(path: ":api")
 
   modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
   modCompileOnly "me.lucko:fabric-permissions-api:0.1-SNAPSHOT"
