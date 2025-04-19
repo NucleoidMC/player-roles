@@ -13,8 +13,8 @@
   "mixins": ["roles.mixins.json"],
   "depends": {
     "fabricloader": ">=0.15",
-    "fabric": ">=0.99",
-    "minecraft": ">=1.21.1",
+    "fabric-api": "*",
+    "minecraft": ">=1.21.5",
     "java": ">=21"
   }
 }
