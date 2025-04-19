@@ -6,7 +6,6 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.NbtList;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.WorldSavePath;
@@ -14,6 +13,7 @@ import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
@@ -93,10 +93,10 @@ public final class PlayerRoleManager {
         }
     }
 
-    public void addLegacyRoles(ServerPlayerEntity player, NbtList nbt) {
+    public void addLegacyRoles(ServerPlayerEntity player, List<String> names) {
         var roles = this.onlinePlayerRoles.get(player.getUuid());
         if (roles != null) {
-            roles.deserialize(PlayerRolesConfig.get(), nbt);
+            roles.deserialize(PlayerRolesConfig.get(), names);
             roles.setDirty(true);
         }
     }

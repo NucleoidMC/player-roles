@@ -1,10 +1,10 @@
 package dev.gegy.roles.store.db;
 
 import com.mojang.logging.LogUtils;
+import com.mojang.serialization.Codec;
 import dev.gegy.roles.config.PlayerRolesConfig;
 import dev.gegy.roles.store.PlayerRoleSet;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtSizeTracker;
 import org.slf4j.Logger;
@@ -75,7 +75,10 @@ public final class PlayerRoleDatabase implements Closeable {
 
         try (var input = new ByteArrayInputStream(bytes.array())) {
             var nbt = NbtIo.readCompressed(input, NbtSizeTracker.ofUnlimitedBytes());
-            roles.deserialize(config, nbt.getList("roles", NbtElement.STRING_TYPE));
+
+            nbt.get("roles", Codec.STRING.listOf()).ifPresent(names -> {
+                roles.deserialize(config, names);
+            });
         }
     }
 
