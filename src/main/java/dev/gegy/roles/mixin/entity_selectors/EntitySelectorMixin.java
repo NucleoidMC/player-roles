@@ -10,13 +10,13 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(EntitySelector.class)
 public class EntitySelectorMixin {
-    @Redirect(method = "checkSourcePermission", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/command/ServerCommandSource;hasPermissionLevel(I)Z"))
-    private boolean hasPermissionLevel(ServerCommandSource source, int level) {
-        if (source.hasPermissionLevel(level)) {
+    @Redirect(method = "checkSourcePermission", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/command/ServerCommandSource;hasElevatedPermissions()Z"))
+    private boolean hasPermissionLevel(ServerCommandSource instance) {
+        if (instance.hasElevatedPermissions()) {
             return true;
         }
 
-        var roles = PlayerRolesApi.lookup().bySource(source);
+        var roles = PlayerRolesApi.lookup().bySource(instance);
         return roles.overrides().test(PlayerRoles.ENTITY_SELECTORS);
     }
 }
