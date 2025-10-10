@@ -1,5 +1,7 @@
 package dev.gegy.roles;
 
+import com.google.common.jimfs.Configuration;
+import com.google.common.jimfs.Jimfs;
 import dev.gegy.roles.store.db.Uuid2BinaryDatabase;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
@@ -7,9 +9,9 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.UUID;
 
@@ -20,185 +22,208 @@ final class RoleDatabaseTests {
     private static final UUID BAR = UUID.fromString("303505c1-798d-3df3-ab8d-6c701f3fe36a");
     private static final UUID BAZ = UUID.fromString("fc74fe37-e9f9-3198-8e46-1eee97cacfa6");
 
-    private static final Path DATABASE_PATH = Paths.get("test_database");
-
     @Test
     void testAddOne() throws IOException {
-        Uuid2BinaryDatabase database = createEmptyDatabase();
-        database.put(FOO, encode("foo"));
+        try (FileSystem fs = Jimfs.newFileSystem(Configuration.unix())) {
+            Uuid2BinaryDatabase database = createEmptyDatabase(fs.getPath("db"));
+            database.put(FOO, encode("foo"));
 
-        assertEquals(decode(database.get(FOO)), "foo");
-        assertNull(database.get(BAR));
+            assertEquals(decode(database.get(FOO)), "foo");
+            assertNull(database.get(BAR));
+        }
     }
 
     @Test
     void testAddAndUpdateOne() throws IOException {
-        Uuid2BinaryDatabase database = createEmptyDatabase();
-        database.put(FOO, encode("foo"));
-        assertEquals(decode(database.get(FOO)), "foo");
+        try (FileSystem fs = Jimfs.newFileSystem(Configuration.unix())) {
+            Uuid2BinaryDatabase database = createEmptyDatabase(fs.getPath("db"));
+            database.put(FOO, encode("foo"));
+            assertEquals(decode(database.get(FOO)), "foo");
 
-        database.put(FOO, encode("not foo"));
-        assertEquals(decode(database.get(FOO)), "not foo");
+            database.put(FOO, encode("not foo"));
+            assertEquals(decode(database.get(FOO)), "not foo");
+        }
     }
 
     @Test
     void testAddAndRemoveOne() throws IOException {
-        Uuid2BinaryDatabase database = createEmptyDatabase();
-        database.put(FOO, encode("foo"));
-        assertEquals(decode(database.get(FOO)), "foo");
+        try (FileSystem fs = Jimfs.newFileSystem(Configuration.unix())) {
+            Uuid2BinaryDatabase database = createEmptyDatabase(fs.getPath("db"));
+            database.put(FOO, encode("foo"));
+            assertEquals(decode(database.get(FOO)), "foo");
 
-        assertTrue(database.remove(FOO));
-        assertNull(database.get(FOO));
+            assertTrue(database.remove(FOO));
+            assertNull(database.get(FOO));
+        }
     }
 
     @Test
     void testAddAndShrinkInMiddle() throws IOException {
-        Uuid2BinaryDatabase database = createEmptyDatabase();
-        database.put(FOO, encode("foo"));
-        database.put(BAR, encode("bar"));
-        database.put(BAZ, encode("baz"));
+        try (FileSystem fs = Jimfs.newFileSystem(Configuration.unix())) {
+            Uuid2BinaryDatabase database = createEmptyDatabase(fs.getPath("db"));
+            database.put(FOO, encode("foo"));
+            database.put(BAR, encode("bar"));
+            database.put(BAZ, encode("baz"));
 
-        assertEquals(decode(database.get(FOO)), "foo");
-        assertEquals(decode(database.get(BAR)), "bar");
-        assertEquals(decode(database.get(BAZ)), "baz");
+            assertEquals(decode(database.get(FOO)), "foo");
+            assertEquals(decode(database.get(BAR)), "bar");
+            assertEquals(decode(database.get(BAZ)), "baz");
 
-        database.put(BAR, encode("b"));
+            database.put(BAR, encode("b"));
 
-        assertEquals(decode(database.get(FOO)), "foo");
-        assertEquals(decode(database.get(BAR)), "b");
-        assertEquals(decode(database.get(BAZ)), "baz");
+            assertEquals(decode(database.get(FOO)), "foo");
+            assertEquals(decode(database.get(BAR)), "b");
+            assertEquals(decode(database.get(BAZ)), "baz");
+        }
     }
 
     @Test
     void testAddAndGrowInMiddle() throws IOException {
-        Uuid2BinaryDatabase database = createEmptyDatabase();
-        database.put(FOO, encode("foo"));
-        database.put(BAR, encode("bar"));
-        database.put(BAZ, encode("baz"));
+        try (FileSystem fs = Jimfs.newFileSystem(Configuration.unix())) {
+            Uuid2BinaryDatabase database = createEmptyDatabase(fs.getPath("db"));
+            database.put(FOO, encode("foo"));
+            database.put(BAR, encode("bar"));
+            database.put(BAZ, encode("baz"));
 
-        assertEquals(decode(database.get(FOO)), "foo");
-        assertEquals(decode(database.get(BAR)), "bar");
-        assertEquals(decode(database.get(BAZ)), "baz");
+            assertEquals(decode(database.get(FOO)), "foo");
+            assertEquals(decode(database.get(BAR)), "bar");
+            assertEquals(decode(database.get(BAZ)), "baz");
 
-        database.put(BAR, encode("baaar"));
+            database.put(BAR, encode("baaar"));
 
-        assertEquals(decode(database.get(FOO)), "foo");
-        assertEquals(decode(database.get(BAR)), "baaar");
-        assertEquals(decode(database.get(BAZ)), "baz");
+            assertEquals(decode(database.get(FOO)), "foo");
+            assertEquals(decode(database.get(BAR)), "baaar");
+            assertEquals(decode(database.get(BAZ)), "baz");
+        }
     }
 
     @Test
     void testAddAndRemoveInMiddle() throws IOException {
-        Uuid2BinaryDatabase database = createEmptyDatabase();
-        database.put(FOO, encode("foo"));
-        database.put(BAR, encode("bar"));
-        database.put(BAZ, encode("baz"));
+        try (FileSystem fs = Jimfs.newFileSystem(Configuration.unix())) {
+            Uuid2BinaryDatabase database = createEmptyDatabase(fs.getPath("db"));
+            database.put(FOO, encode("foo"));
+            database.put(BAR, encode("bar"));
+            database.put(BAZ, encode("baz"));
 
-        assertEquals(decode(database.get(FOO)), "foo");
-        assertEquals(decode(database.get(BAR)), "bar");
-        assertEquals(decode(database.get(BAZ)), "baz");
+            assertEquals(decode(database.get(FOO)), "foo");
+            assertEquals(decode(database.get(BAR)), "bar");
+            assertEquals(decode(database.get(BAZ)), "baz");
 
-        assertTrue(database.remove(BAR));
+            assertTrue(database.remove(BAR));
 
-        assertEquals(decode(database.get(FOO)), "foo");
-        assertNull(database.get(BAR));
-        assertEquals(decode(database.get(BAZ)), "baz");
+            assertEquals(decode(database.get(FOO)), "foo");
+            assertNull(database.get(BAR));
+            assertEquals(decode(database.get(BAZ)), "baz");
+        }
     }
 
     @Test
     void testPersistent() throws IOException {
-        Uuid2BinaryDatabase database = createEmptyDatabase();
-        database.put(FOO, encode("foo"));
-        database.put(BAZ, encode("baz"));
+        try (FileSystem fs = Jimfs.newFileSystem(Configuration.unix())) {
+            Uuid2BinaryDatabase database = createEmptyDatabase(fs.getPath("db"));
+            database.put(FOO, encode("foo"));
+            database.put(BAZ, encode("baz"));
 
-        assertEquals(decode(database.get(FOO)), "foo");
-        assertEquals(decode(database.get(BAZ)), "baz");
+            assertEquals(decode(database.get(FOO)), "foo");
+            assertEquals(decode(database.get(BAZ)), "baz");
 
-        database = reopenDatabase();
-        assertEquals(decode(database.get(FOO)), "foo");
-        assertEquals(decode(database.get(BAZ)), "baz");
+            database = reopenDatabase(fs.getPath("db"));
+            assertEquals(decode(database.get(FOO)), "foo");
+            assertEquals(decode(database.get(BAZ)), "baz");
+        }
     }
 
     @Test
     void testBigDatabaseGrow() throws IOException {
-        UUID[] uuids = createUuids(30);
+        try (FileSystem fs = Jimfs.newFileSystem(Configuration.unix())) {
+            Uuid2BinaryDatabase database = createEmptyDatabase(fs.getPath("db"));
+            UUID[] uuids = createUuids(30);
 
-        Uuid2BinaryDatabase database = createEmptyDatabase();
-        for (UUID uuid : uuids) {
-            database.put(uuid, encode(uuid.toString()));
-        }
+            for (UUID uuid : uuids) {
+                database.put(uuid, encode(uuid.toString()));
+            }
 
-        String padding = StringUtils.repeat('a', 20);
-        for (int i = 0; i < uuids.length; i += 4) {
-            UUID uuid = uuids[i];
-            database.put(uuid, encode(uuid.toString() + padding));
+            String padding = StringUtils.repeat('a', 20);
+            for (int i = 0; i < uuids.length; i += 4) {
+                UUID uuid = uuids[i];
+                database.put(uuid, encode(uuid.toString() + padding));
+            }
         }
     }
 
     @Test
     void testBigDatabaseRemove() throws IOException {
-        UUID[] uuids = createUuids(30);
+        try (FileSystem fs = Jimfs.newFileSystem(Configuration.unix())) {
+            Uuid2BinaryDatabase database = createEmptyDatabase(fs.getPath("db"));
 
-        Uuid2BinaryDatabase database = createEmptyDatabase();
-        for (UUID uuid : uuids) {
-            database.put(uuid, encode(uuid.toString()));
-        }
+            UUID[] uuids = createUuids(30);
 
-        for (int i = 0; i < uuids.length; i += 4) {
-            UUID uuid = uuids[i];
-            database.remove(uuid);
+            for (UUID uuid : uuids) {
+                database.put(uuid, encode(uuid.toString()));
+            }
+
+            for (int i = 0; i < uuids.length; i += 4) {
+                UUID uuid = uuids[i];
+                database.remove(uuid);
+            }
         }
     }
 
     @Test
     void testBigDatabaseShrink() throws IOException {
-        UUID[] uuids = createUuids(30);
+        try (FileSystem fs = Jimfs.newFileSystem(Configuration.unix())) {
+            Uuid2BinaryDatabase database = createEmptyDatabase(fs.getPath("db"));
 
-        Uuid2BinaryDatabase database = createEmptyDatabase();
-        for (UUID uuid : uuids) {
-            database.put(uuid, encode(uuid.toString()));
-        }
+            UUID[] uuids = createUuids(30);
 
-        for (int i = 0; i < uuids.length; i += 4) {
-            UUID uuid = uuids[i];
-            database.put(uuid, encode("a"));
+            for (UUID uuid : uuids) {
+                database.put(uuid, encode(uuid.toString()));
+            }
+
+            for (int i = 0; i < uuids.length; i += 4) {
+                UUID uuid = uuids[i];
+                database.put(uuid, encode("a"));
+            }
         }
     }
 
     @Test
     void testBigDatabaseGrowAndRemoveAndShrink() throws IOException {
-        UUID[] uuids = createUuids(30);
-        boolean[] set = new boolean[uuids.length];
-        Arrays.fill(set, true);
+        try (FileSystem fs = Jimfs.newFileSystem(Configuration.unix())) {
+            Uuid2BinaryDatabase database = createEmptyDatabase(fs.getPath("db"));
 
-        Uuid2BinaryDatabase database = createEmptyDatabase();
-        for (UUID uuid : uuids) {
-            database.put(uuid, encode(uuid.toString()));
-        }
+            UUID[] uuids = createUuids(30);
+            boolean[] set = new boolean[uuids.length];
+            Arrays.fill(set, true);
 
-        String padding = StringUtils.repeat('a', 20);
-        for (int i = 0; i < uuids.length; i += 4) {
-            UUID uuid = uuids[i];
-            database.put(uuid, encode(uuid.toString() + padding));
-            set[i] = false;
-        }
+            for (UUID uuid : uuids) {
+                database.put(uuid, encode(uuid.toString()));
+            }
 
-        for (int i = 1; i < uuids.length; i += 4) {
-            UUID uuid = uuids[i];
-            database.remove(uuid);
-            set[i] = false;
-        }
-
-        for (int i = 3; i < uuids.length; i += 4) {
-            UUID uuid = uuids[i];
-            database.put(uuid, encode("a"));
-            set[i] = false;
-        }
-
-        for (int i = 0; i < uuids.length; i++) {
-            if (set[i]) {
+            String padding = StringUtils.repeat('a', 20);
+            for (int i = 0; i < uuids.length; i += 4) {
                 UUID uuid = uuids[i];
-                assertEquals(decode(database.get(uuid)), uuid.toString());
+                database.put(uuid, encode(uuid.toString() + padding));
+                set[i] = false;
+            }
+
+            for (int i = 1; i < uuids.length; i += 4) {
+                UUID uuid = uuids[i];
+                database.remove(uuid);
+                set[i] = false;
+            }
+
+            for (int i = 3; i < uuids.length; i += 4) {
+                UUID uuid = uuids[i];
+                database.put(uuid, encode("a"));
+                set[i] = false;
+            }
+
+            for (int i = 0; i < uuids.length; i++) {
+                if (set[i]) {
+                    UUID uuid = uuids[i];
+                    assertEquals(decode(database.get(uuid)), uuid.toString());
+                }
             }
         }
     }
@@ -211,13 +236,18 @@ final class RoleDatabaseTests {
         return uuids;
     }
 
-    private static Uuid2BinaryDatabase createEmptyDatabase() throws IOException {
-        Files.deleteIfExists(DATABASE_PATH);
-        return Uuid2BinaryDatabase.open(DATABASE_PATH);
+    private static Uuid2BinaryDatabase createEmptyDatabase(Path path) throws IOException {
+        if (Files.exists(path)) {
+            throw new IOException("Database already exists at " + path);
+        }
+        return Uuid2BinaryDatabase.open(path);
     }
 
-    private static Uuid2BinaryDatabase reopenDatabase() throws IOException {
-        return Uuid2BinaryDatabase.open(DATABASE_PATH);
+    private static Uuid2BinaryDatabase reopenDatabase(Path path) throws IOException {
+        if (!Files.exists(path)) {
+            throw new IOException("Database does not exist at " + path);
+        }
+        return Uuid2BinaryDatabase.open(path);
     }
 
     private static ByteBuffer encode(String text) {
