@@ -14,10 +14,8 @@ public record PermissionKeyOverride(PermissionKeyRules rules) {
     public static void register() {
         var override = RoleOverrideType.register(PlayerRoles.identifier("permission_keys"), PermissionKeyOverride.CODEC)
                 .withChangeListener(player -> {
-                    var server = player.getServer();
-                    if (server != null) {
-                        server.getCommandManager().sendCommandTree(player);
-                    }
+                    var server = player.getEntityWorld().getServer();
+                    server.getCommandManager().sendCommandTree(player);
                 });
 
         PermissionCheckEvent.EVENT.register((source, permission) -> {

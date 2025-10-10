@@ -1,5 +1,5 @@
 plugins {
-  id 'fabric-loom' version '1.10.+' apply false
+  id 'fabric-loom' version '1.11.+' apply false
   id "maven-publish"
 }
 
@@ -36,7 +36,7 @@ allprojects {
 
   jar {
     from("LICENSE") {
-      rename { "${it}_${project.archivesBaseName}" }
+      rename { "${it}_${project.archives_base_name}" }
     }
   }
 
@@ -44,7 +44,7 @@ allprojects {
     publishing {
       publications {
         mavenJava(MavenPublication) {
-          artifactId = project.archivesBaseName
+          artifactId = project.archives_base_name
           from components.java
         }
       }
@@ -73,9 +73,13 @@ base {
 
 repositories {
   mavenCentral()
-  maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
-  maven { url "https://maven.nucleoid.xyz" }
-  maven { url "https://maven.gegy.dev" }
+  maven {
+    url "https://maven.nucleoid.xyz/releases"
+    content {
+      includeGroup 'xyz.nucleoid'
+      includeGroup 'me.lucko'
+    }
+  }
 }
 
 dependencies {
@@ -85,10 +89,11 @@ dependencies {
   modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
   modCompileOnly "me.lucko:fabric-permissions-api:0.1-SNAPSHOT"
 
-  modImplementation include("xyz.nucleoid:more-codecs:0.3.3+1.20.2")
+  modImplementation include("xyz.nucleoid:more-codecs:0.3.5+1.21.2")
 
   testImplementation platform("org.junit:junit-bom:5.7.0")
   testImplementation "org.junit.jupiter:junit-jupiter"
+  testRuntimeOnly "org.junit.platform:junit-platform-launcher"
 }
 
 test {

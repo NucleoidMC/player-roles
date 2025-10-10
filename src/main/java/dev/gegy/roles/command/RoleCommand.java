@@ -1,6 +1,5 @@
 package dev.gegy.roles.command;
 
-import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -18,6 +17,7 @@ import dev.gegy.roles.store.PlayerRoleSet;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.GameProfileArgumentType;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.PlayerConfigEntry;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
@@ -85,7 +85,7 @@ public final class RoleCommand {
     }
     // @formatter:on
 
-    private static int updateRoles(ServerCommandSource source, Collection<GameProfile> players, String roleName, BiPredicate<PlayerRoleSet, SimpleRole> apply, String success) throws CommandSyntaxException {
+    private static int updateRoles(ServerCommandSource source, Collection<PlayerConfigEntry> players, String roleName, BiPredicate<PlayerRoleSet, SimpleRole> apply, String success) throws CommandSyntaxException {
         var role = getRole(roleName);
         requireHasPower(source, role);
 
@@ -94,7 +94,7 @@ public final class RoleCommand {
 
         int count = 0;
         for (var player : players) {
-            boolean applied = roleManager.updateRoles(server, player.getId(), roles -> apply.test(roles, role));
+            boolean applied = roleManager.updateRoles(server, player.id(), roles -> apply.test(roles, role));
             if (applied) {
                 count++;
             }
@@ -106,11 +106,11 @@ public final class RoleCommand {
         return Command.SINGLE_SUCCESS;
     }
 
-    private static int listRoles(ServerCommandSource source, GameProfile player) {
+    private static int listRoles(ServerCommandSource source, PlayerConfigEntry player) {
         var roleManager = PlayerRoleManager.get();
         var server = source.getServer();
 
-        var roles = roleManager.peekRoles(server, player.getId()).stream().toList();
+        var roles = roleManager.peekRoles(server, player.id()).stream().toList();
         source.sendFeedback(() -> {
             var rolesComponent = Texts.join(roles, role -> Text.literal(role.getId()).setStyle(Style.EMPTY.withColor(Formatting.GRAY)));
             return Text.translatable("Found %s roles on player: %s", roles.size(), rolesComponent);

@@ -49,7 +49,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity {
             if (currentName != null) {
                 cir.setReturnValue(nameDecoration.apply(currentName.copy(), NameDecorationOverride.Context.TAB_LIST));
             } else {
-                cir.setReturnValue(nameDecoration.apply(Text.literal(getGameProfile().getName()), NameDecorationOverride.Context.TAB_LIST));
+                cir.setReturnValue(nameDecoration.apply(Text.literal(getGameProfile().name()), NameDecorationOverride.Context.TAB_LIST));
             }
         }
     }

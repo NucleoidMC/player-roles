@@ -40,17 +40,15 @@ public final class PlayerRoles implements ModInitializer {
 
     public static final RoleOverrideType<CommandOverride> COMMANDS = registerOverride("commands", CommandOverride.CODEC)
             .withChangeListener(player -> {
-                var server = player.getServer();
-                if (server != null) {
-                    server.getCommandManager().sendCommandTree(player);
-                }
+                var server = player.getEntityWorld().getServer();
+                server.getCommandManager().sendCommandTree(player);
             });
 
     public static final RoleOverrideType<ChatTypeOverride> CHAT_TYPE = registerOverride("chat_type", ChatTypeOverride.CODEC);
     public static final RoleOverrideType<NameDecorationOverride> NAME_DECORATION = registerOverride("name_decoration", NameDecorationOverride.CODEC)
             .withChangeListener(player -> {
                 var packet = new PlayerListS2CPacket(PlayerListS2CPacket.Action.UPDATE_DISPLAY_NAME, player);
-                player.getServer().getPlayerManager().sendToAll(packet);
+                player.getEntityWorld().getServer().getPlayerManager().sendToAll(packet);
             });
     public static final RoleOverrideType<Boolean> COMMAND_FEEDBACK = registerOverride("command_feedback", Codec.BOOL);
     public static final RoleOverrideType<Boolean> MUTE = registerOverride("mute", Codec.BOOL);
