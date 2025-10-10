@@ -36,7 +36,7 @@ allprojects {
 
   jar {
     from("LICENSE") {
-      rename { "${it}_${project.archives_base_name}" }
+      rename { "${it}_${project.base.archivesName.get()}" }
     }
   }
 
@@ -44,7 +44,7 @@ allprojects {
     publishing {
       publications {
         mavenJava(MavenPublication) {
-          artifactId = project.archives_base_name
+          artifactId = project.base.archivesName.get()
           from components.java
         }
       }
