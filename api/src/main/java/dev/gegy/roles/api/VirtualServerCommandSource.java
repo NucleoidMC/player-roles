@@ -1,5 +1,6 @@
 package dev.gegy.roles.api;
 
+import net.minecraft.command.permission.PermissionPredicate;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.CommandOutput;
@@ -18,8 +19,8 @@ import org.jetbrains.annotations.Nullable;
 public class VirtualServerCommandSource extends ServerCommandSource implements RoleOwner {
     private final RoleReader roles;
 
-    public VirtualServerCommandSource(RoleReader roles, CommandOutput output, Vec3d pos, Vec2f rot, ServerWorld world, int level, String simpleName, Text name, MinecraftServer server, @Nullable Entity entity) {
-        super(output, pos, rot, world, level, simpleName, name, server, entity);
+    public VirtualServerCommandSource(RoleReader roles, CommandOutput output, Vec3d pos, Vec2f rot, ServerWorld world, PermissionPredicate permissions, String simpleName, Text name, MinecraftServer server, @Nullable Entity entity) {
+        super(output, pos, rot, world, permissions, simpleName, name, server, entity);
         this.roles = roles;
     }
 

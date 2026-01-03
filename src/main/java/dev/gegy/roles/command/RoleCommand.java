@@ -15,9 +15,11 @@ import dev.gegy.roles.override.command.CommandOverride;
 import dev.gegy.roles.store.PlayerRoleManager;
 import dev.gegy.roles.store.PlayerRoleSet;
 import net.minecraft.command.CommandSource;
+import net.minecraft.command.DefaultPermissions;
 import net.minecraft.command.argument.GameProfileArgumentType;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.PlayerConfigEntry;
+import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
@@ -49,7 +51,7 @@ public final class RoleCommand {
     // @formatter:off
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         dispatcher.register(literal("role")
-                .requires(s -> s.hasPermissionLevel(4))
+                .requires(CommandManager.requirePermissionLevel(CommandManager.OWNERS_CHECK))
                 .then(literal("assign")
                     .then(argument("targets", GameProfileArgumentType.gameProfile())
                     .then(argument("role", StringArgumentType.word()).suggests(roleSuggestions())

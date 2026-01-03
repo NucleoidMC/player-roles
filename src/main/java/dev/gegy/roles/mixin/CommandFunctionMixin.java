@@ -3,7 +3,6 @@ package dev.gegy.roles.mixin;
 import com.mojang.brigadier.CommandDispatcher;
 import dev.gegy.roles.IdentifiableCommandSource;
 import net.minecraft.server.command.AbstractServerCommandSource;
-import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.function.CommandFunction;
 import net.minecraft.util.Identifier;
 import org.spongepowered.asm.mixin.Mixin;
@@ -16,10 +15,10 @@ import java.util.List;
 @Mixin(CommandFunction.class)
 public interface CommandFunctionMixin {
     @Inject(method = "create", at = @At("HEAD"))
-    private static void create(
-            Identifier id, CommandDispatcher<AbstractServerCommandSource> dispatcher,
-            AbstractServerCommandSource source, List<String> lines,
-            CallbackInfoReturnable<CommandFunction> ci
+    private static <T extends AbstractServerCommandSource<T>> void create(
+            Identifier id, CommandDispatcher<T> dispatcher,
+            T source, List<String> lines,
+            CallbackInfoReturnable<CommandFunction<T>> ci
     ) {
         var identifiableSource = (IdentifiableCommandSource) source;
         identifiableSource.player_roles$setIdentityType(IdentifiableCommandSource.Type.FUNCTION);

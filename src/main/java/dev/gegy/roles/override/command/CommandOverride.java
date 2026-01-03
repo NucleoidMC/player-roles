@@ -6,6 +6,8 @@ import dev.gegy.roles.PlayerRoles;
 import dev.gegy.roles.api.PlayerRolesApi;
 import dev.gegy.roles.api.override.RoleOverrideResult;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.minecraft.command.DefaultPermissions;
+import net.minecraft.command.permission.Permission;
 import net.minecraft.server.command.ServerCommandSource;
 
 public record CommandOverride(CommandOverrideRules rules) {
@@ -64,7 +66,7 @@ public record CommandOverride(CommandOverrideRules rules) {
     }
 
     public static boolean doesBypassPermissions(ServerCommandSource source) {
-        return source.hasPermissionLevel(4);
+        return source.getPermissions().hasPermission(DefaultPermissions.OWNERS);
     }
 
     public RoleOverrideResult test(MatchableCommand command) {
