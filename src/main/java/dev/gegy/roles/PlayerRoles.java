@@ -19,6 +19,7 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.message.v1.ServerMessageEvents;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.command.permission.PermissionLevel;
 import net.minecraft.entity.Entity;
 import net.minecraft.network.packet.s2c.play.PlayerListS2CPacket;
 import net.minecraft.server.MinecraftServer;
@@ -52,7 +53,7 @@ public final class PlayerRoles implements ModInitializer {
             });
     public static final RoleOverrideType<Boolean> COMMAND_FEEDBACK = registerOverride("command_feedback", Codec.BOOL);
     public static final RoleOverrideType<Boolean> MUTE = registerOverride("mute", Codec.BOOL);
-    public static final RoleOverrideType<Integer> PERMISSION_LEVEL = registerOverride("permission_level", Codec.intRange(0, 4));
+    public static final RoleOverrideType<PermissionLevel> PERMISSION_LEVEL = registerOverride("permission_level", PermissionLevel.NUMERIC_CODEC);
     public static final RoleOverrideType<Boolean> ENTITY_SELECTORS = registerOverride("entity_selectors", Codec.BOOL);
     public static final RoleOverrideType<Boolean> BYPASS_PLAYER_LIMIT = registerOverride("bypass_player_limit", Codec.BOOL);
 
