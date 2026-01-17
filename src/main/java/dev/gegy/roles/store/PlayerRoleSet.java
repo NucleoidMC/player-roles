@@ -128,7 +128,7 @@ public final class PlayerRoleSet implements RoleReader {
     }
 
     public void reloadFrom(RoleProvider roleProvider, PlayerRoleSet roles) {
-        var names = roles.stream().map(Role::getId).toList();
+        var names = roles.roles.stream().map(Role::getId).toList();
         this.deserialize(roleProvider, names);
 
         this.dirty |= roles.dirty;
