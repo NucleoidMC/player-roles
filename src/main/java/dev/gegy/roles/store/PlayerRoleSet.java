@@ -8,27 +8,27 @@ import dev.gegy.roles.api.override.RoleOverrideReader;
 import dev.gegy.roles.override.RoleOverrideMap;
 import it.unimi.dsi.fastutil.objects.ObjectAVLTreeSet;
 import it.unimi.dsi.fastutil.objects.ObjectSortedSet;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtString;
-import net.minecraft.server.network.ServerPlayerEntity;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.server.level.ServerPlayer;
 
 public final class PlayerRoleSet implements RoleReader {
     private final Role everyoneRole;
 
     @Nullable
-    private final ServerPlayerEntity player;
+    private final ServerPlayer player;
 
     private final ObjectSortedSet<Role> roles = new ObjectAVLTreeSet<>();
     private final RoleOverrideMap overrides = new RoleOverrideMap();
 
     private boolean dirty;
 
-    public PlayerRoleSet(Role everyoneRole, @Nullable ServerPlayerEntity player) {
+    public PlayerRoleSet(Role everyoneRole, @Nullable ServerPlayer player) {
         this.everyoneRole = everyoneRole;
         this.player = player;
 
@@ -90,10 +90,10 @@ public final class PlayerRoleSet implements RoleReader {
         return this.overrides;
     }
 
-    public NbtList serialize() {
-        var list = new NbtList();
+    public ListTag serialize() {
+        var list = new ListTag();
         for (var role : this.roles) {
-            list.add(NbtString.of(role.getId()));
+            list.add(StringTag.valueOf(role.getId()));
         }
         return list;
     }

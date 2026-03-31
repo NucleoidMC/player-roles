@@ -3,8 +3,8 @@ package dev.gegy.roles.api.override;
 import com.mojang.serialization.Codec;
 import dev.gegy.roles.api.PlayerRolesApi;
 import dev.gegy.roles.api.util.TinyRegistry;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
 
 public final class RoleOverrideType<T> {
@@ -38,7 +38,7 @@ public final class RoleOverrideType<T> {
         return this.codec;
     }
 
-    public void notifyChange(ServerPlayerEntity player) {
+    public void notifyChange(ServerPlayer player) {
         if (this.changeListener != null) {
             this.changeListener.onRoleChange(player);
         }

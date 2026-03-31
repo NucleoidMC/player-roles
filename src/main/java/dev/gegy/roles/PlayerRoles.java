@@ -19,15 +19,15 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.message.v1.ServerMessageEvents;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.command.permission.PermissionLevel;
-import net.minecraft.entity.Entity;
-import net.minecraft.network.packet.s2c.play.PlayerListS2CPacket;
+import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.PermissionLevel;
+import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
@@ -41,19 +41,19 @@ public final class PlayerRoles implements ModInitializer {
 
     public static final RoleOverrideType<CommandOverride> COMMANDS = registerOverride("commands", CommandOverride.CODEC)
             .withChangeListener(player -> {
-                var server = player.getEntityWorld().getServer();
-                server.getCommandManager().sendCommandTree(player);
+                var server = player.level().getServer();
+                server.getCommands().sendCommands(player);
             });
 
     public static final RoleOverrideType<ChatTypeOverride> CHAT_TYPE = registerOverride("chat_type", ChatTypeOverride.CODEC);
     public static final RoleOverrideType<NameDecorationOverride> NAME_DECORATION = registerOverride("name_decoration", NameDecorationOverride.CODEC)
             .withChangeListener(player -> {
-                var packet = new PlayerListS2CPacket(PlayerListS2CPacket.Action.UPDATE_DISPLAY_NAME, player);
-                player.getEntityWorld().getServer().getPlayerManager().sendToAll(packet);
+                var packet = new ClientboundPlayerInfoUpdatePacket(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_DISPLAY_NAME, player);
+                player.level().getServer().getPlayerList().broadcastAll(packet);
             });
     public static final RoleOverrideType<Boolean> COMMAND_FEEDBACK = registerOverride("command_feedback", Codec.BOOL);
     public static final RoleOverrideType<Boolean> MUTE = registerOverride("mute", Codec.BOOL);
-    public static final RoleOverrideType<PermissionLevel> PERMISSION_LEVEL = registerOverride("permission_level", PermissionLevel.NUMERIC_CODEC);
+    public static final RoleOverrideType<PermissionLevel> PERMISSION_LEVEL = registerOverride("permission_level", PermissionLevel.INT_CODEC);
     public static final RoleOverrideType<Boolean> ENTITY_SELECTORS = registerOverride("entity_selectors", Codec.BOOL);
     public static final RoleOverrideType<Boolean> BYPASS_PLAYER_LIMIT = registerOverride("bypass_player_limit", Codec.BOOL);
 
@@ -80,7 +80,7 @@ public final class PlayerRoles implements ModInitializer {
 
             @Override
             @NotNull
-            public RoleReader bySource(ServerCommandSource source) {
+            public RoleReader bySource(CommandSourceStack source) {
                 var entity = source.getEntity();
                 if (entity != null) {
                     return this.byEntity(entity);
@@ -139,15 +139,15 @@ public final class PlayerRoles implements ModInitializer {
         PermissionKeyOverride.register();
     }
 
-    public static boolean trySendChat(ServerCommandSource source) {
-        final ServerPlayerEntity player = source.getPlayer();
+    public static boolean trySendChat(CommandSourceStack source) {
+        final ServerPlayer player = source.getPlayer();
         return player == null || trySendChat(player);
     }
 
-    public static boolean trySendChat(ServerPlayerEntity player) {
+    public static boolean trySendChat(ServerPlayer player) {
         var roles = PlayerRolesApi.lookup().byPlayer(player);
         if (roles.overrides().test(PlayerRoles.MUTE)) {
-            player.sendMessage(Text.literal("You are muted!").formatted(Formatting.RED), true);
+            player.displayClientMessage(Component.literal("You are muted!").withStyle(ChatFormatting.RED), true);
             return false;
         }
         return true;
@@ -158,6 +158,6 @@ public final class PlayerRoles implements ModInitializer {
     }
 
     public static Identifier identifier(String path) {
-        return Identifier.of(ID, path);
+        return Identifier.fromNamespaceAndPath(ID, path);
     }
 }

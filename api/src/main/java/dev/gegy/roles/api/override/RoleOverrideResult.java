@@ -1,17 +1,16 @@
 package dev.gegy.roles.api.override;
 
 import com.mojang.serialization.Codec;
-import net.minecraft.util.StringIdentifiable;
-
 import java.util.Locale;
+import net.minecraft.util.StringRepresentable;
 
-public enum RoleOverrideResult implements StringIdentifiable {
+public enum RoleOverrideResult implements StringRepresentable {
     PASS,
     ALLOW,
     DENY,
     HIDDEN;
 
-    public static final Codec<RoleOverrideResult> CODEC = StringIdentifiable.createCodec(RoleOverrideResult::values);
+    public static final Codec<RoleOverrideResult> CODEC = StringRepresentable.fromEnum(RoleOverrideResult::values);
 
     public boolean isDefinitive() {
         return this != PASS;
@@ -35,7 +34,7 @@ public enum RoleOverrideResult implements StringIdentifiable {
     }
 
     @Override
-    public String asString() {
+    public String getSerializedName() {
         return switch (this) {
             case ALLOW -> "allow";
             case DENY -> "deny";
