@@ -1,29 +1,28 @@
 plugins {
-  id 'fabric-loom' version '1.14.+' apply false
+  id 'net.fabricmc.fabric-loom' version '1.15.+' apply false
   id "maven-publish"
 }
 
 allprojects {
-  apply plugin: "fabric-loom"
+  apply plugin: "net.fabricmc.fabric-loom"
   apply plugin: "maven-publish"
 
   version = project.mod_version
   group = project.maven_group
 
   java {
-    toolchain.languageVersion = JavaLanguageVersion.of(21)
+    toolchain.languageVersion = JavaLanguageVersion.of(25)
     withSourcesJar()
   }
 
   tasks.withType(JavaCompile).configureEach {
     it.options.encoding = "UTF-8"
-    it.options.release = 21
+    it.options.release = 25
   }
 
   dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    mappings loom.officialMojangMappings()
-    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    implementation "net.fabricmc:fabric-loader:${project.loader_version}"
   }
 
   processResources {
@@ -83,13 +82,13 @@ repositories {
 }
 
 dependencies {
-  implementation project(path: ":api", configuration: "namedElements")
+  implementation project(path: ":api")
   include project(path: ":api")
 
-  modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-  modCompileOnly "me.lucko:fabric-permissions-api:0.1-SNAPSHOT"
+  implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+  compileOnly "me.lucko:fabric-permissions-api:0.7.0"
 
-  modImplementation include("xyz.nucleoid:more-codecs:0.3.5+1.21.2")
+  implementation include("xyz.nucleoid:more-codecs:0.3.5+26.1")
 
   testImplementation platform("org.junit:junit-bom:5.7.0")
   testImplementation "org.junit.jupiter:junit-jupiter"
