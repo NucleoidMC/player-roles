@@ -5,7 +5,6 @@ import com.mojang.serialization.Codec;
 import dev.gegy.roles.api.override.RoleOverrideReader;
 import dev.gegy.roles.api.override.RoleOverrideType;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
-import net.minecraft.server.network.ServerPlayerEntity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nucleoid.codecs.MoreCodecs;
@@ -15,6 +14,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import net.minecraft.server.level.ServerPlayer;
 
 public final class RoleOverrideMap implements RoleOverrideReader {
     @SuppressWarnings("unchecked")
@@ -35,7 +35,7 @@ public final class RoleOverrideMap implements RoleOverrideReader {
         this.overrides = new Reference2ObjectOpenHashMap<>(overrides);
     }
 
-    public void notifyChange(ServerPlayerEntity player) {
+    public void notifyChange(ServerPlayer player) {
         for (var override : this.overrides.keySet()) {
             override.notifyChange(player);
         }

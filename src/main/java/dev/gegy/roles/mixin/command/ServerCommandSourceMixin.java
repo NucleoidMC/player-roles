@@ -4,22 +4,22 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import dev.gegy.roles.PlayerRoles;
 import dev.gegy.roles.api.PlayerRolesApi;
-import net.minecraft.server.PlayerConfigEntry;
-import net.minecraft.server.PlayerManager;
-import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.server.players.NameAndId;
+import net.minecraft.server.players.PlayerList;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
-@Mixin(ServerCommandSource.class)
+@Mixin(CommandSourceStack.class)
 public class ServerCommandSourceMixin {
     @WrapOperation(
-            method = "sendToOps",
+            method = "broadcastToAdmins",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/server/PlayerManager;isOperator(Lnet/minecraft/server/PlayerConfigEntry;)Z"
+                    target = "Lnet/minecraft/server/players/PlayerList;isOp(Lnet/minecraft/server/players/NameAndId;)Z"
             )
     )
-    private boolean shouldReceiveCommandFeedback(PlayerManager playerManager, PlayerConfigEntry profile, Operation<Boolean> original) {
+    private boolean shouldReceiveCommandFeedback(PlayerList playerManager, NameAndId profile, Operation<Boolean> original) {
         if (original.call(playerManager, profile)) {
             return true;
         }

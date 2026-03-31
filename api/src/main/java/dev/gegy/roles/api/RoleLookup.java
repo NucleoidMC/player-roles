@@ -1,8 +1,8 @@
 package dev.gegy.roles.api;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 
 public interface RoleLookup {
@@ -15,13 +15,13 @@ public interface RoleLookup {
 
         @Override
         @NotNull
-        public RoleReader bySource(ServerCommandSource source) {
+        public RoleReader bySource(CommandSourceStack source) {
             return RoleReader.EMPTY;
         }
     };
 
     @NotNull
-    default RoleReader byPlayer(PlayerEntity player) {
+    default RoleReader byPlayer(Player player) {
         return this.byEntity(player);
     }
 
@@ -29,5 +29,5 @@ public interface RoleLookup {
     RoleReader byEntity(Entity entity);
 
     @NotNull
-    RoleReader bySource(ServerCommandSource source);
+    RoleReader bySource(CommandSourceStack source);
 }

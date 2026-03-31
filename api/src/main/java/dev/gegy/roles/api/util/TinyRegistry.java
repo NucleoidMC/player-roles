@@ -6,12 +6,12 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
-import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Iterator;
 import java.util.Set;
+import net.minecraft.resources.Identifier;
 
 public final class TinyRegistry<T> implements Codec<T>, Iterable<T> {
     private final BiMap<Identifier, T> map = HashBiMap.create();
@@ -62,9 +62,9 @@ public final class TinyRegistry<T> implements Codec<T>, Iterable<T> {
 
     private Identifier parseId(String string) {
         if (string.indexOf(Identifier.NAMESPACE_SEPARATOR) != -1) {
-            return Identifier.of(string);
+            return Identifier.parse(string);
         } else {
-            return Identifier.of(this.defaultNamespace, string);
+            return Identifier.fromNamespaceAndPath(this.defaultNamespace, string);
         }
     }
 

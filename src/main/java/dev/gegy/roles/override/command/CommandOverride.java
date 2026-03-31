@@ -6,9 +6,8 @@ import dev.gegy.roles.PlayerRoles;
 import dev.gegy.roles.api.PlayerRolesApi;
 import dev.gegy.roles.api.override.RoleOverrideResult;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.minecraft.command.DefaultPermissions;
-import net.minecraft.command.permission.Permission;
-import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.server.permissions.Permissions;
 
 public record CommandOverride(CommandOverrideRules rules) {
     public static final Codec<CommandOverride> CODEC = CommandOverrideRules.CODEC.xmap(
@@ -28,18 +27,18 @@ public record CommandOverride(CommandOverrideRules rules) {
             registered = true;
 
             ServerLifecycleEvents.SERVER_STARTED.register(server -> {
-                hookCommands(server.getCommandManager().getDispatcher());
+                hookCommands(server.getCommands().getDispatcher());
             });
         });
 
         ServerLifecycleEvents.END_DATA_PACK_RELOAD.register((server, resources, success) -> {
-            hookCommands(server.getCommandManager().getDispatcher());
+            hookCommands(server.getCommands().getDispatcher());
         });
     }
 
-    private static void hookCommands(CommandDispatcher<ServerCommandSource> dispatcher) {
+    private static void hookCommands(CommandDispatcher<CommandSourceStack> dispatcher) {
         try {
-            var hooks = CommandRequirementHooks.<ServerCommandSource>tryCreate((nodes, parent) -> {
+            var hooks = CommandRequirementHooks.<CommandSourceStack>tryCreate((nodes, parent) -> {
                 var command = MatchableCommand.compile(nodes);
 
                 return source -> switch (canUseCommand(source, command)) {
@@ -56,7 +55,7 @@ public record CommandOverride(CommandOverrideRules rules) {
         }
     }
 
-    private static RoleOverrideResult canUseCommand(ServerCommandSource source, MatchableCommand command) {
+    private static RoleOverrideResult canUseCommand(CommandSourceStack source, MatchableCommand command) {
         if (doesBypassPermissions(source)) {
             return RoleOverrideResult.PASS;
         }
@@ -65,8 +64,8 @@ public record CommandOverride(CommandOverrideRules rules) {
         return roles.overrides().test(PlayerRoles.COMMANDS, m -> m.test(command));
     }
 
-    public static boolean doesBypassPermissions(ServerCommandSource source) {
-        return source.getPermissions().hasPermission(DefaultPermissions.OWNERS);
+    public static boolean doesBypassPermissions(CommandSourceStack source) {
+        return source.permissions().hasPermission(Permissions.COMMANDS_OWNER);
     }
 
     public RoleOverrideResult test(MatchableCommand command) {

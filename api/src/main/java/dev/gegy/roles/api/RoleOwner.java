@@ -1,8 +1,8 @@
 package dev.gegy.roles.api;
 
 /**
- * Can be implemented on custom {@link net.minecraft.entity.Entity Entities} or
- * {@link net.minecraft.server.command.ServerCommandSource ServerCommandSources}
+ * Can be implemented on custom {@link net.minecraft.world.entity.Entity Entities} or
+ * {@link net.minecraft.commands.CommandSourceStack ServerCommandSources}
  * to allow overriding the set of roles that the entity/source is assumed to have.
  *
  * @see VirtualServerCommandSource

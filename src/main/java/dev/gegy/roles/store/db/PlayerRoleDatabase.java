@@ -4,9 +4,9 @@ import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import dev.gegy.roles.config.PlayerRolesConfig;
 import dev.gegy.roles.store.PlayerRoleSet;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtIo;
-import net.minecraft.nbt.NbtSizeTracker;
 import org.slf4j.Logger;
 
 import java.io.ByteArrayInputStream;
@@ -61,7 +61,7 @@ public final class PlayerRoleDatabase implements Closeable {
     }
 
     private static ByteBuffer serializeRoles(PlayerRoleSet roles) throws IOException {
-        var nbt = new NbtCompound();
+        var nbt = new CompoundTag();
         nbt.put("roles", roles.serialize());
 
         try (var output = new ByteArrayOutputStream()) {
@@ -74,9 +74,9 @@ public final class PlayerRoleDatabase implements Closeable {
         var config = PlayerRolesConfig.get();
 
         try (var input = new ByteArrayInputStream(bytes.array())) {
-            var nbt = NbtIo.readCompressed(input, NbtSizeTracker.ofUnlimitedBytes());
+            var nbt = NbtIo.readCompressed(input, NbtAccounter.unlimitedHeap());
 
-            nbt.get("roles", Codec.STRING.listOf()).ifPresent(names -> {
+            nbt.read("roles", Codec.STRING.listOf()).ifPresent(names -> {
                 roles.deserialize(config, names);
             });
         }

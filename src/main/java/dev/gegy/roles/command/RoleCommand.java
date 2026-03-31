@@ -14,68 +14,67 @@ import dev.gegy.roles.config.PlayerRolesConfig;
 import dev.gegy.roles.override.command.CommandOverride;
 import dev.gegy.roles.store.PlayerRoleManager;
 import dev.gegy.roles.store.PlayerRoleSet;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.DefaultPermissions;
-import net.minecraft.command.argument.GameProfileArgumentType;
+import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.arguments.GameProfileArgument;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentUtils;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.PlayerConfigEntry;
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.text.Texts;
-import net.minecraft.util.Formatting;
+import net.minecraft.server.players.NameAndId;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.function.BiPredicate;
 
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
+import static net.minecraft.commands.Commands.argument;
+import static net.minecraft.commands.Commands.literal;
 
 public final class RoleCommand {
     public static final DynamicCommandExceptionType ROLE_NOT_FOUND = new DynamicCommandExceptionType(arg ->
-            Text.stringifiedTranslatable("Role with name '%s' was not found!", arg)
+            Component.translatableEscape("Role with name '%s' was not found!", arg)
     );
 
     public static final SimpleCommandExceptionType ROLE_POWER_TOO_LOW = new SimpleCommandExceptionType(
-            Text.literal("You do not have sufficient power to manage this role")
+            Component.literal("You do not have sufficient power to manage this role")
     );
 
     public static final SimpleCommandExceptionType TOO_MANY_SELECTED = new SimpleCommandExceptionType(
-            Text.literal("Too many players selected!")
+            Component.literal("Too many players selected!")
     );
 
     // @formatter:off
-    public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(literal("role")
-                .requires(CommandManager.requirePermissionLevel(CommandManager.OWNERS_CHECK))
+                .requires(Commands.hasPermission(Commands.LEVEL_OWNERS))
                 .then(literal("assign")
-                    .then(argument("targets", GameProfileArgumentType.gameProfile())
+                    .then(argument("targets", GameProfileArgument.gameProfile())
                     .then(argument("role", StringArgumentType.word()).suggests(roleSuggestions())
                     .executes(ctx -> {
                         var source = ctx.getSource();
-                        var targets = GameProfileArgumentType.getProfileArgument(ctx, "targets");
+                        var targets = GameProfileArgument.getGameProfiles(ctx, "targets");
                         var roleName = StringArgumentType.getString(ctx, "role");
                         return updateRoles(source, targets, roleName, PlayerRoleSet::add, "'%s' assigned to %s players");
                     })
                 )))
                 .then(literal("remove")
-                    .then(argument("targets", GameProfileArgumentType.gameProfile())
+                    .then(argument("targets", GameProfileArgument.gameProfile())
                     .then(argument("role", StringArgumentType.word()).suggests(roleSuggestions())
                     .executes(ctx -> {
                         var source = ctx.getSource();
-                        var targets = GameProfileArgumentType.getProfileArgument(ctx, "targets");
+                        var targets = GameProfileArgument.getGameProfiles(ctx, "targets");
                         var roleName = StringArgumentType.getString(ctx, "role");
                         return updateRoles(source, targets, roleName, PlayerRoleSet::remove, "'%s' removed from %s players");
                     })
                 )))
                 .then(literal("list")
-                    .then(argument("target", GameProfileArgumentType.gameProfile()).executes(ctx -> {
+                    .then(argument("target", GameProfileArgument.gameProfile()).executes(ctx -> {
                         var source = ctx.getSource();
-                        var gameProfiles = GameProfileArgumentType.getProfileArgument(ctx, "target");
+                        var gameProfiles = GameProfileArgument.getGameProfiles(ctx, "target");
                         if (gameProfiles.size() != 1) {
                             throw TOO_MANY_SELECTED.create();
                         }
@@ -87,7 +86,7 @@ public final class RoleCommand {
     }
     // @formatter:on
 
-    private static int updateRoles(ServerCommandSource source, Collection<PlayerConfigEntry> players, String roleName, BiPredicate<PlayerRoleSet, SimpleRole> apply, String success) throws CommandSyntaxException {
+    private static int updateRoles(CommandSourceStack source, Collection<NameAndId> players, String roleName, BiPredicate<PlayerRoleSet, SimpleRole> apply, String success) throws CommandSyntaxException {
         var role = getRole(roleName);
         requireHasPower(source, role);
 
@@ -103,25 +102,25 @@ public final class RoleCommand {
         }
 
         int finalCount = count;
-        source.sendFeedback(() -> Text.translatable(success, roleName, finalCount), true);
+        source.sendSuccess(() -> Component.translatable(success, roleName, finalCount), true);
 
         return Command.SINGLE_SUCCESS;
     }
 
-    private static int listRoles(ServerCommandSource source, PlayerConfigEntry player) {
+    private static int listRoles(CommandSourceStack source, NameAndId player) {
         var roleManager = PlayerRoleManager.get();
         var server = source.getServer();
 
         var roles = roleManager.peekRoles(server, player.id()).stream().toList();
-        source.sendFeedback(() -> {
-            var rolesComponent = Texts.join(roles, role -> Text.literal(role.getId()).setStyle(Style.EMPTY.withColor(Formatting.GRAY)));
-            return Text.translatable("Found %s roles on player: %s", roles.size(), rolesComponent);
+        source.sendSuccess(() -> {
+            var rolesComponent = ComponentUtils.formatList(roles, role -> Component.literal(role.getId()).setStyle(Style.EMPTY.withColor(ChatFormatting.GRAY)));
+            return Component.translatable("Found %s roles on player: %s", roles.size(), rolesComponent);
         }, false);
 
         return Command.SINGLE_SUCCESS;
     }
 
-    private static int reloadRoles(ServerCommandSource source) {
+    private static int reloadRoles(CommandSourceStack source) {
         var server = source.getServer();
 
         server.execute(() -> {
@@ -131,20 +130,20 @@ public final class RoleCommand {
             roleManager.onRoleReload(server, PlayerRolesConfig.get());
 
             if (errors.isEmpty()) {
-                source.sendFeedback(() -> Text.literal("Role configuration successfully reloaded"), false);
+                source.sendSuccess(() -> Component.literal("Role configuration successfully reloaded"), false);
             } else {
-                MutableText errorFeedback = Text.literal("Failed to reload roles configuration!");
+                MutableComponent errorFeedback = Component.literal("Failed to reload roles configuration!");
                 for (String error : errors) {
                     errorFeedback = errorFeedback.append("\n - " + error);
                 }
-                source.sendError(errorFeedback);
+                source.sendFailure(errorFeedback);
             }
         });
 
         return Command.SINGLE_SUCCESS;
     }
 
-    private static void requireHasPower(ServerCommandSource source, SimpleRole role) throws CommandSyntaxException {
+    private static void requireHasPower(CommandSourceStack source, SimpleRole role) throws CommandSyntaxException {
         if (hasAdminPower(source)) {
             return;
         }
@@ -161,7 +160,7 @@ public final class RoleCommand {
         return role;
     }
 
-    private static SuggestionProvider<ServerCommandSource> roleSuggestions() {
+    private static SuggestionProvider<CommandSourceStack> roleSuggestions() {
         return (ctx, builder) -> {
             var source = ctx.getSource();
 
@@ -169,7 +168,7 @@ public final class RoleCommand {
             var highestRole = getHighestRole(source);
             Comparator<Role> comparator = Comparator.nullsLast(Comparator.naturalOrder());
 
-            return CommandSource.suggestMatching(
+            return SharedSuggestionProvider.suggest(
                     PlayerRolesConfig.get().stream()
                             .filter(role -> admin || comparator.compare(role, highestRole) > 0)
                             .map(Role::getId),
@@ -179,13 +178,13 @@ public final class RoleCommand {
     }
 
     @Nullable
-    private static Role getHighestRole(ServerCommandSource source) {
+    private static Role getHighestRole(CommandSourceStack source) {
         return PlayerRolesApi.lookup().bySource(source).stream()
                 .min(Comparator.naturalOrder())
                 .orElse(null);
     }
 
-    private static boolean hasAdminPower(ServerCommandSource source) {
+    private static boolean hasAdminPower(CommandSourceStack source) {
         return source.getEntity() == null || CommandOverride.doesBypassPermissions(source);
     }
 }

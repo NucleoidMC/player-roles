@@ -3,14 +3,6 @@ package dev.gegy.roles.override;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.text.HoverEvent;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.text.TextCodecs;
-import net.minecraft.text.TextColor;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.StringIdentifiable;
 import org.jetbrains.annotations.Nullable;
 import xyz.nucleoid.codecs.MoreCodecs;
 
@@ -18,6 +10,14 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentSerialization;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextColor;
+import net.minecraft.util.StringRepresentable;
 
 public record NameDecorationOverride(
 		Optional<AddPrefix> prefix,
@@ -36,7 +36,7 @@ public record NameDecorationOverride(
 			Context.SET_CODEC.optionalFieldOf("contexts", DEFAULT_CONTEXTS).forGetter(NameDecorationOverride::contexts)
 	).apply(i, NameDecorationOverride::new));
 
-	public MutableText apply(MutableText name, Context context) {
+	public MutableComponent apply(MutableComponent name, Context context) {
 		if (!this.contexts.contains(context)) {
 			return name;
 		}
@@ -55,46 +55,46 @@ public record NameDecorationOverride(
 		return name;
 	}
 
-	public record AddPrefix(Text prefix) {
-		public static final Codec<AddPrefix> CODEC = TextCodecs.CODEC.xmap(AddPrefix::new, AddPrefix::prefix);
+	public record AddPrefix(Component prefix) {
+		public static final Codec<AddPrefix> CODEC = ComponentSerialization.CODEC.xmap(AddPrefix::new, AddPrefix::prefix);
 
-		public MutableText apply(final MutableText name) {
-			return Text.empty().append(this.prefix).append(name);
+		public MutableComponent apply(final MutableComponent name) {
+			return Component.empty().append(this.prefix).append(name);
 		}
 	}
 
-	public record AddSuffix(Text suffix) {
-		public static final Codec<AddSuffix> CODEC = TextCodecs.CODEC.xmap(AddSuffix::new, AddSuffix::suffix);
+	public record AddSuffix(Component suffix) {
+		public static final Codec<AddSuffix> CODEC = ComponentSerialization.CODEC.xmap(AddSuffix::new, AddSuffix::suffix);
 
-		public MutableText apply(final MutableText name) {
+		public MutableComponent apply(final MutableComponent name) {
 			return name.append(this.suffix);
 		}
 	}
 
-	public record ApplyStyle(Formatting[] formats, @Nullable TextColor color) {
+	public record ApplyStyle(ChatFormatting[] formats, @Nullable TextColor color) {
 		public static final Codec<ApplyStyle> CODEC = MoreCodecs.listOrUnit(Codec.STRING).xmap(
 				formatKeys -> {
-					List<Formatting> formats = new ArrayList<>();
+					List<ChatFormatting> formats = new ArrayList<>();
 					TextColor color = null;
 
 					for (String formatKey : formatKeys) {
-						var format = Formatting.byName(formatKey);
+						var format = ChatFormatting.getByName(formatKey);
 						if (format != null) {
 							formats.add(format);
 						} else {
-							var parsedColor = TextColor.parse(formatKey).result();
+							var parsedColor = TextColor.parseColor(formatKey).result();
 							if (parsedColor.isPresent()) {
 								color = parsedColor.get();
 							}
 						}
 					}
 
-					return new ApplyStyle(formats.toArray(new Formatting[0]), color);
+					return new ApplyStyle(formats.toArray(new ChatFormatting[0]), color);
 				},
 				override -> {
 					List<String> formatKeys = new ArrayList<>();
 					if (override.color != null) {
-						formatKeys.add(override.color.getName());
+						formatKeys.add(override.color.serialize());
 					}
 
 					for (var format : override.formats) {
@@ -105,12 +105,12 @@ public record NameDecorationOverride(
 				}
 		);
 
-		public MutableText apply(MutableText text) {
+		public MutableComponent apply(MutableComponent text) {
 			return text.setStyle(this.applyStyle(text.getStyle()));
 		}
 
 		private Style applyStyle(Style style) {
-			style = style.withFormatting(this.formats);
+			style = style.applyFormats(this.formats);
 			if (this.color != null) {
 				style = style.withColor(this.color);
 			}
@@ -120,17 +120,17 @@ public record NameDecorationOverride(
 
 	public record OnHover(HoverEvent event) {
 		private static final Codec<OnHover> CODEC = HoverEvent.CODEC.xmap(OnHover::new, OnHover::event);
-		public MutableText apply(MutableText text) {
+		public MutableComponent apply(MutableComponent text) {
 			return text.setStyle(text.getStyle().withHoverEvent(this.event));
 		}
 	}
 
-	public enum Context implements StringIdentifiable {
+	public enum Context implements StringRepresentable {
 		CHAT("chat"),
 		TAB_LIST("tab_list"),
 		;
 
-		public static final com.mojang.serialization.Codec<Context> CODEC = StringIdentifiable.createCodec(Context::values);
+		public static final com.mojang.serialization.Codec<Context> CODEC = StringRepresentable.fromEnum(Context::values);
 
 		public static final com.mojang.serialization.Codec<EnumSet<Context>> SET_CODEC = Context.CODEC.listOf().comapFlatMap(list -> {
 			var set = EnumSet.noneOf(Context.class);
@@ -149,7 +149,7 @@ public record NameDecorationOverride(
 		}
 
 		@Override
-		public String asString() {
+		public String getSerializedName() {
 			return this.name;
 		}
 	}
