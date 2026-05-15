@@ -13,11 +13,12 @@ import dev.gegy.roles.config.PlayerRolesConfig;
 import dev.gegy.roles.override.ChatTypeOverride;
 import dev.gegy.roles.override.NameDecorationOverride;
 import dev.gegy.roles.override.command.CommandOverride;
-import dev.gegy.roles.override.permission.PermissionKeyOverride;
+import dev.gegy.roles.override.legacypermission.LegacyPermissionKeyOverride;
 import dev.gegy.roles.store.PlayerRoleManager;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.message.v1.ServerMessageEvents;
+import net.fabricmc.fabric.api.permission.v1.PermissionContext;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
@@ -100,6 +101,25 @@ public final class PlayerRoles implements ModInitializer {
 
                 return RoleReader.EMPTY;
             }
+
+            @Override
+            public @NotNull RoleReader byPermissionContext(PermissionContext context) {
+                var entity = context.get(PermissionContext.ENTITY);
+                if (entity != null) {
+                    return this.byEntity(entity);
+                }
+
+                var source = context.get(PermissionContext.COMMAND_SOURCE_STACK);
+                if (source != null) {
+                    return this.bySource(source);
+                }
+
+                var server = context.get(PermissionContext.SERVER);
+                if (server != null && context.type() == PermissionContext.Type.PLAYER) {
+                    return PlayerRoleManager.get().peekRoles(server, context.uuid());
+                }
+
+                return RoleReader.EMPTY;            }
         });
     }
 
@@ -130,13 +150,7 @@ public final class PlayerRoles implements ModInitializer {
     }
 
     private static void registerModIntegrations() {
-        if (FabricLoader.getInstance().isModLoaded("fabric-permissions-api-v0")) {
-            registerPermissionKeyOverride();
-        }
-    }
-
-    private static void registerPermissionKeyOverride() {
-        PermissionKeyOverride.register();
+        LegacyPermissionKeyOverride.register();
     }
 
     public static boolean trySendChat(CommandSourceStack source) {

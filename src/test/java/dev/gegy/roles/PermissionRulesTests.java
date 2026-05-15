@@ -1,7 +1,7 @@
 package dev.gegy.roles;
 
 import dev.gegy.roles.api.override.RoleOverrideResult;
-import dev.gegy.roles.override.permission.PermissionKeyRules;
+import dev.gegy.roles.override.legacypermission.LegacyPermissionKeyRules;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 final class PermissionRulesTests {
     @Test
     void testMatchExact() {
-        PermissionKeyRules rules = PermissionKeyRules.builder()
+        LegacyPermissionKeyRules rules = LegacyPermissionKeyRules.builder()
                 .add("a.b.c", RoleOverrideResult.ALLOW)
                 .add("a.b", RoleOverrideResult.DENY)
                 .build();
@@ -21,7 +21,7 @@ final class PermissionRulesTests {
 
     @Test
     void testMatchSuffixWildcards() {
-        PermissionKeyRules rules = PermissionKeyRules.builder()
+        LegacyPermissionKeyRules rules = LegacyPermissionKeyRules.builder()
                 .add("a.b.c", RoleOverrideResult.ALLOW)
                 .add("a.b.*", RoleOverrideResult.DENY)
                 .build();
@@ -34,7 +34,7 @@ final class PermissionRulesTests {
 
     @Test
     void testMatchPrefixWildcards() {
-        PermissionKeyRules rules = PermissionKeyRules.builder()
+        LegacyPermissionKeyRules rules = LegacyPermissionKeyRules.builder()
                 .add("*.b", RoleOverrideResult.ALLOW)
                 .add("a.b", RoleOverrideResult.DENY)
                 .build();
@@ -47,7 +47,7 @@ final class PermissionRulesTests {
 
     @Test
     void testMatchInlineWildcards() {
-        PermissionKeyRules rules = PermissionKeyRules.builder()
+        LegacyPermissionKeyRules rules = LegacyPermissionKeyRules.builder()
                 .add("a.*.c", RoleOverrideResult.ALLOW)
                 .add("a.b.c", RoleOverrideResult.DENY)
                 .build();

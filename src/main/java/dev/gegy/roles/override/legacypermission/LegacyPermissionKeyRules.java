@@ -1,19 +1,19 @@
-package dev.gegy.roles.override.permission;
+package dev.gegy.roles.override.legacypermission;
 
 import com.mojang.serialization.Codec;
 import dev.gegy.roles.api.override.RoleOverrideResult;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.resources.Identifier;import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public final class PermissionKeyRules {
-    public static final Codec<PermissionKeyRules> CODEC = Codec.unboundedMap(Codec.STRING, RoleOverrideResult.CODEC).xmap(
+public final class LegacyPermissionKeyRules {
+    public static final Codec<LegacyPermissionKeyRules> CODEC = Codec.unboundedMap(Codec.STRING, RoleOverrideResult.CODEC).xmap(
             map -> {
-                PermissionKeyRules.Builder rules = PermissionKeyRules.builder();
+                LegacyPermissionKeyRules.Builder rules = LegacyPermissionKeyRules.builder();
                 map.forEach(rules::add);
                 return rules.build();
             },
@@ -27,11 +27,19 @@ public final class PermissionKeyRules {
     );
 
     private final Map<String, RoleOverrideResult> exactPermissions;
+    private final Map<Identifier, RoleOverrideResult> exactIdentifierPermissions;
     private final KeyMatcher[] keyMatchers;
 
-    private PermissionKeyRules(Map<String, RoleOverrideResult> exactPermissions, KeyMatcher[] keyMatchers) {
+    private LegacyPermissionKeyRules(Map<String, RoleOverrideResult> exactPermissions, KeyMatcher[] keyMatchers) {
         this.exactPermissions = exactPermissions;
         this.keyMatchers = keyMatchers;
+        this.exactIdentifierPermissions = new HashMap<>();
+        for (var entry : exactPermissions.entrySet()) {
+            var id = Identifier.tryParse(entry.getKey());
+            if (id != null) {
+                this.exactIdentifierPermissions.put(id, entry.getValue());
+            }
+        }
     }
 
     public static Builder builder() {
@@ -45,6 +53,23 @@ public final class PermissionKeyRules {
         }
 
         var tokens = permission.split("\\.");
+        for (var matcher : this.keyMatchers) {
+            result = matcher.test(tokens);
+            if (result != null) {
+                return result;
+            }
+        }
+
+        return RoleOverrideResult.PASS;
+    }
+
+    public RoleOverrideResult test(Identifier permission) {
+        var result = this.exactIdentifierPermissions.get(permission);
+        if (result != null) {
+            return result;
+        }
+
+        var tokens = permission.toString().split("[:/.]");
         for (var matcher : this.keyMatchers) {
             result = matcher.test(tokens);
             if (result != null) {
@@ -71,17 +96,19 @@ public final class PermissionKeyRules {
             return this;
         }
 
-        public PermissionKeyRules build() {
-            return new PermissionKeyRules(this.exactPermissions, this.keyMatchers.toArray(new KeyMatcher[0]));
+        public LegacyPermissionKeyRules build() {
+            return new LegacyPermissionKeyRules(this.exactPermissions, this.keyMatchers.toArray(new KeyMatcher[0]));
         }
     }
 
     static final class KeyMatcher {
         final String[] pattern;
         final RoleOverrideResult result;
+        private final String input;
 
         KeyMatcher(String permission, RoleOverrideResult result) {
-            this.pattern = permission.split("\\.");
+            this.input = permission;
+            this.pattern = permission.contains(":") ? permission.split("[:/.]") : permission.split("\\.");
             this.result = result;
         }
 
@@ -128,7 +155,7 @@ public final class PermissionKeyRules {
         }
 
         String asPattern() {
-            return String.join(".", this.pattern);
+            return this.input;
         }
     }
 }

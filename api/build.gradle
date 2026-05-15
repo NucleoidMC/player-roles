@@ -1,3 +1,7 @@
 base {
     archivesName = project.archives_base_name + '-api'
 }
+
+dependencies {
+    implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+}

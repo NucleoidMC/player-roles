@@ -1,5 +1,6 @@
 package dev.gegy.roles.api;
 
+import net.fabricmc.fabric.api.permission.v1.PermissionContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -18,6 +19,11 @@ public interface RoleLookup {
         public RoleReader bySource(CommandSourceStack source) {
             return RoleReader.EMPTY;
         }
+
+        @Override
+        public @NotNull RoleReader byPermissionContext(PermissionContext context) {
+            return RoleReader.EMPTY;
+        }
     };
 
     @NotNull
@@ -30,4 +36,7 @@ public interface RoleLookup {
 
     @NotNull
     RoleReader bySource(CommandSourceStack source);
+
+    @NotNull
+    RoleReader byPermissionContext(PermissionContext context);
 }
