@@ -27,19 +27,11 @@ public final class LegacyPermissionKeyRules {
     );
 
     private final Map<String, RoleOverrideResult> exactPermissions;
-    private final Map<Identifier, RoleOverrideResult> exactIdentifierPermissions;
     private final KeyMatcher[] keyMatchers;
 
     private LegacyPermissionKeyRules(Map<String, RoleOverrideResult> exactPermissions, KeyMatcher[] keyMatchers) {
         this.exactPermissions = exactPermissions;
         this.keyMatchers = keyMatchers;
-        this.exactIdentifierPermissions = new HashMap<>();
-        for (var entry : exactPermissions.entrySet()) {
-            var id = Identifier.tryParse(entry.getKey());
-            if (id != null) {
-                this.exactIdentifierPermissions.put(id, entry.getValue());
-            }
-        }
     }
 
     public static Builder builder() {
@@ -64,20 +56,7 @@ public final class LegacyPermissionKeyRules {
     }
 
     public RoleOverrideResult test(Identifier permission) {
-        var result = this.exactIdentifierPermissions.get(permission);
-        if (result != null) {
-            return result;
-        }
-
-        var tokens = permission.toString().split("[:/.]");
-        for (var matcher : this.keyMatchers) {
-            result = matcher.test(tokens);
-            if (result != null) {
-                return result;
-            }
-        }
-
-        return RoleOverrideResult.PASS;
+        return this.test(permission.getNamespace() + "." + permission.getPath().replace('/', '.'));
     }
 
     public static class Builder {
@@ -108,7 +87,7 @@ public final class LegacyPermissionKeyRules {
 
         KeyMatcher(String permission, RoleOverrideResult result) {
             this.input = permission;
-            this.pattern = permission.contains(":") ? permission.split("[:/.]") : permission.split("\\.");
+            this.pattern = permission.split("\\.");
             this.result = result;
         }
 

@@ -14,12 +14,12 @@ import dev.gegy.roles.override.ChatTypeOverride;
 import dev.gegy.roles.override.NameDecorationOverride;
 import dev.gegy.roles.override.command.CommandOverride;
 import dev.gegy.roles.override.legacypermission.LegacyPermissionKeyOverride;
+import dev.gegy.roles.override.permission.PermissionKeyOverride;
 import dev.gegy.roles.store.PlayerRoleManager;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.message.v1.ServerMessageEvents;
 import net.fabricmc.fabric.api.permission.v1.PermissionContext;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
@@ -151,6 +151,7 @@ public final class PlayerRoles implements ModInitializer {
 
     private static void registerModIntegrations() {
         LegacyPermissionKeyOverride.register();
+        PermissionKeyOverride.register();
     }
 
     public static boolean trySendChat(CommandSourceStack source) {

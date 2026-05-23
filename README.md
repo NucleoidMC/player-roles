@@ -51,7 +51,7 @@ The other roles that are specified function as overrides on top of the `everyone
 
 ### Overrides
 Within each role declaration, we list a set of overrides. Overrides are the generic system that this mod uses to change game behavior based on roles.
-Currently, the supported override types are `commands`, `name_decoration`, `chat_type`, `mute`, `command_feedback`, `permission_level` and `entity_selectors`.
+Currently, the supported override types are `commands`, `name_decoration`, `chat_type`, `mute`, `command_feedback`, `permission_level`, `permissions` (Fabric Permission API) and `entity_selectors`.
 
 It is important to consider how overrides are applied when multiple roles target the same things. Conflicts like this are resolved by always choosing the role with the highest level.
 So, in the case of the example: although `everyone` declares every command except `help` to be disallowed, because `admin` and `spectator` have higher levels, they will override this behaviour.
@@ -156,6 +156,21 @@ This is useful for interacting with other mods, as well as with vanilla features
 Permission level is declared like:
 ```json
 "permission_level": 4
+```
+
+#### Permissions (Player Roles 1.9.0+)
+The `permissions` override sets the values of permissions that can be requested by [Fabric Permission API](https://maven.fabricmc.net/docs/fabric-api-0.149.1+26.2/net/fabricmc/fabric/api/permission/v1/package-summary.html).
+This allows for interacting with compatible mods, setting the permissions to any values. 
+This field supports any permission type, from default boolean, string and integer to custom codec based ones.
+You can also apply them as a wildcard, by adding a `*` after a path separator (or as an only symbol for path).
+
+Permissions are declared like:
+```json
+"permissions": {
+  "tiny_potato:allow_teleportation": true,
+  "chatformatter:color/*": true,
+  "homes:home_limit": 5
+}
 ```
 
 #### Mute

@@ -35,7 +35,6 @@ public record LegacyPermissionKeyOverride(LegacyPermissionKeyRules rules) {
         PermissionEvents.ON_REQUEST.register(new PermissionEvents.OnRequest() {
             @Override
             public @Nullable <T> T handlePermissionRequest(@NonNull PermissionContext context, @NonNull PermissionNode<T> node) {
-                // Todo: replace with more correct approach that supports dynamic codecs. Probably as a override?
                 if (node.codec() != Codec.BOOL) {
                     return null;
                 }
