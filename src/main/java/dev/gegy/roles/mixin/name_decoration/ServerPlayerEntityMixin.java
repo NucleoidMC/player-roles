@@ -3,7 +3,6 @@ package dev.gegy.roles.mixin.name_decoration;
 import com.mojang.authlib.GameProfile;
 import dev.gegy.roles.PlayerRoles;
 import dev.gegy.roles.api.PlayerRolesApi;
-import dev.gegy.roles.mixin.TeamAccessor;
 import dev.gegy.roles.override.NameDecorationOverride;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -27,7 +26,7 @@ public abstract class ServerPlayerEntityMixin extends Player {
         var displayName = super.getDisplayName();
 
         var team = this.getTeam();
-        if (team == null || ((TeamAccessor) team).getFormattingColor() == ChatFormatting.RESET) {
+        if (team == null || team.getColor().isEmpty()) {
             var roles = PlayerRolesApi.lookup().byPlayer(this);
 
             var nameDecoration = roles.overrides().select(PlayerRoles.NAME_DECORATION);

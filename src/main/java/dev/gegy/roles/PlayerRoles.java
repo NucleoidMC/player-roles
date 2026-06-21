@@ -31,6 +31,7 @@ import net.minecraft.server.permissions.PermissionLevel;
 import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
+import org.spongepowered.asm.mixin.MixinEnvironment;
 
 import java.util.UUID;
 
@@ -125,6 +126,7 @@ public final class PlayerRoles implements ModInitializer {
 
     @Override
     public void onInitialize() {
+        //MixinEnvironment.getCurrentEnvironment().audit();
         registerModIntegrations();
 
         var errors = PlayerRolesConfig.setup();
